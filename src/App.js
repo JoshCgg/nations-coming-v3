@@ -160,54 +160,85 @@ function getTrophyState(gameState) {
 const STORAGE_KEY = "pftc_game";
 
 const DEFAULT_GAME_STATE = {
-  journeyMode:          JOURNEY_MODE_DEFAULT,
-  prayedNations:        [],
-  checkedInDays:        [],
+  journeyMode: true, // TEMP: set to true for testing — revert to false in Phase 2
+  prayedNations: [],
+  checkedInDays: [],
   completedDevotionals: [],
-  fullDaysCompleted:    0,
-  streakCount:          0,
-  lastCheckIn:          null,
-  goalsAchieved:        [],
+  streakCount: 0,
+  lastCheckIn: null,
+  goalsAchieved: [],
 };
 
 function useGameState() {
-  const [gameState, setGameState] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? { ...DEFAULT_GAME_STATE, ...JSON.parse(stored) } : DEFAULT_GAME_STATE;
-    } catch {
-      return DEFAULT_GAME_STATE;
-    }
-  });
+  const [gameState, setGameState] = useState(DEFAULT_GAME_STATE);
 
-  // Persist to localStorage whenever state changes
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-    } catch {
-      // localStorage unavailable (private browsing, etc.) — fail silently
-    }
-  }, [gameState]);
+      const stored = localStorage.getItem("pftc_game");
+      if (stored) setGameState({ ...DEFAULT_GAME_STATE, ...JSON.parse(stored) });
+    } catch {}
+  }, []);
 
-  // Updater: merges partial updates and checks for newly earned achievements
-  function updateGameState(partial) {
+  function updateGameState(changes) {
     setGameState(prev => {
-      const next = { ...prev, ...partial };
-
-      // Check for any newly earned achievements
-      const newlyEarned = ACHIEVEMENTS
-        .filter(a => !next.goalsAchieved.includes(a.id) && a.check(next))
-        .map(a => a.id);
-
-      if (newlyEarned.length > 0) {
-        next.goalsAchieved = [...next.goalsAchieved, ...newlyEarned];
-      }
-
+      const next = { ...prev, ...changes };
+      try {
+        localStorage.setItem("pftc_game", JSON.stringify(next));
+      } catch {}
       return next;
     });
   }
 
   return [gameState, updateGameState];
+}
+
+function calcScore(gameState) {
+  const nations = Math.min((gameState.prayedNations || []).length, 48);
+  const days    = Math.min((gameState.checkedInDays || []).length, 17);
+  const devos   = Math.min((gameState.completedDevotionals || []).length, 20);
+  const streak  = gameState.streakCount || 0;
+  const bonus   = (streak >= 3 ? 3 : 0) + (streak >= 7 ? 7 : 0) + (streak >= 17 ? 15 : 0);
+  return nations + days + devos + bonus;
+}
+
+const ACHIEVEMENT_RULES = [
+  { id: 'first_touch',        check: g => g.prayedNations.length >= 1 },
+  { id: 'hat_trick',          check: g => g.streakCount >= 3 },
+  { id: 'clean_sheet',        check: g => g.checkedInDays.length >= 1 && g.completedDevotionals.length >= 1 },
+  { id: 'golden_boot',        check: g => g.streakCount >= 7 },
+  { id: 'full_squad',         check: g => {
+      const regions = ['Americas','Europe','Africa','Asia','Oceania'];
+      return regions.some(r =>
+        RAW_COUNTRIES.filter(c => c.r === r).every(c => g.prayedNations.includes(c.n))
+      );
+  }},
+  { id: 'world_tour',         check: g => {
+      const regions = ['Americas','Europe','Africa','Asia','Oceania'];
+      return regions.every(r =>
+        RAW_COUNTRIES.filter(c => c.r === r).some(c => g.prayedNations.includes(c.n))
+      );
+  }},
+  { id: 'through_the_groups', check: g => g.checkedInDays.length >= 17 },
+  { id: 'final_whistle',      check: g => g.prayedNations.length >= 48 },
+  { id: 'sent',               check: g => g.completedDevotionals.length >= 20 },
+];
+
+const ACHIEVEMENT_LABELS = {
+  first_touch:        { label: 'First Touch',           icon: '⚽', desc: 'Prayed for your first nation' },
+  hat_trick:          { label: 'Hat Trick',              icon: '🎩', desc: '3-day prayer streak' },
+  clean_sheet:        { label: 'Clean Sheet',            icon: '🧤', desc: 'Completed a full day' },
+  golden_boot:        { label: 'Golden Boot',            icon: '🥇', desc: '7-day prayer streak' },
+  full_squad:         { label: 'Full Squad',             icon: '🌍', desc: 'Prayed for every nation in a region' },
+  world_tour:         { label: 'World Tour',             icon: '🗺️', desc: 'Prayed for a nation on every continent' },
+  through_the_groups: { label: 'Through the Groups',    icon: '📋', desc: 'Checked in for all 17 group stage days' },
+  final_whistle:      { label: 'The Final Whistle',     icon: '🏆', desc: 'Prayed for all 48 nations' },
+  sent:               { label: 'Sent',                   icon: '✝️', desc: 'Completed all 20 devotionals' },
+};
+
+function checkAchievements(gameState) {
+  return ACHIEVEMENT_RULES
+    .filter(r => r.check(gameState) && !(gameState.goalsAchieved || []).includes(r.id))
+    .map(r => r.id);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -401,7 +432,7 @@ function HomeScreenBanner({ onDismiss }) {
 }
 
 /* ─── NATION MODAL ─── */
-function NationModal({ nation, onClose }) {
+function NationModal({ nation, onClose, gameState, updateGameState }) {
   if (!nation) return null;
   return (
     <div onClick={onClose} style={{
@@ -499,6 +530,26 @@ function NationModal({ nation, onClose }) {
                   textDecoration: "none", display: "block",
                 }}>Operation World</a>
               </div>
+
+              {/* Prayer */}
+              {gameState && (gameState.prayedNations || []).includes(nation.n) ? (
+                <div style={{ marginTop: 12, textAlign: "center", fontFamily: "Montserrat, sans-serif", fontSize: 14, color: C.blue, fontWeight: 600 }}>
+                  ✓ You prayed for {nation.n}
+                </div>
+              ) : (
+                <button
+                  onClick={() => updateGameState({ prayedNations: [...(gameState?.prayedNations || []), nation.n] })}
+                  style={{
+                    display: "block", width: "100%", marginTop: 12,
+                    background: C.orange, color: C.white, border: "none",
+                    borderRadius: 12, padding: 16,
+                    fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16,
+                    cursor: "pointer",
+                  }}
+                >
+                  I prayed for this nation ✓
+                </button>
+              )}
             </>
           )}
         </div>
@@ -515,7 +566,7 @@ function NationModal({ nation, onClose }) {
 }
 
 /* ─── DAILY DIGEST TAB ─── */
-function DailyDigest() {
+function DailyDigest({ gameState, updateGameState }) {
   const today = new Date();
   const startOfTournament = new Date("2026-06-11");
   let defaultDay = 0;
@@ -532,7 +583,7 @@ function DailyDigest() {
 
   return (
     <div style={{ paddingBottom: 100 }}>
-      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} />
+      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} />
 
       {/* Date heading */}
       <div style={{ background: C.indigo, padding: "14px 16px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -680,13 +731,75 @@ function DailyDigest() {
           </div>
         </div>
 
+        {/* Check-in */}
+        {(() => {
+          const todayISO = new Date().toISOString().split('T')[0];
+          const alreadyCheckedIn = gameState.checkedInDays.includes(todayISO);
+
+          if (alreadyCheckedIn) {
+            return (
+              <div style={{ background: "#e8f5e9", borderRadius: 16, padding: 18, marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 26 }}>✅</span>
+                <div>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: "#2e7d32" }}>Prayed ✓</div>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#388e3c", marginTop: 2 }}>{todayISO}</div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div style={{ marginBottom: 14 }}>
+              <button
+                onClick={() => {
+                  const yesterday = new Date();
+                  yesterday.setDate(yesterday.getDate() - 1);
+                  const yesterdayISO = yesterday.toISOString().split('T')[0];
+                  let newStreak;
+                  if (gameState.lastCheckIn === yesterdayISO) {
+                    newStreak = gameState.streakCount + 1;
+                  } else if (gameState.lastCheckIn === todayISO) {
+                    newStreak = gameState.streakCount;
+                  } else {
+                    newStreak = 1;
+                  }
+                  updateGameState({
+                    checkedInDays: [...gameState.checkedInDays, todayISO],
+                    completedDevotionals: [...gameState.completedDevotionals, todayISO],
+                    streakCount: newStreak,
+                    lastCheckIn: todayISO,
+                  });
+                }}
+                style={{
+                  width: "100%",
+                  background: C.orange,
+                  color: C.white,
+                  border: "none",
+                  borderRadius: 14,
+                  padding: 18,
+                  fontFamily: "Montserrat, sans-serif",
+                  fontWeight: 700,
+                  fontSize: 17,
+                  cursor: "pointer",
+                  display: "block",
+                }}
+              >
+                I prayed today ✓
+              </button>
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#888", textAlign: "center", marginTop: 8 }}>
+                Marks today's prayer focus and devotional as complete
+              </div>
+            </div>
+          );
+        })()}
+
       </div>
     </div>
   );
 }
 
 /* ─── ALL NATIONS TAB ─── */
-function AllNations() {
+function AllNations({ gameState, updateGameState }) {
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("All");
   const [selectedNation, setSelectedNation] = useState(null);
@@ -700,7 +813,7 @@ function AllNations() {
 
   return (
     <div style={{ paddingBottom: 100 }}>
-      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} />
+      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} />
 
       {/* Search & Filter */}
       <div style={{ background: C.indigo, padding: "14px 16px 16px" }}>
@@ -761,6 +874,11 @@ function AllNations() {
               <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: C.text, marginTop: 4, lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                 {c.ug.join(" · ")}
               </div>
+              {(gameState?.prayedNations || []).includes(c.n) && (
+                <span style={{ display: "inline-block", marginTop: 3, background: "#e8f5e9", color: "#2e7d32", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, borderRadius: 999, padding: "2px 8px" }}>
+                  ✓ Prayed
+                </span>
+              )}
             </div>
             <div style={{ ...ugBadgeStyle(c.u), borderRadius: 10, padding: "8px 10px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 12, textAlign: "center", flexShrink: 0, minWidth: 44 }}>
               <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{c.u}</div>
@@ -796,10 +914,180 @@ function AllNations() {
   );
 }
 
+/* ─── MY JOURNEY TAB ─── */
+function MyJourney({ gameState }) {
+  const score = calcScore(gameState);
+  const earned = gameState.goalsAchieved || [];
+
+  return (
+    <div style={{ paddingBottom: 100 }}>
+      <div style={{ padding: "16px 16px 0" }}>
+
+        {/* Score summary */}
+        <div style={{
+          background: C.white, borderRadius: 16, padding: 18,
+          borderLeft: `4px solid ${C.orange}`, marginBottom: 14,
+        }}>
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: C.indigo, marginBottom: 8 }}>
+            Your Score
+          </div>
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 48, color: C.orange, lineHeight: 1 }}>
+            {score}
+          </div>
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
+            {[
+              `${gameState.prayedNations.length} / 48 nations prayed`,
+              `${gameState.checkedInDays.length} / 17 days checked in`,
+              `${gameState.completedDevotionals.length} / 20 devotionals read`,
+            ].map(line => (
+              <div key={line} style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.text }}>{line}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Streak */}
+        <div style={{
+          background: C.white, borderRadius: 16, padding: 18,
+          borderLeft: `4px solid ${C.blue}`, marginBottom: 14,
+        }}>
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: C.indigo, marginBottom: 8 }}>
+            Prayer Streak
+          </div>
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 48, color: C.orange, lineHeight: 1 }}>
+            🔥 {gameState.streakCount}
+          </div>
+          <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.text, fontStyle: "italic", marginTop: 8 }}>
+            days in a row
+          </div>
+        </div>
+
+        {/* Achievements */}
+        <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16, color: C.indigo, marginBottom: 10 }}>
+          Achievements
+        </div>
+        {Object.entries(ACHIEVEMENT_LABELS).map(([id, info]) => {
+          const isEarned = earned.includes(id);
+          return (
+            <div key={id} style={{
+              background: C.white, borderRadius: 12, padding: "14px 16px",
+              display: "flex", alignItems: "center", gap: 14,
+              marginBottom: 8, opacity: isEarned ? 1 : 0.6,
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
+                background: isEarned ? C.orange : C.brightGray,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 20,
+              }}>
+                {info.icon}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: C.indigo }}>
+                  {info.label}
+                </div>
+                <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: C.blue, marginTop: 2 }}>
+                  {info.desc}
+                </div>
+              </div>
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, flexShrink: 0,
+                color: isEarned ? C.orange : "rgba(0,0,0,0.2)" }}>
+                {isEarned ? "✓" : "🔒"}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Trophy placeholder */}
+        <div style={{
+          marginTop: 6, marginBottom: 14, borderRadius: 16, padding: 32,
+          border: "2px dashed #ccc", textAlign: "center",
+        }}>
+          <div style={{ fontSize: 64 }}>🏆</div>
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16, color: C.indigo, marginTop: 10 }}>
+            Trophy coming soon
+          </div>
+          <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.blue, fontStyle: "italic", marginTop: 6 }}>
+            Complete achievements to build your trophy
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ─── ACHIEVEMENT TOAST ─── */
+function AchievementToast({ achievement, onDismiss }) {
+  useEffect(() => {
+    if (!achievement) return;
+    const timer = setTimeout(onDismiss, 3000);
+    return () => clearTimeout(timer);
+  }, [achievement, onDismiss]);
+
+  if (!achievement) return null;
+  const info = ACHIEVEMENT_LABELS[achievement];
+  if (!info) return null;
+
+  return (
+    <div style={{
+      position: "fixed",
+      bottom: 80,
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: 3000,
+      width: "calc(100% - 48px)",
+      maxWidth: 480,
+      background: C.indigo,
+      borderRadius: 16,
+      padding: 16,
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 12,
+      boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    }}>
+      <span style={{ fontSize: 24 }}>{info.icon}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: C.white }}>
+          {info.label}
+        </div>
+        <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.8)", fontStyle: "italic", marginTop: 3 }}>
+          {info.desc}
+        </div>
+      </div>
+      <button onClick={onDismiss} style={{
+        background: "none", border: "none",
+        color: "rgba(255,255,255,0.6)", fontSize: 16,
+        cursor: "pointer", padding: "0 0 0 4px",
+        fontFamily: "Montserrat, sans-serif", fontWeight: 700,
+      }}>✕</button>
+    </div>
+  );
+}
+
 /* ─── MAIN APP ─── */
 export default function App() {
   const [tab, setTab] = useState("digest");
   const [showBanner, setShowBanner] = useState(true);
+  const [gameState, updateGameState] = useGameState();
+  const [pendingToast, setPendingToast] = useState(null);
+  const [toastQueue, setToastQueue] = useState([]);
+
+  function handleGameStateUpdate(changes) {
+    updateGameState(changes);
+    const nextState = { ...gameState, ...changes };
+    const newlyEarned = checkAchievements(nextState);
+    if (newlyEarned.length > 0) {
+      updateGameState({ goalsAchieved: [...(gameState.goalsAchieved || []), ...newlyEarned] });
+      setToastQueue(q => [...q, ...newlyEarned]);
+    }
+  }
+
+  useEffect(() => {
+    if (toastQueue.length > 0 && pendingToast === null) {
+      setPendingToast(toastQueue[0]);
+      setToastQueue(q => q.slice(1));
+    }
+  }, [toastQueue, pendingToast]);
 
   return (
     <>
@@ -826,16 +1114,33 @@ export default function App() {
           background: C.indigo,
           padding: "env(safe-area-inset-top, 12px) 20px 0",
         }}>
-          <div style={{ padding: "14px 0 16px" }}>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 10, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>
-              Global Gates
+          <div style={{ padding: "14px 0 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 10, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>
+                Global Gates
+              </div>
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: C.white, lineHeight: 1.2 }}>
+                The Nations Are Coming
+              </div>
+              <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 5, fontStyle: "italic" }}>
+                2026 FIFA World Cup Missions Resource
+              </div>
             </div>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: C.white, lineHeight: 1.2 }}>
-              The Nations Are Coming
-            </div>
-            <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 5, fontStyle: "italic" }}>
-              2026 FIFA World Cup Missions Resource
-            </div>
+            {gameState.streakCount > 0 && (
+              <div style={{
+                background: C.orange,
+                color: C.white,
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 700,
+                fontSize: 14,
+                borderRadius: 999,
+                padding: "4px 10px",
+                whiteSpace: "nowrap",
+                marginTop: 2,
+              }}>
+                🔥 {gameState.streakCount}
+              </div>
+            )}
           </div>
         </div>
 
@@ -848,6 +1153,7 @@ export default function App() {
             {[
               { id: "digest", label: "📅  Daily Digest" },
               { id: "nations", label: "🌍  All Nations" },
+              ...(gameState.journeyMode ? [{ id: "journey", label: "🏆  My Journey" }] : []),
             ].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)} style={{
                 flex: 1,
@@ -870,8 +1176,15 @@ export default function App() {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: "auto" }}>
-          {tab === "digest" ? <DailyDigest /> : <AllNations />}
+          {tab === "digest"
+            ? <DailyDigest gameState={gameState} updateGameState={handleGameStateUpdate} />
+            : tab === "journey"
+              ? <MyJourney gameState={gameState} />
+              : <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} />
+          }
         </div>
+
+        <AchievementToast achievement={pendingToast} onDismiss={() => setPendingToast(null)} />
 
         {/* Footer */}
         <div style={{
