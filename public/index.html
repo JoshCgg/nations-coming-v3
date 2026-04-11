@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <!-- ─── PWA / App Store meta ─── -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1B456A" />
+
+    <!-- ─── iOS PWA meta (Android handles this via manifest) ─── -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nations" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- ─── Splash screen color on iOS ─── -->
+    <meta name="msapplication-TileColor" content="#1B456A" />
+    <meta name="msapplication-TileImage" content="/icons/icon-192.png" />
+
+    <!-- ─── SEO / Share meta ─── -->
+    <title>The Nations Are Coming — 2026 World Cup Prayer Guide</title>
+    <meta name="description" content="Pray for the nations at the 2026 FIFA World Cup. Daily devotionals, unreached people group profiles, and match-day prayer prompts. A Global Gates resource." />
+
+    <!-- Open Graph (WhatsApp, Facebook, iMessage link previews) -->
+    <meta property="og:title" content="The Nations Are Coming" />
+    <meta property="og:description" content="2026 FIFA World Cup missions prayer resource. Pray for unreached peoples — daily." />
+    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta property="og:url" content="https://nations.globalgates.info" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter/X card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The Nations Are Coming" />
+    <meta name="twitter:description" content="2026 World Cup daily prayer guide for unreached peoples." />
+    <meta name="twitter:image" content="/icons/icon-512.png" />
+
+    <!-- ─── Favicon fallback ─── -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  </head>
+  <body>
+    <noscript>
+      This app requires JavaScript. Please enable it in your browser settings.
+    </noscript>
+
+    <!-- React mounts here -->
+    <div id="root"></div>
+
+    <!-- ─── Service Worker Registration ─── -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then(function (reg) {
+              console.log("[SW] Registered:", reg.scope);
+            })
+            .catch(function (err) {
+              console.warn("[SW] Registration failed:", err);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
