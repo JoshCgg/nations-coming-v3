@@ -606,7 +606,7 @@ function DailyDigest({ gameState, updateGameState }) {
       <div style={{ padding: "16px 16px 0" }}>
 
         {/* Devotional */}
-        <div style={{ background: C.white, borderRadius: 16, padding: 18, marginBottom: 14, border: `1px solid ${C.blue}30` }}>
+        <div style={{ background: C.white, borderRadius: 16, padding: 18, marginBottom: 14, border: `1px solid ${C.blue}30`, boxShadow: "0 4px 20px rgba(27,69,106,0.12)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <span style={{ fontSize: 22 }}>📖</span>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.indigo }}>Today's Devotional</div>
@@ -617,7 +617,7 @@ function DailyDigest({ gameState, updateGameState }) {
         </div>
 
         {/* Prayer */}
-        <div style={{ background: `${C.blueJeans}15`, borderRadius: 16, padding: 18, marginBottom: 14, border: `2px solid ${C.blueJeans}40` }}>
+        <div style={{ background: `${C.blueJeans}20`, borderRadius: 16, padding: 18, marginBottom: 14, border: `2px solid ${C.blueJeans}`, boxShadow: "0 4px 20px rgba(27,69,106,0.12)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <span style={{ fontSize: 22 }}>🙏</span>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.blueJeans }}>Prayer Focus</div>
@@ -628,7 +628,7 @@ function DailyDigest({ gameState, updateGameState }) {
         </div>
 
         {/* Matches */}
-        <div style={{ background: C.white, borderRadius: 16, padding: 18, marginBottom: 14, border: `1px solid ${C.blue}30` }}>
+        <div style={{ background: C.white, borderRadius: 16, padding: 18, marginBottom: 14, border: `1px solid ${C.blue}30`, boxShadow: "0 4px 20px rgba(27,69,106,0.12)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
             <span style={{ fontSize: 22 }}>⚽</span>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.indigo }}>Today's Matches</div>
@@ -687,7 +687,7 @@ function DailyDigest({ gameState, updateGameState }) {
                   display: "flex", alignItems: "center", gap: 14, width: "100%",
                   background: C.white, border: `2px solid ${C.orange}`,
                   borderRadius: 14, padding: "14px 16px", cursor: "pointer",
-                  textAlign: "left", marginBottom: 10,
+                  textAlign: "left", marginBottom: 10, boxShadow: "0 4px 20px rgba(27,69,106,0.12)",
                 }}>
                   <span style={{ fontSize: 38 }}>{nation.f}</span>
                   <div style={{ flex: 1 }}>
@@ -705,7 +705,7 @@ function DailyDigest({ gameState, updateGameState }) {
         )}
 
         {/* Calendar — Jump to Any Day */}
-        <div style={{ background: C.white, borderRadius: 16, padding: "16px 0 16px", marginBottom: 14, border: `1px solid ${C.blue}30` }}>
+        <div style={{ background: C.white, borderRadius: 16, padding: "16px 0 16px", marginBottom: 14, border: `1px solid ${C.blue}30`, boxShadow: "0 4px 20px rgba(27,69,106,0.12)" }}>
           <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 14, color: C.indigo, padding: "0 16px 12px", display: "flex", alignItems: "center", gap: 8 }}>
             <span>📅</span> Jump to Any Day
           </div>
@@ -1111,15 +1111,40 @@ export default function App() {
 
         {/* App Header */}
         <div style={{
-          background: C.indigo,
+          background: "linear-gradient(135deg, #1B456A 0%, #2a5a8a 50%, #1B456A 100%)",
           padding: "env(safe-area-inset-top, 12px) 20px 0",
+          position: "relative",
+          overflow: "hidden",
         }}>
-          <div style={{ padding: "14px 0 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <img
+            src="/images/global-gates-logo-white-cityscape.png"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              height: "auto",
+              opacity: 0.07,
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          />
+          <div style={{ position: "relative", zIndex: 1, padding: "14px 0 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div>
-              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 10, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 2, marginBottom: 4 }}>
-                Global Gates
-              </div>
-              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: C.white, lineHeight: 1.2 }}>
+              <img
+                src="/images/global-gates-logo-white-BUG-transparent-background.png"
+                alt="Global Gates"
+                style={{
+                  height: 36,
+                  width: "auto",
+                  marginBottom: 6,
+                  display: "block",
+                }}
+              />
+
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 26, color: C.white, lineHeight: 1.2, textShadow: "0 2px 8px rgba(0,0,0,0.25)", letterSpacing: 0.3 }}>
                 The Nations Are Coming
               </div>
               <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 5, fontStyle: "italic" }}>
@@ -1143,13 +1168,17 @@ export default function App() {
             )}
           </div>
         </div>
+        <div style={{
+          height: 3,
+          background: `linear-gradient(90deg, transparent, ${C.orange}, transparent)`
+        }} />
 
         {/* Home Screen Banner */}
         {showBanner && <HomeScreenBanner onDismiss={() => setShowBanner(false)} />}
 
         {/* Tab Bar */}
-        <div style={{ background: C.indigo, padding: "0 16px 0" }}>
-          <div style={{ display: "flex", borderBottom: `2px solid rgba(255,255,255,0.15)` }}>
+        <div style={{ background: C.indigo, padding: "8px 0 0" }}>
+          <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: "6px", display: "flex", margin: "0 16px 12px" }}>
             {[
               { id: "digest", label: "📅  Daily Digest" },
               { id: "nations", label: "🌍  All Nations" },
@@ -1157,17 +1186,16 @@ export default function App() {
             ].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)} style={{
                 flex: 1,
-                background: "none",
+                background: tab === t.id ? C.orange : "transparent",
                 border: "none",
-                borderBottom: tab === t.id ? `3px solid ${C.orange}` : "3px solid transparent",
-                padding: "14px 8px",
+                borderRadius: 8,
+                padding: "10px 8px",
                 fontFamily: "Montserrat, sans-serif",
                 fontWeight: 700,
                 fontSize: 15,
-                color: tab === t.id ? C.white : "rgba(255,255,255,0.6)",
+                color: tab === t.id ? "#fff" : "rgba(255,255,255,0.65)",
                 cursor: "pointer",
                 textAlign: "center",
-                marginBottom: -2,
                 letterSpacing: 0.2,
               }}>{t.label}</button>
             ))}
