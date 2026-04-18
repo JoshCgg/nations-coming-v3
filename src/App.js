@@ -1072,10 +1072,33 @@ function AchievementToast({ achievement, onDismiss }) {
   );
 }
 
+/* ─── TOGGLE SWITCH ─── */
+function ToggleSwitch({ value, onToggle }) {
+  return (
+    <div onClick={onToggle} style={{
+      width: 50, height: 28, borderRadius: 14,
+      background: value ? C.orange : "#ccc",
+      position: "relative", cursor: "pointer",
+      transition: "background 0.2s",
+      flexShrink: 0,
+    }}>
+      <div style={{
+        position: "absolute",
+        top: 3, left: value ? 25 : 3,
+        width: 22, height: 22,
+        borderRadius: "50%", background: "white",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+        transition: "left 0.2s",
+      }} />
+    </div>
+  );
+}
+
 /* ─── MAIN APP ─── */
 export default function App() {
   const [tab, setTab] = useState("digest");
   const [showBanner, setShowBanner] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
@@ -1159,21 +1182,31 @@ export default function App() {
                 2026 FIFA World Cup Missions Resource
               </div>
             </div>
-            {gameState.streakCount > 0 && (
-              <div style={{
-                background: C.orange,
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+              <button onClick={() => setShowSettings(true)} style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 22,
                 color: C.white,
-                fontFamily: "Montserrat, sans-serif",
-                fontWeight: 700,
-                fontSize: 14,
-                borderRadius: 999,
-                padding: "4px 10px",
-                whiteSpace: "nowrap",
-                marginTop: 2,
-              }}>
-                🔥 {gameState.streakCount}
-              </div>
-            )}
+                padding: 2,
+                lineHeight: 1,
+              }}>⚙️</button>
+              {gameState.streakCount > 0 && (
+                <div style={{
+                  background: C.orange,
+                  color: C.white,
+                  fontFamily: "Montserrat, sans-serif",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  borderRadius: 999,
+                  padding: "4px 10px",
+                  whiteSpace: "nowrap",
+                }}>
+                  🔥 {gameState.streakCount}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div style={{
@@ -1221,6 +1254,62 @@ export default function App() {
         </div>
 
         <AchievementToast achievement={pendingToast} onDismiss={() => setPendingToast(null)} />
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <div
+            onClick={() => setShowSettings(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000 }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                position: "fixed", bottom: 0, left: 0, right: 0,
+                background: C.white, borderRadius: "20px 20px 0 0",
+                padding: 24, maxHeight: "60vh", overflowY: "auto",
+              }}
+            >
+              {/* Header row */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+                <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, color: C.indigo }}>Settings</span>
+                <button onClick={() => setShowSettings(false)} style={{ background: "transparent", border: "none", fontSize: 18, cursor: "pointer", color: C.indigo, padding: 4 }}>✕</button>
+              </div>
+
+              {/* Journey Mode row */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Prayer Journey</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ flex: 1, marginRight: 16 }}>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Journey Mode</div>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Track streaks, achievements, and your prayer score</div>
+                  </div>
+                  <ToggleSwitch value={gameState.journeyMode} onToggle={() => updateGameState({ journeyMode: !gameState.journeyMode })} />
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: C.brightGray, margin: "0 0 20px" }} />
+
+              {/* Account row */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Account</div>
+                <div onClick={() => setShowSettings(false)} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                  <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Sign In / Register</div>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Save your progress and join the prayer leaderboard</div>
+                  </div>
+                  <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
+                </div>
+              </div>
+
+              {/* Version line */}
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: C.blue, textAlign: "center", marginTop: 20 }}>
+                Pray for the Cup · prayforthecup.com
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div style={{
