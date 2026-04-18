@@ -1187,11 +1187,12 @@ export default function App() {
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
-                fontSize: 22,
-                color: C.white,
-                padding: 2,
-                lineHeight: 1,
-              }}>⚙️</button>
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.85)",
+                padding: 8,
+              }}>Settings</button>
               {gameState.streakCount > 0 && (
                 <div style={{
                   background: C.orange,
