@@ -1150,13 +1150,10 @@ export default function App() {
               />
 
               <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 26, color: C.white, lineHeight: 1.2, textShadow: "0 2px 8px rgba(0,0,0,0.25)", letterSpacing: 0.3 }}>
-                The Nations Are Coming
+                Pray for the Cup
               </div>
               <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 5, fontStyle: "italic" }}>
                 2026 FIFA World Cup Missions Resource
-              </div>
-              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "rgba(236,241,238,0.7)", marginTop: 3 }}>
-                Pray for the Cup · prayforthecup.com
               </div>
             </div>
             {gameState.streakCount > 0 && (
