@@ -160,7 +160,7 @@ function getTrophyState(gameState) {
 const STORAGE_KEY = "pftc_game";
 
 const DEFAULT_GAME_STATE = {
-  journeyMode: true, // TEMP: set to true for testing — revert to false in Phase 2
+  journeyMode: false,
   prayedNations: [],
   checkedInDays: [],
   completedDevotionals: [],
