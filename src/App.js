@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
@@ -29,113 +29,6 @@ const C = {
    and the data model, ready to be wired up in a future session.
    ═══════════════════════════════════════════════════════════════ */
 
-const JOURNEY_MODE_DEFAULT = false;
-
-/* ─── ACHIEVEMENT DEFINITIONS ───────────────────────────────────
-   Each achievement has:
-     id       — unique key, stored in localStorage when earned
-     label    — display name shown to user
-     icon     — emoji displayed alongside the achievement
-     desc     — short description of what it means
-     check()  — function that receives (gameState) and returns
-                true when the achievement should be awarded.
-                Not wired up yet — just defined here for planning.
-   ──────────────────────────────────────────────────────────────── */
-
-const ACHIEVEMENTS = [
-  {
-    id:    "first_touch",
-    label: "First Touch",
-    icon:  "⚽",
-    desc:  "Prayed for your first nation",
-    check: (gs) => gs.prayedNations.length >= 1,
-  },
-  {
-    id:    "hat_trick",
-    label: "Hat Trick",
-    icon:  "🎩",
-    desc:  "3 days of prayer in a row",
-    check: (gs) => gs.streakCount >= 3,
-  },
-  {
-    id:    "clean_sheet",
-    label: "Clean Sheet",
-    icon:  "🧤",
-    desc:  "Completed a full day — devotional, prayer, and check-in",
-    check: (gs) => gs.fullDaysCompleted >= 1,
-  },
-  {
-    id:    "golden_boot",
-    label: "Golden Boot",
-    icon:  "🥇",
-    desc:  "7 days of prayer in a row",
-    check: (gs) => gs.streakCount >= 7,
-  },
-  {
-    id:    "full_squad",
-    label: "Full Squad",
-    icon:  "🌍",
-    desc:  "Prayed for every nation in one region",
-    check: (gs) => {
-      // Check if all nations in any single region have been prayed for
-      const regions = ["Americas", "Europe", "Africa", "Asia", "Oceania"];
-      return regions.some(region => {
-        const nationsInRegion = RAW_COUNTRIES.filter(c => c.r === region).map(c => c.n);
-        return nationsInRegion.every(n => gs.prayedNations.includes(n));
-      });
-    },
-  },
-  {
-    id:    "world_tour",
-    label: "World Tour",
-    icon:  "🗺️",
-    desc:  "Prayed for at least one nation on every continent",
-    check: (gs) => {
-      const regions = ["Americas", "Europe", "Africa", "Asia", "Oceania"];
-      return regions.every(region => {
-        const nationsInRegion = RAW_COUNTRIES.filter(c => c.r === region).map(c => c.n);
-        return nationsInRegion.some(n => gs.prayedNations.includes(n));
-      });
-    },
-  },
-  {
-    id:    "through_the_groups",
-    label: "Through the Groups",
-    icon:  "📋",
-    desc:  "Checked in for all 17 group stage days",
-    check: (gs) => gs.checkedInDays.length >= 17,
-  },
-  {
-    id:    "final_whistle",
-    label: "The Final Whistle",
-    icon:  "🏆",
-    desc:  "Prayed for all 48 nations — the Nations Trophy unlocks",
-    check: (gs) => gs.prayedNations.length >= 48,
-  },
-  {
-    id:    "sent",
-    label: "Sent",
-    icon:  "✝️",
-    desc:  "Completed all 20 devotionals — you answered the call",
-    check: (gs) => gs.completedDevotionals.length >= 20,
-  },
-];
-
-/* ─── TROPHY STATES ──────────────────────────────────────────────
-   The trophy builds progressively as achievements are earned.
-   State 0 = nothing shown. State 4 = full gold trophy + share unlocks.
-   This drives the SVG reveal on the My Journey tab (not yet built).
-   ──────────────────────────────────────────────────────────────── */
-
-function getTrophyState(gameState) {
-  if (!gameState) return 0;
-  const earned = gameState.goalsAchieved || [];
-  if (earned.includes("final_whistle")) return 4; // Full gold trophy
-  if (earned.includes("through_the_groups")) return 3; // Base + stem + dark globe
-  if (earned.includes("hat_trick")) return 2;          // Base + stem
-  if (earned.includes("first_touch")) return 1;        // Base only
-  return 0;
-}
 
 /* ─── GAME STATE — localStorage HOOK ────────────────────────────
    useGameState() reads and writes all gamification data.
@@ -156,8 +49,6 @@ function getTrophyState(gameState) {
    NOTE: Nothing calls this hook yet — it's defined and ready,
    but not connected to any UI. That happens next session.
    ──────────────────────────────────────────────────────────────── */
-
-const STORAGE_KEY = "pftc_game";
 
 const DEFAULT_GAME_STATE = {
   journeyMode: false,
