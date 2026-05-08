@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
@@ -840,103 +840,295 @@ function AllNations({ gameState, updateGameState }) {
 }
 
 /* ─── MY JOURNEY TAB ─── */
-function MyJourney({ gameState }) {
+function scheduleToISO(dateStr) {
+  const m = { Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12 };
+  const [mon, day] = dateStr.split(' ');
+  return `2026-${String(m[mon]).padStart(2,'0')}-${String(parseInt(day)).padStart(2,'0')}`;
+}
+
+const JOURNEY_CSS = `
+  .jny-stats {
+    background: white;
+    margin: 12px 16px 0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    box-shadow: 0 2px 8px rgba(27,69,106,0.08);
+  }
+  .jny-stat-block {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .jny-stat-block + .jny-stat-block { border-left: 1px solid #E5EAF0; }
+  .jny-stat-num { font-size: 22px; font-weight: 800; line-height: 1; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; }
+  .jny-stat-label { font-size: 10px; font-weight: 600; color: #8899AA; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Montserrat', sans-serif; }
+  .jny-clr-orange { color: #F38E53; }
+  .jny-clr-jeans  { color: #5388F3; }
+  .jny-clr-blue   { color: #3E67AC; }
+
+  .jny-mission-btn {
+    margin: 10px 16px 0;
+    background: linear-gradient(90deg, #F38E53, #e07840);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    cursor: pointer; border: none;
+    width: calc(100% - 32px);
+  }
+
+  .jny-section-label {
+    padding: 16px 16px 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 17px; font-weight: 800;
+    color: #1B456A; letter-spacing: -0.2px;
+  }
+  .jny-section-sub { font-size: 12px; font-weight: 500; color: #8899AA; margin-top: 1px; }
+
+  .carousel-scroll-wrap {
+    overflow-x: auto;
+    padding: 0 16px 16px;
+    display: flex; gap: 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .carousel-scroll-wrap::-webkit-scrollbar { display: none; }
+
+  .devo-card {
+    scroll-snap-align: center;
+    flex-shrink: 0; width: 200px;
+    border-radius: 18px; overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+  }
+  .devo-card:active { transform: scale(0.97); }
+  .devo-card.today { width: 220px; box-shadow: 0 8px 28px rgba(27,69,106,0.22); transform: translateY(-4px); }
+  .devo-card.today:active { transform: translateY(-4px) scale(0.97); }
+  .devo-card.past  { opacity: 0.85; box-shadow: 0 2px 8px rgba(27,69,106,0.08); }
+  .devo-card.future { opacity: 0.45; filter: grayscale(0.6); cursor: not-allowed; box-shadow: none; }
+
+  .devo-card-inner {
+    height: 260px; display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 16px; position: relative;
+  }
+  .devo-card.today  .devo-card-inner { background: linear-gradient(160deg, #1B456A 0%, #2a6ea6 60%, #1B456A 100%); }
+  .devo-card.past   .devo-card-inner { background: linear-gradient(160deg, #2a5a8a 0%, #3E67AC 100%); }
+  .devo-card.future .devo-card-inner { background: linear-gradient(160deg, #5a7a9a 0%, #8899AA 100%); }
+
+  .devo-flag-bg { position: absolute; top: 12px; right: 14px; font-size: 64px; opacity: 0.25; line-height: 1; user-select: none; }
+  .devo-card.today .devo-flag-bg { font-size: 72px; opacity: 0.3; }
+
+  .devo-day-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px; padding: 3px 9px;
+    font-size: 10px; font-weight: 700; color: white;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    backdrop-filter: blur(4px); font-family: 'Montserrat', sans-serif;
+  }
+  .devo-card.today .devo-day-badge { background: #F38E53; border-color: #F38E53; }
+
+  .devo-checked-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: #2ecc71; border-radius: 20px; padding: 3px 9px;
+    font-size: 10px; font-weight: 700; color: white;
+    letter-spacing: 0.3px; font-family: 'Montserrat', sans-serif;
+  }
+
+  .devo-lock { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 28px; opacity: 0.6; }
+
+  .devo-flag-main { font-size: 28px; margin-bottom: 6px; display: block; }
+  .devo-nation { color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; }
+  .devo-theme  { color: white; font-size: 13px; font-weight: 700; line-height: 1.3; font-family: 'Libre Baskerville', serif; }
+  .devo-card.today .devo-theme { font-size: 15px; }
+  .devo-date   { color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 500; margin-top: 6px; font-family: 'Montserrat', sans-serif; }
+
+  .devo-card.today::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 4px; background: #F38E53; border-radius: 0 0 18px 18px;
+  }
+
+  .carousel-dots { display: flex; justify-content: center; gap: 5px; margin: -8px 0 4px; }
+  .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: #CDD5DE; transition: all 0.2s; }
+  .carousel-dot.active { width: 18px; border-radius: 3px; background: #F38E53; }
+
+  .jny-achieve-strip { padding: 0 16px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .jny-achieve-strip::-webkit-scrollbar { display: none; }
+  .achieve-chip {
+    flex-shrink: 0; background: white; border-radius: 12px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 2px 6px rgba(27,69,106,0.07); min-width: 120px;
+  }
+  .achieve-chip.locked { opacity: 0.4; filter: grayscale(1); }
+  .achieve-icon { font-size: 20px; }
+  .achieve-label { font-size: 11px; font-weight: 700; color: #1B456A; font-family: 'Montserrat', sans-serif; }
+  .achieve-earned-dot { width: 6px; height: 6px; background: #2ecc71; border-radius: 50%; margin-left: auto; }
+
+  .jny-score-row {
+    margin: 0 16px 16px; background: #1B456A;
+    border-radius: 14px; padding: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .jny-score-label { color: rgba(255,255,255,0.65); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; }
+  .jny-score-num   { color: white; font-size: 28px; font-weight: 800; font-family: 'Montserrat', sans-serif; }
+  .jny-score-sub   { color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 500; margin-top: 1px; font-family: 'Montserrat', sans-serif; }
+  .jny-trophy-thumb { font-size: 44px; }
+`;
+
+function MyJourney({ gameState, setTab }) {
   const score = calcScore(gameState);
   const earned = gameState.goalsAchieved || [];
+  const carouselRef = useRef(null);
+
+  const today = new Date();
+  const startOfTournament = new Date("2026-06-11");
+  let todayIdx = 0;
+  if (today >= startOfTournament) {
+    const diff = Math.floor((today - startOfTournament) / 86400000);
+    todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
+  }
+
+  const [activeCard, setActiveCard] = useState(todayIdx);
+
+  useEffect(() => {
+    if (!carouselRef.current) return;
+    const container = carouselRef.current;
+    const cards = container.children;
+    if (cards[todayIdx]) {
+      const card = cards[todayIdx];
+      const offset = card.offsetLeft - container.offsetWidth / 2 + card.offsetWidth / 2;
+      container.scrollTo({ left: offset, behavior: 'auto' });
+    }
+  }, [todayIdx]);
 
   return (
     <div style={{ paddingBottom: 100 }}>
-      <div style={{ padding: "16px 16px 0" }}>
+      <style>{JOURNEY_CSS}</style>
 
-        {/* Score summary */}
-        <div style={{
-          background: C.white, borderRadius: 16, padding: 18,
-          borderLeft: `4px solid ${C.orange}`, marginBottom: 14,
-        }}>
-          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: C.indigo, marginBottom: 8 }}>
-            Your Score
-          </div>
-          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 48, color: C.orange, lineHeight: 1 }}>
-            {score}
-          </div>
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 4 }}>
-            {[
-              `${gameState.prayedNations.length} / 48 nations prayed`,
-              `${gameState.checkedInDays.length} / 17 days checked in`,
-              `${gameState.completedDevotionals.length} / 20 devotionals read`,
-            ].map(line => (
-              <div key={line} style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.text }}>{line}</div>
-            ))}
-          </div>
+      {/* Stats bar */}
+      <div className="jny-stats">
+        <div className="jny-stat-block">
+          <div className="jny-stat-num jny-clr-orange">🔥 {gameState.streakCount}</div>
+          <div className="jny-stat-label">Day Streak</div>
         </div>
+        <div className="jny-stat-block">
+          <div className="jny-stat-num jny-clr-jeans">{gameState.prayedNations.length}</div>
+          <div className="jny-stat-label">Nations</div>
+        </div>
+        <div className="jny-stat-block">
+          <div className="jny-stat-num jny-clr-blue">{gameState.completedDevotionals.length}</div>
+          <div className="jny-stat-label">Devotionals</div>
+        </div>
+      </div>
 
-        {/* Streak */}
-        <div style={{
-          background: C.white, borderRadius: 16, padding: 18,
-          borderLeft: `4px solid ${C.blue}`, marginBottom: 14,
-        }}>
-          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: C.indigo, marginBottom: 8 }}>
-            Prayer Streak
-          </div>
-          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 48, color: C.orange, lineHeight: 1 }}>
-            🔥 {gameState.streakCount}
-          </div>
-          <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.text, fontStyle: "italic", marginTop: 8 }}>
-            days in a row
-          </div>
-        </div>
+      {/* Today's Mission CTA */}
+      <button className="jny-mission-btn" onClick={() => setTab("digest")}>
+        <span>⚡ Today's Mission — Day {todayIdx + 1}</span>
+        <span style={{ fontSize: 16 }}>›</span>
+      </button>
 
-        {/* Achievements */}
-        <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16, color: C.indigo, marginBottom: 10 }}>
-          Achievements
-        </div>
-        {Object.entries(ACHIEVEMENT_LABELS).map(([id, info]) => {
-          const isEarned = earned.includes(id);
+      {/* Section label */}
+      <div className="jny-section-label">
+        Your Prayer Journey
+        <div className="jny-section-sub">Today's devotional is centered · past days completed · future days locked</div>
+      </div>
+
+      {/* Devotional Carousel */}
+      <div
+        className="carousel-scroll-wrap"
+        ref={carouselRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const center = el.scrollLeft + el.offsetWidth / 2;
+          let closest = 0, minDist = Infinity;
+          Array.from(el.children).forEach((child, i) => {
+            const dist = Math.abs(child.offsetLeft + child.offsetWidth / 2 - center);
+            if (dist < minDist) { minDist = dist; closest = i; }
+          });
+          setActiveCard(closest);
+        }}
+      >
+        {RAW_SCHEDULE.map((d, i) => {
+          const isToday  = i === todayIdx;
+          const isPast   = i < todayIdx;
+          const isFuture = i > todayIdx;
+          const cardClass = isToday ? "today" : isPast ? "past" : "future";
+          const featNation = (d.feat && d.feat[0] && d.feat[0] !== "All Nations")
+            ? RAW_COUNTRIES.find(c => c.n === d.feat[0])
+            : null;
+          const flag = featNation ? featNation.f : "🌍";
+          const nationName = featNation
+            ? featNation.n
+            : (d.feat && d.feat[0] === "All Nations" ? "All Nations" : "The Nations");
+          const theme = d.dev.length > 44 ? d.dev.substring(0, 44) + "…" : d.dev;
+          const isPrayed = isPast && (gameState.checkedInDays || []).includes(scheduleToISO(d.d));
+
           return (
-            <div key={id} style={{
-              background: C.white, borderRadius: 12, padding: "14px 16px",
-              display: "flex", alignItems: "center", gap: 14,
-              marginBottom: 8, opacity: isEarned ? 1 : 0.6,
-            }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
-                background: isEarned ? C.orange : C.brightGray,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 20,
-              }}>
-                {info.icon}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: C.indigo }}>
-                  {info.label}
-                </div>
-                <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: C.blue, marginTop: 2 }}>
-                  {info.desc}
-                </div>
-              </div>
-              <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, flexShrink: 0,
-                color: isEarned ? C.orange : "rgba(0,0,0,0.2)" }}>
-                {isEarned ? "✓" : "🔒"}
+            <div
+              key={i}
+              className={`devo-card ${cardClass}`}
+              onClick={isFuture ? undefined : () => setTab("digest")}
+            >
+              <div className="devo-card-inner">
+                <div className="devo-flag-bg">{flag}</div>
+                {isFuture ? (
+                  <div className="devo-lock">🔒</div>
+                ) : isPrayed ? (
+                  <div className="devo-checked-badge">✓ Prayed</div>
+                ) : (
+                  <div className="devo-day-badge">
+                    {isToday ? `Today · Day ${i + 1}` : `Day ${i + 1}`}
+                  </div>
+                )}
+                <span className="devo-flag-main">{flag}</span>
+                <div className="devo-nation">{nationName}</div>
+                <div className="devo-theme">{theme}</div>
+                <div className="devo-date">{d.d} · Day {i + 1}</div>
               </div>
             </div>
           );
         })}
+      </div>
 
-        {/* Trophy placeholder */}
-        <div style={{
-          marginTop: 6, marginBottom: 14, borderRadius: 16, padding: 32,
-          border: "2px dashed #ccc", textAlign: "center",
-        }}>
-          <div style={{ fontSize: 64 }}>🏆</div>
-          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16, color: C.indigo, marginTop: 10 }}>
-            Trophy coming soon
-          </div>
-          <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.blue, fontStyle: "italic", marginTop: 6 }}>
-            Complete achievements to build your trophy
+      {/* Carousel dots */}
+      <div className="carousel-dots">
+        {RAW_SCHEDULE.map((_, i) => (
+          <div key={i} className={`carousel-dot ${i === activeCard ? "active" : ""}`} />
+        ))}
+      </div>
+
+      {/* Achievements */}
+      <div className="jny-section-label" style={{ paddingBottom: 8 }}>Achievements</div>
+      <div className="jny-achieve-strip">
+        {Object.entries(ACHIEVEMENT_LABELS).map(([id, info]) => {
+          const isEarned = earned.includes(id);
+          return (
+            <div key={id} className={`achieve-chip ${isEarned ? "" : "locked"}`}>
+              <span className="achieve-icon">{info.icon}</span>
+              <span className="achieve-label">{info.label}</span>
+              {isEarned && <div className="achieve-earned-dot" />}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Score card */}
+      <div className="jny-score-row">
+        <div>
+          <div className="jny-score-label">Your Score</div>
+          <div className="jny-score-num">{score} pts</div>
+          <div className="jny-score-sub">
+            {gameState.prayedNations.length} nations · {gameState.checkedInDays.length} days · {gameState.completedDevotionals.length} devotionals
           </div>
         </div>
-
+        <div className="jny-trophy-thumb">🏆</div>
       </div>
+
     </div>
   );
 }
@@ -1168,7 +1360,7 @@ export default function App() {
           {tab === "digest"
             ? <DailyDigest gameState={gameState} updateGameState={handleGameStateUpdate} />
             : tab === "journey"
-              ? <MyJourney gameState={gameState} />
+              ? <MyJourney gameState={gameState} setTab={setTab} />
               : <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} />
           }
         </div>
