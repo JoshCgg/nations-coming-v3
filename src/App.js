@@ -498,10 +498,10 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
 
       {onBack && (
         <button onClick={onBack} style={{
-          display: "flex", alignItems: "center", gap: 6,
+          display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 6,
           background: "none", border: "none", cursor: "pointer",
-          padding: "12px 16px 4px",
-          fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13,
+          width: "100%", minHeight: 48, padding: "16px 16px",
+          fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16,
           color: C.indigo,
         }}>← All Days</button>
       )}
@@ -827,13 +827,17 @@ function DigestHome({ gameState, onCardTap }) {
           const theme = d.dev.length > 44 ? d.dev.substring(0, 44) + "…" : d.dev;
           const isPrayed = isPast && (gameState.checkedInDays || []).includes(scheduleToISO(d.d));
 
+          const innerStyle = d.img ? {
+            background: `linear-gradient(to top, rgba(10,20,40,0.88) 0%, rgba(10,20,40,0.35) 65%, rgba(10,20,40,0.15) 100%), url('${d.img}') center / cover no-repeat`,
+          } : {};
+
           return (
             <div
               key={i}
               className={`devo-card ${cardClass}`}
               onClick={locked ? undefined : () => onCardTap(i)}
             >
-              <div className="devo-card-inner">
+              <div className="devo-card-inner" style={innerStyle}>
                 <div className="devo-flag-bg">{flag}</div>
                 {locked ? (
                   <div className="devo-lock">🔒</div>
@@ -1506,7 +1510,7 @@ export default function App() {
         <div style={{ background: C.indigo, padding: "8px 0 0" }}>
           <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: "6px", display: "flex", margin: "0 16px 12px" }}>
             {[
-              { id: "digest", label: "📅  Daily Digest" },
+              { id: "digest", label: "🏠  Home" },
               { id: "nations", label: "🌍  All Nations" },
               ...(gameState.journeyMode ? [{ id: "journey", label: "🏆  My Journey" }] : []),
             ].map(t => (
