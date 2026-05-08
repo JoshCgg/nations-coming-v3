@@ -815,8 +815,10 @@ function DigestHome({ gameState, onCardTap }) {
           const isToday  = i === todayIdx;
           const isPast   = i < todayIdx;
           const isFuture = i > todayIdx;
-          const locked   = isFuture && gameState.journeyMode;
-          const cardClass = isToday ? "today" : (isPast || !gameState.journeyMode) ? "past" : "future";
+          const locked    = isFuture && gameState.journeyMode;
+          const isActive  = i === activeCard;
+          const cardClass = isActive ? "today" : (locked ? "future" : "past");
+          const cardStyle = isActive ? {} : { opacity: 0.6, transform: 'scale(0.92)' };
           const featNation = (d.feat && d.feat[0] && d.feat[0] !== "All Nations")
             ? RAW_COUNTRIES.find(c => c.n === d.feat[0])
             : null;
@@ -835,6 +837,7 @@ function DigestHome({ gameState, onCardTap }) {
             <div
               key={i}
               className={`devo-card ${cardClass}`}
+              style={cardStyle}
               onClick={locked ? undefined : () => onCardTap(i)}
             >
               <div className="devo-card-inner" style={innerStyle}>
@@ -1079,7 +1082,7 @@ const JOURNEY_CSS = `
     flex-shrink: 0; width: 200px;
     border-radius: 18px; overflow: hidden;
     cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
     position: relative;
   }
   .devo-card:active { transform: scale(0.97); }
