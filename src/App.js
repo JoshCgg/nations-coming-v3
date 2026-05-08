@@ -818,7 +818,7 @@ function DigestHome({ gameState, onCardTap }) {
           const locked    = isFuture && gameState.journeyMode;
           const isActive  = i === activeCard;
           const cardClass = isActive ? "today" : (locked ? "future" : "past");
-          const cardStyle = isActive ? {} : { opacity: 0.6, transform: 'scale(0.92)' };
+          const cardStyle = isActive ? {} : { opacity: 0.75, transform: 'scale(0.92)' };
           const featNation = (d.feat && d.feat[0] && d.feat[0] !== "All Nations")
             ? RAW_COUNTRIES.find(c => c.n === d.feat[0])
             : null;
