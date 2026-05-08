@@ -477,7 +477,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
 }
 
 /* ─── DAILY DIGEST TAB ─── */
-function DailyDigest({ gameState, updateGameState }) {
+function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
   const today = new Date();
   const startOfTournament = new Date("2026-06-11");
   let defaultDay = 0;
@@ -485,7 +485,7 @@ function DailyDigest({ gameState, updateGameState }) {
     const diff = Math.floor((today - startOfTournament) / 86400000);
     defaultDay = Math.min(diff, RAW_SCHEDULE.length - 1);
   }
-  const [dayIdx, setDayIdx] = useState(defaultDay);
+  const [dayIdx, setDayIdx] = useState(initialDay ?? defaultDay);
   const [selectedNation, setSelectedNation] = useState(null);
   const day = RAW_SCHEDULE[dayIdx];
   const [showAllMatches, setShowAllMatches] = useState(false);
@@ -495,6 +495,16 @@ function DailyDigest({ gameState, updateGameState }) {
   return (
     <div style={{ paddingBottom: 100 }}>
       <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} />
+
+      {onBack && (
+        <button onClick={onBack} style={{
+          display: "flex", alignItems: "center", gap: 6,
+          background: "none", border: "none", cursor: "pointer",
+          padding: "12px 16px 4px",
+          fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13,
+          color: C.indigo,
+        }}>← All Days</button>
+      )}
 
       {/* Date heading */}
       <div style={{ background: C.indigo, padding: "14px 16px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -719,6 +729,168 @@ function DailyDigest({ gameState, updateGameState }) {
         })()}
 
       </div>
+    </div>
+  );
+}
+
+/* ─── DIGEST HOME (carousel — Tab 1 primary view) ─── */
+function DigestHome({ gameState, onCardTap }) {
+  const carouselRef = useRef(null);
+
+  const today = new Date();
+  const startOfTournament = new Date("2026-06-11");
+  let todayIdx = 0;
+  if (today >= startOfTournament) {
+    const diff = Math.floor((today - startOfTournament) / 86400000);
+    todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
+  }
+
+  const [activeCard, setActiveCard] = useState(todayIdx);
+  const score = calcScore(gameState);
+  const earned = gameState.goalsAchieved || [];
+
+  useEffect(() => {
+    if (!carouselRef.current) return;
+    const container = carouselRef.current;
+    const cards = container.children;
+    if (cards[todayIdx]) {
+      const card = cards[todayIdx];
+      const offset = card.offsetLeft - container.offsetWidth / 2 + card.offsetWidth / 2;
+      container.scrollTo({ left: offset, behavior: 'auto' });
+    }
+  }, [todayIdx]);
+
+  return (
+    <div style={{ paddingBottom: 100 }}>
+      <style>{JOURNEY_CSS}</style>
+
+      {gameState.journeyMode && (
+        <div className="jny-stats">
+          <div className="jny-stat-block">
+            <div className="jny-stat-num jny-clr-orange">🔥 {gameState.streakCount}</div>
+            <div className="jny-stat-label">Day Streak</div>
+          </div>
+          <div className="jny-stat-block">
+            <div className="jny-stat-num jny-clr-jeans">{gameState.prayedNations.length}</div>
+            <div className="jny-stat-label">Nations</div>
+          </div>
+          <div className="jny-stat-block">
+            <div className="jny-stat-num jny-clr-blue">{gameState.completedDevotionals.length}</div>
+            <div className="jny-stat-label">Devotionals</div>
+          </div>
+        </div>
+      )}
+
+      {gameState.journeyMode && (
+        <button className="jny-mission-btn" onClick={() => onCardTap(todayIdx)}>
+          <span>⚡ Today's Mission — Day {todayIdx + 1}</span>
+          <span style={{ fontSize: 16 }}>›</span>
+        </button>
+      )}
+
+      <div className="jny-section-label">
+        Your Prayer Journey
+        <div className="jny-section-sub">
+          {gameState.journeyMode
+            ? "Today's devotional is centered · past days completed · future days locked"
+            : "Tap any day to read its devotional"}
+        </div>
+      </div>
+
+      <div
+        className="carousel-scroll-wrap"
+        ref={carouselRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          const center = el.scrollLeft + el.offsetWidth / 2;
+          let closest = 0, minDist = Infinity;
+          Array.from(el.children).forEach((child, i) => {
+            const dist = Math.abs(child.offsetLeft + child.offsetWidth / 2 - center);
+            if (dist < minDist) { minDist = dist; closest = i; }
+          });
+          setActiveCard(closest);
+        }}
+      >
+        {RAW_SCHEDULE.map((d, i) => {
+          const isToday  = i === todayIdx;
+          const isPast   = i < todayIdx;
+          const isFuture = i > todayIdx;
+          const locked   = isFuture && gameState.journeyMode;
+          const cardClass = isToday ? "today" : (isPast || !gameState.journeyMode) ? "past" : "future";
+          const featNation = (d.feat && d.feat[0] && d.feat[0] !== "All Nations")
+            ? RAW_COUNTRIES.find(c => c.n === d.feat[0])
+            : null;
+          const flag = featNation ? featNation.f : "🌍";
+          const nationName = featNation
+            ? featNation.n
+            : (d.feat && d.feat[0] === "All Nations" ? "All Nations" : "The Nations");
+          const theme = d.dev.length > 44 ? d.dev.substring(0, 44) + "…" : d.dev;
+          const isPrayed = isPast && (gameState.checkedInDays || []).includes(scheduleToISO(d.d));
+
+          return (
+            <div
+              key={i}
+              className={`devo-card ${cardClass}`}
+              onClick={locked ? undefined : () => onCardTap(i)}
+            >
+              <div className="devo-card-inner">
+                <div className="devo-flag-bg">{flag}</div>
+                {locked ? (
+                  <div className="devo-lock">🔒</div>
+                ) : isPrayed ? (
+                  <div className="devo-checked-badge">✓ Prayed</div>
+                ) : (
+                  <div className="devo-day-badge">
+                    {isToday ? `Today · Day ${i + 1}` : `Day ${i + 1}`}
+                  </div>
+                )}
+                <span className="devo-flag-main">{flag}</span>
+                <div className="devo-nation">{nationName}</div>
+                <div className="devo-theme">{theme}</div>
+                <div className="devo-date">{d.d} · Day {i + 1}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="carousel-dots">
+        {RAW_SCHEDULE.map((_, i) => (
+          <div key={i} className={`carousel-dot ${i === activeCard ? "active" : ""}`} />
+        ))}
+      </div>
+
+      {gameState.journeyMode && (
+        <>
+          <div className="jny-section-label" style={{ paddingBottom: 8 }}>Achievements</div>
+          <div className="jny-achieve-strip">
+            {Object.entries(ACHIEVEMENT_LABELS).map(([id, info]) => {
+              const isEarned = earned.includes(id);
+              return (
+                <div key={id} className={`achieve-chip ${isEarned ? "" : "locked"}`}>
+                  <span className="achieve-icon">{info.icon}</span>
+                  <span className="achieve-label">{info.label}</span>
+                  {isEarned && <div className="achieve-earned-dot" />}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {gameState.journeyMode && (
+        <div className="jny-score-row">
+          <div>
+            <div className="jny-score-label">Your Score</div>
+            <div className="jny-score-num">{score} pts</div>
+            <div className="jny-score-sub">
+              {gameState.prayedNations.length} nations · {gameState.checkedInDays.length} days · {gameState.completedDevotionals.length} devotionals
+            </div>
+          </div>
+          <div className="jny-trophy-thumb">🏆</div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -1206,6 +1378,7 @@ function ToggleSwitch({ value, onToggle }) {
 /* ─── MAIN APP ─── */
 export default function App() {
   const [tab, setTab] = useState("digest");
+  const [selectedDayIdx, setSelectedDayIdx] = useState(null);
   const [showBanner, setShowBanner] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [gameState, updateGameState] = useGameState();
@@ -1337,7 +1510,7 @@ export default function App() {
               { id: "nations", label: "🌍  All Nations" },
               ...(gameState.journeyMode ? [{ id: "journey", label: "🏆  My Journey" }] : []),
             ].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{
+              <button key={t.id} onClick={() => { setTab(t.id); setSelectedDayIdx(null); }} style={{
                 flex: 1,
                 background: tab === t.id ? C.orange : "transparent",
                 border: "none",
@@ -1357,12 +1530,21 @@ export default function App() {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: "auto" }}>
-          {tab === "digest"
-            ? <DailyDigest gameState={gameState} updateGameState={handleGameStateUpdate} />
-            : tab === "journey"
-              ? <MyJourney gameState={gameState} setTab={setTab} />
-              : <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} />
-          }
+          {tab === "digest" ? (
+            selectedDayIdx !== null
+              ? <DailyDigest
+                  key={selectedDayIdx}
+                  initialDay={selectedDayIdx}
+                  onBack={() => setSelectedDayIdx(null)}
+                  gameState={gameState}
+                  updateGameState={handleGameStateUpdate}
+                />
+              : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} />
+          ) : tab === "journey" ? (
+            <MyJourney gameState={gameState} setTab={setTab} />
+          ) : (
+            <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} />
+          )}
         </div>
 
         <AchievementToast achievement={pendingToast} onDismiss={() => setPendingToast(null)} />
