@@ -140,15 +140,19 @@ function checkAchievements(gameState) {
 /* ─── ALL NATIONS DATA ─── */
 const FlagImg = ({ iso, f, size = 32 }) => {
   if (!iso) return <span style={{ fontSize: size * 0.75 }}>{f}</span>;
+  const validWidths = [20, 40, 80, 160, 320, 640, 1280];
+  const w = validWidths.reduce((prev, curr) =>
+    Math.abs(curr - size) < Math.abs(prev - size) ? curr : prev
+  );
   const h = Math.round(size * 0.75);
   return (
     <img
-      src={`https://flagcdn.com/w${size}/${iso}.png`}
-      srcSet={`https://flagcdn.com/w${size * 2}/${iso}.png 2x`}
+      src={`https://flagcdn.com/w${w}/${iso}.png`}
+      srcSet={`https://flagcdn.com/w${w * 2 <= 1280 ? w * 2 : w}/${iso}.png 2x`}
       width={size}
       height={h}
       alt=""
-      style={{ objectFit: "cover", borderRadius: 2, display: "inline-block", verticalAlign: "middle" }}
+      style={{ objectFit:"cover", borderRadius:2, display:"inline-block", verticalAlign:"middle" }}
     />
   );
 };
@@ -505,9 +509,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
   const [dayIdx, setDayIdx] = useState(initialDay ?? defaultDay);
   const [selectedNation, setSelectedNation] = useState(null);
   const day = RAW_SCHEDULE[dayIdx];
-  const [showAllMatches, setShowAllMatches] = useState(false);
-
-  const matchesToShow = showAllMatches ? day.matches : day.matches.slice(0, 3);
+  const matchesToShow = day.matches;
 
   return (
     <div style={{ paddingBottom: 100 }}>
@@ -619,14 +621,6 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
               </div>
             );
           })}
-          {day.matches.length > 3 && !showAllMatches && (
-            <button onClick={() => setShowAllMatches(true)} style={{
-              display: "block", width: "100%", marginTop: 14,
-              background: "none", border: `2px solid ${C.blue}40`, borderRadius: 10,
-              padding: 12, fontFamily: "Montserrat, sans-serif", fontWeight: 700,
-              fontSize: 14, color: C.blue, cursor: "pointer",
-            }}>Show {day.matches.length - 3} More Matches ▾</button>
-          )}
         </div>
 
         {/* Featured Nations */}
