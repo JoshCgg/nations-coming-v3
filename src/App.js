@@ -527,7 +527,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
 
       {/* Date heading */}
       <div style={{ background: C.indigo, padding: "14px 16px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <button onClick={() => { if (dayIdx > 0) { setDayIdx(dayIdx - 1); setShowAllMatches(false); } }} disabled={dayIdx === 0} style={{
+        <button onClick={() => { if (dayIdx > 0) { setDayIdx(dayIdx - 1); } }} disabled={dayIdx === 0} style={{
           background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
           borderRadius: 10, padding: "10px 18px", fontSize: 18, cursor: "pointer",
           opacity: dayIdx === 0 ? 0.3 : 1, fontFamily: "Montserrat, sans-serif", fontWeight: 700,
@@ -536,7 +536,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
           <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 17, color: "#fff" }}>{day.full}</div>
           <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>Day {dayIdx + 1} of 17</div>
         </div>
-        <button onClick={() => { if (dayIdx < RAW_SCHEDULE.length - 1) { setDayIdx(dayIdx + 1); setShowAllMatches(false); } }} disabled={dayIdx === RAW_SCHEDULE.length - 1} style={{
+        <button onClick={() => { if (dayIdx < RAW_SCHEDULE.length - 1) { setDayIdx(dayIdx + 1); } }} disabled={dayIdx === RAW_SCHEDULE.length - 1} style={{
           background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
           borderRadius: 10, padding: "10px 18px", fontSize: 18, cursor: "pointer",
           opacity: dayIdx === RAW_SCHEDULE.length - 1 ? 0.3 : 1, fontFamily: "Montserrat, sans-serif", fontWeight: 700,
@@ -677,7 +677,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
           <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
             <div style={{ display: "flex", gap: 8, padding: "0 16px", width: "max-content" }}>
               {RAW_SCHEDULE.map((s, i) => (
-                <button key={i} onClick={() => { setDayIdx(i); setShowAllMatches(false); window.scrollTo(0,0); }} style={{
+                <button key={i} onClick={() => { setDayIdx(i); window.scrollTo(0,0); }} style={{
                   background: i === dayIdx ? C.indigo : C.brightGray,
                   color: i === dayIdx ? "#fff" : C.indigo,
                   border: "none",
