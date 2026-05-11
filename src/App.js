@@ -366,9 +366,21 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: "#fff", lineHeight: 1.2 }}>
               {nation.n}
             </div>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 4 }}>
-              {nation.r} · {nation.cf}
-            </div>
+            {(() => {
+              const nationMatches = RAW_SCHEDULE.filter(d =>
+                d.matches && d.matches.some(m => m.a === nation.n || m.b === nation.n)
+              );
+              const group = nationMatches.length > 0 ? nationMatches[0].matches.find(m => m.a === nation.n || m.b === nation.n)?.g : null;
+              const dates = nationMatches.map(d => d.d);
+              return (
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 4 }}>
+                  {group ? `Group ${group}` : nation.r}
+                  {dates.length > 0 && (
+                    <span style={{ opacity: 0.8 }}> · {dates.join(" · ")}</span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
           {!nation.contenders && (
             <div style={{ ...ugBadgeStyle(nation.u), borderRadius: 20, padding: "6px 12px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, textAlign: "center", flexShrink: 0 }}>
