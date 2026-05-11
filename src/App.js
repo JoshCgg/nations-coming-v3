@@ -1002,10 +1002,27 @@ function AllNations({ gameState, updateGameState }) {
             <FlagImg iso={c.iso} f={c.f} size={38} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 17, color: C.indigo }}>{c.n}</div>
-              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: C.blue, marginTop: 2 }}>{c.r} · {c.cf}</div>
-              <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: C.text, marginTop: 4, lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                {c.ug.join(" · ")}
-              </div>
+              {(() => {
+                const nationMatches = RAW_SCHEDULE.filter(d =>
+                  d.matches && d.matches.some(m => m.a === c.n || m.b === c.n)
+                );
+                const group = nationMatches.length > 0
+                  ? nationMatches[0].matches.find(m => m.a === c.n || m.b === c.n)?.g
+                  : null;
+                const dates = nationMatches.map(d => d.d);
+                return (
+                  <>
+                    <div style={{ fontSize:13, color:C.blue }}>
+                      {c.r} · {c.cf}{group ? ` · Group ${group}` : ""}
+                    </div>
+                    {dates.length > 0 && (
+                      <div style={{ fontSize:12, color:C.blueJeans, marginTop:2 }}>
+                        {dates.join(" · ")}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               {(gameState?.prayedNations || []).includes(c.n) && (
                 <span style={{ display: "inline-block", marginTop: 3, background: "#e8f5e9", color: "#2e7d32", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, borderRadius: 999, padding: "2px 8px" }}>
                   ✓ Prayed
