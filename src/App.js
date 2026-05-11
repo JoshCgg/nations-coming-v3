@@ -576,9 +576,24 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
             <span style={{ fontSize: 22 }}>🙏</span>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.blueJeans }}>Prayer Focus</div>
           </div>
-          <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 17, lineHeight: 1.75, color: C.text }}>
-            {day.pray}
-          </div>
+          {(() => {
+            const parts = (day.pray || "").split(/•/).map(s => s.trim()).filter(Boolean);
+            if (parts.length <= 1) {
+              return <div style={{ fontFamily:"Libre Baskerville", fontSize:15, lineHeight:1.7, color:C.indigo }}>{day.pray}</div>;
+            }
+            const [intro, ...bullets] = parts;
+            return (
+              <div>
+                <div style={{ fontFamily:"Libre Baskerville", fontSize:15, lineHeight:1.7, color:C.indigo, marginBottom:10 }}>{intro}</div>
+                {bullets.map((b, i) => (
+                  <div key={i} style={{ display:"flex", gap:10, alignItems:"flex-start", marginBottom:8 }}>
+                    <div style={{ color:C.orange, fontWeight:800, fontSize:18, lineHeight:1.4, flexShrink:0 }}>•</div>
+                    <div style={{ fontFamily:"Libre Baskerville", fontSize:15, lineHeight:1.7, color:C.indigo }}>{b}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Matches */}
