@@ -213,15 +213,6 @@ const RAW_COUNTRIES = [
 ];
 
 /* ─── PLAYOFF TBD SLOTS ─── */
-const TBD_SLOTS = [
-  { n:"UEFA Playoff A", f:"🏆", r:"Europe", cf:"UEFA", contenders:"Italy vs N. Ireland / Wales vs Bosnia", u:0 },
-  { n:"UEFA Playoff B", f:"🏆", r:"Europe", cf:"UEFA", contenders:"Ukraine vs Sweden / Poland vs Albania", u:0 },
-  { n:"UEFA Playoff C", f:"🏆", r:"Europe", cf:"UEFA", contenders:"Turkey vs Romania / Slovakia vs Kosovo", u:0 },
-  { n:"UEFA Playoff D", f:"🏆", r:"Europe", cf:"UEFA", contenders:"Denmark vs N. Macedonia / Czechia vs Ireland", u:0 },
-  { n:"Inter-Conf. Playoff 1", f:"🌍", r:"Africa", cf:"CAF/CONCACAF", contenders:"DR Congo vs (New Caledonia vs Jamaica)", u:0 },
-  { n:"Inter-Conf. Playoff 2", f:"🌏", r:"Asia", cf:"AFC/CONMEBOL", contenders:"Iraq vs (Bolivia vs Suriname)", u:0 },
-];
-
 /* ─── SCHEDULE DATA ─── */
 const RAW_SCHEDULE = [
   { d:"Jun 11", full:"Thursday, June 11", img:"/images/day-01.png", feat:["Mexico","South Africa"], dev:`The World Cup is one of the greatest celebrations of the nations, thanks to the global sport of soccer. This year, more nations than ever will participate as the field of teams expands to 48, and for the first time, the tournament will be held in 3 host nations (U.S., Mexico, & Canada). Truly, the eyes of the world will be focused on soccer over the next month, and some have estimated that the 104 matches will bring between 1.5 and 2.5 million international visitors to North America. This means the story of this year's World Cup is the story of the nations coming to us, and that is a story that God set in motion from the beginning. Read Acts 17:26-27.`, pray:`Prayer for the nations to know and experience God through this year's World Cup. Pray that people will see and experience God's heart for the nations, and many will come to know him as Lord and Savior. Pray for the nations represented in this year's World Cup who are considered unreached by the Gospel. Ask the Lord to bring them into contact with believers, so they can hear the Good News.`, matches:[{t:"5:00 PM",a:"Mexico",b:"South Africa",g:"A",v:"Estadio Azteca, Mexico City"},{t:"8:00 PM",a:"USA",b:"Canada",g:"B",v:"AT&T Stadium, Dallas"}] },
@@ -583,8 +574,8 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.indigo }}>Today's Matches</div>
           </div>
           {matchesToShow.map((m, i) => {
-            const teamA = [...RAW_COUNTRIES, ...TBD_SLOTS].find(c => c.n === m.a);
-            const teamB = [...RAW_COUNTRIES, ...TBD_SLOTS].find(c => c.n === m.b);
+            const teamA = RAW_COUNTRIES.find(c => c.n === m.a);
+            const teamB = RAW_COUNTRIES.find(c => c.n === m.b);
             return (
               <div key={i} style={{ marginBottom: i < matchesToShow.length - 1 ? 14 : 0 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
@@ -596,7 +587,9 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
                     flex: 1, background: C.brightGray, border: "none", borderRadius: "10px 0 0 10px",
                     padding: "12px 10px", cursor: "pointer", textAlign: "center",
                   }}>
-                    <div style={{ fontSize: 26 }}>{teamA?.f || "🏆"}</div>
+                    <div style={{ fontSize: 26 }}>
+                      {teamA ? <FlagImg iso={teamA.iso} f={teamA.f} size={26} /> : "🏆"}
+                    </div>
                     <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, color: C.indigo, marginTop: 4 }}>{m.a}</div>
                   </button>
                   <div style={{ background: C.orange, color: "#fff", fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 14, padding: "16px 10px", flexShrink: 0 }}>VS</div>
@@ -604,7 +597,9 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
                     flex: 1, background: C.brightGray, border: "none", borderRadius: "0 10px 10px 0",
                     padding: "12px 10px", cursor: "pointer", textAlign: "center",
                   }}>
-                    <div style={{ fontSize: 26 }}>{teamB?.f || "🏆"}</div>
+                    <div style={{ fontSize: 26 }}>
+                      {teamB ? <FlagImg iso={teamB.iso} f={teamB.f} size={26} /> : "🏆"}
+                    </div>
                     <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, color: C.indigo, marginTop: 4 }}>{m.b}</div>
                   </button>
                 </div>
@@ -764,13 +759,11 @@ function DigestHome({ gameState, onCardTap }) {
   const earned = gameState.goalsAchieved || [];
 
   useEffect(() => {
-    if (!carouselRef.current) return;
-    const container = carouselRef.current;
-    const cards = container.children;
-    if (cards[todayIdx]) {
-      const card = cards[todayIdx];
-      const offset = card.offsetLeft - container.offsetWidth / 2 + card.offsetWidth / 2;
-      container.scrollTo({ left: offset, behavior: 'auto' });
+    if (carouselRef.current && todayIdx >= 0) {
+      const cards = carouselRef.current.querySelectorAll('.devo-card');
+      if (cards[todayIdx]) {
+        cards[todayIdx].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+      }
     }
   }, [todayIdx]);
 
@@ -1005,28 +998,6 @@ function AllNations({ gameState, updateGameState }) {
           </button>
         ))}
 
-        {/* TBD Slots */}
-        {(region === "All" || region === "Europe") && !search && (
-          <div style={{ marginTop: 6 }}>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, color: C.blue, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>⏳ Playoff Slots — Results April 1</div>
-            {TBD_SLOTS.filter(s => region === "All" || s.r === region).map((s, i) => (
-              <button key={i} onClick={() => setSelectedNation(s)} style={{
-                display: "flex", alignItems: "center", gap: 14, width: "100%",
-                background: "repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(62,103,172,0.06) 6px, rgba(62,103,172,0.06) 12px)",
-                border: `1px dashed ${C.blue}60`,
-                borderRadius: 14, padding: "14px 16px", cursor: "pointer",
-                textAlign: "left", marginBottom: 10,
-              }}>
-                <FlagImg iso={s.iso} f={s.f} size={38} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.indigo }}>{s.n}</div>
-                  <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: C.blue, marginTop: 3 }}>{s.contenders}</div>
-                </div>
-                <div style={{ background: C.brightGray, borderRadius: 10, padding: "8px 10px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, color: C.blue, textAlign: "center", flexShrink: 0 }}>TBD</div>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -1251,12 +1222,12 @@ function MyJourney({ gameState, setTab }) {
           const isPast   = i < todayIdx;
           const isFuture = i > todayIdx;
           const cardClass = isToday ? "today" : isPast ? "past" : "future";
-          const featNation = (d.feat && d.feat[0] && d.feat[0] !== "All Nations")
-            ? RAW_COUNTRIES.find(c => c.n === d.feat[0])
-            : null;
-          const flag = featNation ? featNation.f : "🌍";
-          const nationName = featNation
-            ? featNation.n
+          const featNations = (d.feat || [])
+            .filter(name => name !== "All Nations")
+            .map(name => RAW_COUNTRIES.find(c => c.n === name))
+            .filter(Boolean);
+          const nationName = featNations.length > 0
+            ? featNations.map(n => n.n).join(" · ")
             : (d.feat && d.feat[0] === "All Nations" ? "All Nations" : "The Nations");
           const theme = d.dev.length > 44 ? d.dev.substring(0, 44) + "…" : d.dev;
           const isPrayed = isPast && (gameState.checkedInDays || []).includes(scheduleToISO(d.d));
@@ -1274,8 +1245,8 @@ function MyJourney({ gameState, setTab }) {
             >
               <div className="devo-card-inner">
                 <div className="devo-flag-bg">
-                  {featNation
-                    ? <FlagImg iso={featNation.iso} f={featNation.f} size={64} />
+                  {featNations.length > 0
+                    ? <FlagImg iso={featNations[0].iso} f={featNations[0].f} size={64} />
                     : <span style={{ fontSize: 64 }}>🌍</span>}
                 </div>
                 {isFuture ? (
@@ -1287,9 +1258,9 @@ function MyJourney({ gameState, setTab }) {
                     {isToday ? `Today · Day ${i + 1}` : `Day ${i + 1}`}
                   </div>
                 )}
-                <span className="devo-flag-main">
-                  {featNation
-                    ? <FlagImg iso={featNation.iso} f={featNation.f} size={28} />
+                <span className="devo-flag-main" style={{ display:"flex", gap:4, alignItems:"center" }}>
+                  {featNations.length > 0
+                    ? featNations.map(n => <FlagImg key={n.n} iso={n.iso} f={n.f} size={28} />)
                     : <span style={{ fontSize: 28 }}>🌍</span>}
                 </span>
                 <div className="devo-nation">{nationName}</div>
