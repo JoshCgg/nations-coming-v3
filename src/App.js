@@ -340,6 +340,7 @@ function HomeScreenBanner({ onDismiss }) {
 }
 
 /* ─── NATION MODAL ─── */
+// TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
   if (!nation) return null;
   return (
