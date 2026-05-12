@@ -1502,7 +1502,7 @@ function Onboarding({ onComplete }) {
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}
             >
-              <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 12, boxSizing: "border-box" }} />
+              <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 16 }} />
             </div>
           </div>
         </ObNavyHeader>
@@ -1543,7 +1543,7 @@ function Onboarding({ onComplete }) {
           <ObOrangeBtn onClick={() => setStep(2)}>Begin →</ObOrangeBtn>
 
           <div style={{ marginTop: 20, textAlign: "center", paddingBottom: 32 }}>
-            <img src="/images/gg-wordmark.png" alt="Global Gates" style={{ height: 28, width: "auto", opacity: 0.6, display: "inline-block" }} />
+            <img src="/images/gg-wordmark.png" alt="Global Gates" style={{ width: 160, height: "auto", opacity: 0.6, display: "inline-block", marginTop: 16, marginBottom: 24 }} />
           </div>
         </div>
       </div>
@@ -1977,7 +1977,7 @@ export default function App() {
     return (
       <>
         <style>{FONTS}</style>
-        <style>{`* { -webkit-tap-highlight-color: transparent; } body { margin: 0; background: #f0f7ff; } ::-webkit-scrollbar { display: none; } button { -webkit-appearance: none; } input { -webkit-appearance: none; }`}</style>
+        <style>{`* { -webkit-tap-highlight-color: transparent; } body { margin: 0; background: #ffffff; } ::-webkit-scrollbar { display: none; } button { -webkit-appearance: none; } input { -webkit-appearance: none; }`}</style>
         <Onboarding onComplete={handleOnboardingComplete} />
       </>
     );
