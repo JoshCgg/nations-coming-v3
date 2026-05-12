@@ -244,12 +244,6 @@ const RAW_SCHEDULE = [
 
 const REGIONS = ["All","Americas","Europe","Africa","Asia","Oceania"];
 
-function ugBadgeStyle(u) {
-  if (u >= 20) return { background: C.orange, color: "#fff" };
-  if (u >= 10) return { background: C.blueJeans, color: "#fff" };
-  return { background: C.blue, color: "#fff" };
-}
-
 /* ─── HOME SCREEN BANNER ─── */
 function HomeScreenBanner({ onDismiss }) {
   const [platform, setPlatform] = useState("ios");
