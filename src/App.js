@@ -388,12 +388,6 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
               );
             })()}
           </div>
-          {!nation.contenders && (
-            <div style={{ ...ugBadgeStyle(nation.u), borderRadius: 20, padding: "6px 12px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, textAlign: "center", flexShrink: 0 }}>
-              <div style={{ fontSize: 18, fontWeight: 800 }}>{nation.u}</div>
-              <div style={{ fontSize: 10, letterSpacing: 0.5 }}>UPGS</div>
-            </div>
-          )}
         </div>
 
         <div style={{ padding: "20px 20px 0 20px" }}>
@@ -666,10 +660,6 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 17, color: C.indigo }}>{nation.n}</div>
                     <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, color: C.text, marginTop: 3, lineHeight: 1.4 }}>{nation.m.substring(0, 70)}…</div>
-                  </div>
-                  <div style={{ ...ugBadgeStyle(nation.u), borderRadius: 10, padding: "6px 10px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 12, textAlign: "center", flexShrink: 0 }}>
-                    <div style={{ fontSize: 18, fontWeight: 800 }}>{nation.u}</div>
-                    <div style={{ fontSize: 10 }}>UPGs</div>
                   </div>
                 </button>
               );
