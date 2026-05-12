@@ -1489,23 +1489,25 @@ function Onboarding({ onComplete }) {
   // ─── STEP 1 — Welcome ───
   if (step === 1) {
     return (
-      <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
+      <div style={{ minHeight: "100vh", background: "#ffffff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
         <ObNavyHeader>
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 4 }}>
             <div
               onClick={handleLogoTap}
               style={{
-                background: "#fff", borderRadius: 20, padding: "20px 28px",
+                background: "#fff", borderRadius: 20,
                 boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
-                cursor: "pointer", userSelect: "none", display: "inline-block",
+                cursor: "pointer", userSelect: "none",
+                width: 220, height: 150,
+                display: "flex", alignItems: "center", justifyContent: "center",
               }}
             >
-              <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ height: 80, width: "auto", display: "block" }} />
+              <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 12, boxSizing: "border-box" }} />
             </div>
           </div>
         </ObNavyHeader>
 
-        <div style={{ flex: 1, padding: "32px 24px 20px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        <div style={{ padding: "32px 24px 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
           <div style={{
             fontFamily: "Libre Baskerville, serif", fontWeight: 700, fontStyle: "italic",
             fontSize: 21, color: OB.navy, lineHeight: 1.6, marginBottom: 10, maxWidth: 300,
@@ -1539,10 +1541,10 @@ function Onboarding({ onComplete }) {
           </div>
 
           <ObOrangeBtn onClick={() => setStep(2)}>Begin →</ObOrangeBtn>
-        </div>
 
-        <div style={{ padding: "16px 24px calc(16px + env(safe-area-inset-bottom, 0px))", textAlign: "center" }}>
-          <img src="/images/gg-wordmark.png" alt="Global Gates" style={{ height: 28, width: "auto", opacity: 0.6, display: "inline-block" }} />
+          <div style={{ marginTop: 20, textAlign: "center", paddingBottom: 32 }}>
+            <img src="/images/gg-wordmark.png" alt="Global Gates" style={{ height: 28, width: "auto", opacity: 0.6, display: "inline-block" }} />
+          </div>
         </div>
       </div>
     );
@@ -1569,7 +1571,7 @@ function Onboarding({ onComplete }) {
             </div>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: 27, color: "#fff", lineHeight: 1.25, marginBottom: 12 }}>
               Ready to go on an{" "}
-              <span style={{ color: OB.sky }}>adventure?</span>
+              <span style={{ color: "#FF8844" }}>adventure?</span>
             </div>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
               Build a daily rhythm of prayer that takes you around the world.
