@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 const FONTS = `
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 `;
 
 /* ─── BRAND COLORS ─── */
@@ -51,6 +51,7 @@ const C = {
    ──────────────────────────────────────────────────────────────── */
 
 const DEFAULT_GAME_STATE = {
+  hasOnboarded: false,
   journeyMode: false,
   prayedNations: [],
   checkedInDays: [],
@@ -1411,6 +1412,534 @@ function ToggleSwitch({ value, onToggle }) {
   );
 }
 
+/* ─── ONBOARDING ─── */
+const OB = {
+  navy:      "#00476B",
+  orange:    "#E06520",
+  sky:       "#00BAF8",
+  lightBlue: "#8ADBFF",
+  midBlue:   "#0D68A1",
+};
+
+function ObNavyHeader({ children }) {
+  return (
+    <div style={{
+      background: OB.navy,
+      clipPath: "ellipse(100% 88% at 50% 0%)",
+      paddingTop: "calc(env(safe-area-inset-top, 0px) + 28px)",
+      paddingBottom: 56,
+      paddingLeft: 24,
+      paddingRight: 24,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function ObOrangeBtn({ children, onClick, style = {} }) {
+  return (
+    <button onClick={onClick} style={{
+      display: "block", width: "100%",
+      background: OB.orange, color: "#fff", border: "none",
+      borderRadius: 14, padding: "18px 24px",
+      fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 17,
+      cursor: "pointer", letterSpacing: 0.3,
+      ...style,
+    }}>{children}</button>
+  );
+}
+
+function Onboarding({ onComplete }) {
+  const [step, setStep] = useState(1);
+  const [journeyPath, setJourneyPath] = useState(null);
+  const [tapCount, setTapCount] = useState(0);
+  const tapTimer = useRef(null);
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [carouselIdx, setCarouselIdx] = useState(0);
+
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+
+  function handleLogoTap() {
+    const next = tapCount + 1;
+    if (tapTimer.current) clearTimeout(tapTimer.current);
+    if (next >= 3) {
+      try { localStorage.removeItem("pftc_game"); } catch {}
+      setTapCount(0);
+    } else {
+      setTapCount(next);
+      tapTimer.current = setTimeout(() => setTapCount(0), 800);
+    }
+  }
+
+  function finishOnboarding(opts = {}) {
+    onComplete({ journeyMode: journeyPath === true, ...opts });
+  }
+
+  function handleNotifAllow() {
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission().then(() => finishOnboarding());
+    } else {
+      finishOnboarding();
+    }
+  }
+
+  // ─── STEP 1 — Welcome ───
+  if (step === 1) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
+        <ObNavyHeader>
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 4 }}>
+            <div
+              onClick={handleLogoTap}
+              style={{
+                background: "#fff", borderRadius: 20, padding: "20px 28px",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+                cursor: "pointer", userSelect: "none", display: "inline-block",
+              }}
+            >
+              <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ height: 80, width: "auto", display: "block" }} />
+            </div>
+          </div>
+        </ObNavyHeader>
+
+        <div style={{ flex: 1, padding: "32px 24px 20px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <div style={{
+            fontFamily: "Libre Baskerville, serif", fontWeight: 700, fontStyle: "italic",
+            fontSize: 21, color: OB.navy, lineHeight: 1.6, marginBottom: 10, maxWidth: 300,
+          }}>
+            "Ask of me, and I will make the nations your heritage."
+          </div>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11,
+            color: OB.orange, textTransform: "uppercase", letterSpacing: 2, marginBottom: 24,
+          }}>
+            Psalm 2:8
+          </div>
+
+          <div style={{ width: 52, height: 4, background: OB.orange, borderRadius: 2, marginBottom: 32 }} />
+
+          <div style={{ display: "flex", gap: 36, marginBottom: 32 }}>
+            {[["48","Nations"], ["20","Days"], ["1","Goal"]].map(([num, label]) => (
+              <div key={label} style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: 38, color: OB.navy, lineHeight: 1 }}>{num}</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 11, color: OB.midBlue, marginTop: 4, textTransform: "uppercase", letterSpacing: 0.8 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 12,
+            color: OB.navy, textTransform: "uppercase", letterSpacing: 1.1,
+            marginBottom: 36, maxWidth: 280, lineHeight: 1.6,
+          }}>
+            A Prayer Guide for the 2026 FIFA World Cup
+          </div>
+
+          <ObOrangeBtn onClick={() => setStep(2)}>Begin →</ObOrangeBtn>
+        </div>
+
+        <div style={{ padding: "16px 24px calc(16px + env(safe-area-inset-bottom, 0px))", textAlign: "center" }}>
+          <img src="/images/gg-wordmark.png" alt="Global Gates" style={{ height: 28, width: "auto", opacity: 0.6, display: "inline-block" }} />
+        </div>
+      </div>
+    );
+  }
+
+  // ─── STEP 2 — Journey Prompt ───
+  if (step === 2) {
+    const cards = [
+      { title: "Daily Streak", icon: "🔥", desc: "Build a daily prayer habit", bg: OB.navy },
+      { title: "Cover the World", icon: "🌍", desc: "Pray for all 48 nations", bg: "#1a5fa8" },
+      { title: "Daily Devotionals", icon: "📖", desc: "Deep-dive prayer readings", bg: "#0091bf" },
+      { title: "My Team", icon: "⚽", desc: "Track your favourite nations", bg: OB.orange },
+    ];
+
+    return (
+      <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
+        <ObNavyHeader>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11,
+              color: OB.sky, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14,
+            }}>
+              48 nations · 20 days of prayer · 1 ultimate goal
+            </div>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: 27, color: "#fff", lineHeight: 1.25, marginBottom: 12 }}>
+              Ready to go on an{" "}
+              <span style={{ color: OB.sky }}>adventure?</span>
+            </div>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
+              Build a daily rhythm of prayer that takes you around the world.
+            </div>
+          </div>
+        </ObNavyHeader>
+
+        <div style={{ flex: 1, paddingTop: 24, display: "flex", flexDirection: "column" }}>
+          {/* Carousel */}
+          <div
+            onScroll={e => {
+              const el = e.currentTarget;
+              const idx = Math.round(el.scrollLeft / 122);
+              setCarouselIdx(Math.max(0, Math.min(3, idx)));
+            }}
+            style={{
+              display: "flex", gap: 12,
+              overflowX: "auto", padding: "8px 24px 12px",
+              scrollSnapType: "x mandatory",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+            }}
+          >
+            {cards.map((card, i) => (
+              <div key={i} style={{
+                width: 110, flexShrink: 0,
+                background: card.bg, borderRadius: 16,
+                padding: "20px 14px 18px",
+                color: "#fff", scrollSnapAlign: "start",
+                display: "flex", flexDirection: "column", alignItems: "center",
+                textAlign: "center", minHeight: 150,
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>{card.icon}</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 12, lineHeight: 1.3, marginBottom: 8 }}>{card.title}</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 10, opacity: 0.8, lineHeight: 1.5 }}>{card.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Dots */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 28 }}>
+            {cards.map((_, i) => (
+              <div key={i} style={{
+                width: i === carouselIdx ? 18 : 6, height: 6,
+                borderRadius: 3,
+                background: i === carouselIdx ? OB.orange : "#CBD5E0",
+                transition: "all 0.2s",
+              }} />
+            ))}
+          </div>
+
+          <div style={{ padding: "0 24px", display: "flex", flexDirection: "column", gap: 10, paddingBottom: "calc(28px + env(safe-area-inset-bottom, 0px))" }}>
+            <ObOrangeBtn onClick={() => { setJourneyPath(true); setStep(3); }}>
+              I'm In — Let's Go →
+            </ObOrangeBtn>
+            <button onClick={() => { setJourneyPath(false); setStep(3); }} style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 15,
+              color: OB.midBlue, padding: "10px 0", textAlign: "center",
+            }}>
+              Just pray →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── STEP 3a — Register ───
+  if (step === 3 && journeyPath) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
+        <ObNavyHeader>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11,
+              color: OB.sky, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14,
+            }}>
+              Journey Mode
+            </div>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: 28, color: "#fff", lineHeight: 1.2 }}>
+              Join the adventure.
+            </div>
+          </div>
+        </ObNavyHeader>
+
+        <div style={{ flex: 1, padding: "24px 24px", overflowY: "auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: OB.navy }}>
+              Pray daily{" "}
+              <span style={{ color: OB.orange }}>·</span>
+              {" "}Track your streak{" "}
+              <span style={{ color: OB.orange }}>·</span>
+              {" "}Build your team
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+            <input
+              type="text" placeholder="Your name"
+              value={displayName} onChange={e => setDisplayName(e.target.value)}
+              style={{
+                padding: "16px 18px", borderRadius: 12,
+                border: `2px solid ${OB.lightBlue}`, background: "#f6fbff",
+                fontFamily: "Montserrat, sans-serif", fontSize: 16,
+                outline: "none", color: OB.navy,
+                boxSizing: "border-box", width: "100%",
+              }}
+            />
+            <input
+              type="email" placeholder="Email address"
+              value={email} onChange={e => setEmail(e.target.value)}
+              style={{
+                padding: "16px 18px", borderRadius: 12,
+                border: `2px solid ${OB.lightBlue}`, background: "#f6fbff",
+                fontFamily: "Montserrat, sans-serif", fontSize: 16,
+                outline: "none", color: OB.navy,
+                boxSizing: "border-box", width: "100%",
+              }}
+            />
+          </div>
+
+          <ObOrangeBtn onClick={() => {
+            try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email })); } catch {}
+            setStep(4);
+          }}>
+            Start My Prayer Journey →
+          </ObOrangeBtn>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "20px 0" }}>
+            <div style={{ flex: 1, height: 1, background: "#CBD5E0" }} />
+            <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#8899AA", whiteSpace: "nowrap" }}>or continue with</span>
+            <div style={{ flex: 1, height: 1, background: "#CBD5E0" }} />
+          </div>
+
+          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+            {["G  Google", "  Apple"].map(label => (
+              <button key={label} onClick={() => alert("Coming soon — use email for now")} style={{
+                flex: 1, padding: "14px", borderRadius: 12,
+                border: "2px solid #CBD5E0", background: "#efefef",
+                fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14,
+                color: "#8899AA", cursor: "pointer",
+              }}>{label.includes("Apple") ? "🍎 Apple" : "G  Google"}</button>
+            ))}
+          </div>
+
+          <div style={{
+            fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#8899AA",
+            textAlign: "center", marginBottom: 20, lineHeight: 1.5,
+          }}>
+            We respect your privacy. No spam, ever.
+          </div>
+
+          <button onClick={() => setStep(2)} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 14,
+            color: OB.midBlue, padding: "8px 0", display: "block", margin: "0 auto",
+          }}>← Back</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── STEP 3b — Just Pray ───
+  if (step === 3 && !journeyPath) {
+    const features = [
+      { icon: "📅", title: "Daily Devotionals", desc: "20 days of prayer readings" },
+      { icon: "🌍", title: "All 48 Nations", desc: "Pray for every World Cup nation" },
+      { icon: "⚽", title: "Match Schedule", desc: "Full FIFA 2026 schedule" },
+    ];
+    return (
+      <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
+        <ObNavyHeader>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11,
+              color: OB.sky, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14,
+            }}>
+              You're In
+            </div>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: 28, color: "#fff", lineHeight: 1.2, marginBottom: 14 }}>
+              Just you and the nations.
+            </div>
+            <div style={{ fontFamily: "Libre Baskerville, serif", fontWeight: 700, fontStyle: "italic", fontSize: 16, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>
+              "Pray without ceasing." — 1 Thessalonians 5:17
+            </div>
+          </div>
+        </ObNavyHeader>
+
+        <div style={{ flex: 1, padding: "24px 24px", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+            {features.map(f => (
+              <div key={f.title} style={{
+                background: "#fff", borderRadius: 14, padding: "16px",
+                display: "flex", alignItems: "center", gap: 14,
+                boxShadow: "0 2px 8px rgba(0,71,107,0.08)",
+              }}>
+                <span style={{ fontSize: 28 }}>{f.icon}</span>
+                <div>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: OB.navy }}>{f.title}</div>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: OB.midBlue, marginTop: 2 }}>{f.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <ObOrangeBtn onClick={() => setStep(4)} style={{ marginBottom: 16 }}>
+            Let's Pray →
+          </ObOrangeBtn>
+
+          <div style={{ background: OB.navy, borderRadius: 16, padding: "20px" }}>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 14, color: "#fff", marginBottom: 12, lineHeight: 1.4 }}>
+              Want more? Unlock Journey Mode — free, takes 30 seconds.
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+              {["🔥 Streaks", "🏆 Achievements", "📊 Score", "👥 Team"].map(pill => (
+                <span key={pill} style={{
+                  background: "rgba(255,255,255,0.15)", borderRadius: 999,
+                  padding: "4px 12px", fontFamily: "Montserrat, sans-serif",
+                  fontSize: 11, fontWeight: 600, color: "#fff",
+                }}>{pill}</span>
+              ))}
+            </div>
+            <button onClick={() => { setJourneyPath(true); setStep(3); }} style={{
+              background: OB.orange, color: "#fff", border: "none",
+              borderRadius: 10, padding: "12px 20px", width: "100%",
+              fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14,
+              cursor: "pointer",
+            }}>
+              Join the Adventure →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── STEP 4 — Push Notifications ───
+  const notifFeatures = [
+    { icon: "🌅", title: "Daily Prayer Reminder", desc: "Start each morning in prayer for the nations" },
+    { icon: "⚽", title: "Match Day Alerts", desc: "Know when your nations are playing" },
+    { icon: "🔥", title: "Streak Protection", desc: "Don't break your prayer streak" },
+  ];
+
+  let platformPreview;
+  if (isIOS) {
+    platformPreview = (
+      <div style={{ background: "#fff", borderRadius: 14, padding: "20px", boxShadow: "0 4px 20px rgba(0,0,0,0.15)", marginBottom: 16 }}>
+        <div style={{ fontFamily: "-apple-system, 'Helvetica Neue', sans-serif", fontWeight: 600, fontSize: 14, color: "#000", textAlign: "center", marginBottom: 6 }}>
+          "Pray for the Cup" Would Like to Send You Notifications
+        </div>
+        <div style={{ fontFamily: "-apple-system, 'Helvetica Neue', sans-serif", fontSize: 12, color: "#666", textAlign: "center", marginBottom: 18 }}>
+          Notifications may include alerts, sounds, and icon badges.
+        </div>
+        <div style={{ display: "flex", borderTop: "1px solid #E5E5EA" }}>
+          <button onClick={() => finishOnboarding()} style={{
+            flex: 1, padding: "12px", border: "none", borderRight: "1px solid #E5E5EA",
+            background: "transparent", color: "#007AFF",
+            fontFamily: "-apple-system, sans-serif", fontSize: 16, cursor: "pointer",
+          }}>Don't Allow</button>
+          <button onClick={handleNotifAllow} style={{
+            flex: 1, padding: "12px", border: "none",
+            background: "transparent", color: "#007AFF",
+            fontFamily: "-apple-system, sans-serif", fontWeight: 600, fontSize: 16, cursor: "pointer",
+          }}>Allow</button>
+        </div>
+      </div>
+    );
+  } else if (isAndroid) {
+    platformPreview = (
+      <div style={{ background: "#fff", borderRadius: 24, padding: "20px", boxShadow: "0 4px 20px rgba(0,0,0,0.15)", marginBottom: 16 }}>
+        <div style={{ fontFamily: "Roboto, sans-serif", fontWeight: 500, fontSize: 16, color: "#1C1B1F", marginBottom: 8 }}>
+          Allow notifications?
+        </div>
+        <div style={{ fontFamily: "Roboto, sans-serif", fontSize: 13, color: "#49454F", marginBottom: 20, lineHeight: 1.5 }}>
+          Pray for the Cup wants to send you daily prayer reminders.
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button onClick={() => finishOnboarding()} style={{
+            padding: "10px 20px", borderRadius: 100, border: "none",
+            background: "transparent", color: "#6750A4",
+            fontFamily: "Roboto, sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer",
+          }}>No thanks</button>
+          <button onClick={handleNotifAllow} style={{
+            padding: "10px 20px", borderRadius: 100, border: "none",
+            background: "#6750A4", color: "#fff",
+            fontFamily: "Roboto, sans-serif", fontWeight: 600, fontSize: 14, cursor: "pointer",
+          }}>Allow</button>
+        </div>
+      </div>
+    );
+  } else {
+    platformPreview = (
+      <div style={{
+        background: "#fff", borderRadius: 8, padding: "12px 16px",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.12)", marginBottom: 16,
+        display: "flex", alignItems: "center", gap: 12,
+      }}>
+        <span style={{ fontSize: 20 }}>🔔</span>
+        <div style={{ flex: 1, fontFamily: "sans-serif", fontSize: 13, color: "#202124", lineHeight: 1.4 }}>
+          <strong>Pray for the Cup</strong> wants to send you notifications
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button onClick={() => finishOnboarding()} style={{
+            padding: "6px 12px", borderRadius: 4,
+            border: "1px solid #ccc", background: "#fff",
+            fontSize: 12, cursor: "pointer", color: "#555", fontFamily: "sans-serif",
+          }}>Block</button>
+          <button onClick={handleNotifAllow} style={{
+            padding: "6px 12px", borderRadius: 4, border: "none",
+            background: "#1a73e8", fontSize: 12, cursor: "pointer",
+            color: "#fff", fontWeight: 600, fontFamily: "sans-serif",
+          }}>Allow</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
+      <ObNavyHeader>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11,
+            color: OB.sky, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14,
+          }}>
+            One Last Thing
+          </div>
+          <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: 28, color: "#fff", lineHeight: 1.2 }}>
+            Don't miss a day of prayer.
+          </div>
+        </div>
+      </ObNavyHeader>
+
+      <div style={{ flex: 1, padding: "24px 24px", display: "flex", flexDirection: "column" }}>
+        <div style={{ textAlign: "center", fontSize: 48, marginBottom: 16 }}>🔔</div>
+        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 15, color: OB.navy, textAlign: "center", lineHeight: 1.6, marginBottom: 24 }}>
+          Get a gentle daily reminder to pray for the nations. We'll never spam you.
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+          {notifFeatures.map(f => (
+            <div key={f.title} style={{
+              background: "#fff", borderRadius: 14, padding: "14px 16px",
+              display: "flex", alignItems: "center", gap: 14,
+              boxShadow: "0 2px 8px rgba(0,71,107,0.08)",
+            }}>
+              <span style={{ fontSize: 24 }}>{f.icon}</span>
+              <div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: OB.navy }}>{f.title}</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: OB.midBlue, marginTop: 2 }}>{f.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {platformPreview}
+
+        <button onClick={() => finishOnboarding()} style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontFamily: "Montserrat, sans-serif", fontWeight: 600, fontSize: 14,
+          color: OB.midBlue, padding: "8px 0", display: "block", margin: "0 auto",
+        }}>
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── MAIN APP ─── */
 export default function App() {
   const [tab, setTab] = useState("digest");
@@ -1420,6 +1949,10 @@ export default function App() {
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
+
+  function handleOnboardingComplete({ journeyMode = false } = {}) {
+    updateGameState({ hasOnboarded: true, journeyMode });
+  }
 
   function handleGameStateUpdate(changes) {
     updateGameState(changes);
@@ -1437,6 +1970,16 @@ export default function App() {
       setToastQueue(q => q.slice(1));
     }
   }, [toastQueue, pendingToast]);
+
+  if (!gameState.hasOnboarded) {
+    return (
+      <>
+        <style>{FONTS}</style>
+        <style>{`* { -webkit-tap-highlight-color: transparent; } body { margin: 0; background: #f0f7ff; } ::-webkit-scrollbar { display: none; } button { -webkit-appearance: none; } input { -webkit-appearance: none; }`}</style>
+        <Onboarding onComplete={handleOnboardingComplete} />
+      </>
+    );
+  }
 
   return (
     <>
