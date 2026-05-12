@@ -847,12 +847,13 @@ function DigestHome({ gameState, onCardTap }) {
           const isActive  = i === activeCard;
           const cardClass = isActive ? "today" : (locked ? "future" : "past");
           const cardStyle = isActive ? {} : { opacity: 0.75, transform: 'scale(0.92)' };
-          const featNation = (d.feat && d.feat[0] && d.feat[0] !== "All Nations")
-            ? RAW_COUNTRIES.find(c => c.n === d.feat[0])
-            : null;
-          const flag = featNation ? featNation.f : "🌍";
-          const nationName = featNation
-            ? featNation.n
+          const featNations = (d.feat || [])
+            .filter(name => name !== "All Nations")
+            .map(name => RAW_COUNTRIES.find(c => c.n === name))
+            .filter(Boolean);
+          const flag = featNations.length > 0 ? featNations[0].f : "🌍";
+          const nationName = featNations.length > 0
+            ? featNations.map(n => n.n).join(" · ")
             : (d.feat && d.feat[0] === "All Nations" ? "All Nations" : "The Nations");
           const theme = d.dev.length > 44 ? d.dev.substring(0, 44) + "…" : d.dev;
           const isPrayed = isPast && (gameState.checkedInDays || []).includes(scheduleToISO(d.d));
@@ -879,7 +880,11 @@ function DigestHome({ gameState, onCardTap }) {
                     {isToday ? `Today · Day ${i + 1}` : `Day ${i + 1}`}
                   </div>
                 )}
-                <span className="devo-flag-main">{flag}</span>
+                <span className="devo-flag-main" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {featNations.length > 0
+                    ? featNations.map(n => <FlagImg key={n.n} iso={n.iso} f={n.f} size={28} />)
+                    : flag}
+                </span>
                 <div className="devo-nation">{nationName}</div>
                 <div className="devo-theme">{theme}</div>
                 <div className="devo-date">{d.d} · Day {i + 1}</div>
