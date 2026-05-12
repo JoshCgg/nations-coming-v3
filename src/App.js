@@ -156,6 +156,7 @@ const FlagImg = ({ iso, f, size = 32 }) => {
     />
   );
 };
+// Country shape: { n, f, iso, r, cf, pop, rel, u, ug, cap, lang, m, diaspora?, contenders?, ujp?, ujp_unreached? }
 const RAW_COUNTRIES = [
   // Americas (13)
   { n:"USA",          f:"🇺🇸", iso:"us", r:"Americas", cf:"CONCACAF", pop:"335M", rel:"Christianity", u:25, ug:["Arab Americans","South Asian Americans","Somali Americans"], cap:"Washington D.C.", lang:"English, Spanish", m:"The US hosts millions of unreached immigrants—among the world's greatest mission opportunities without leaving home." },
@@ -428,6 +429,12 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
                     <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, color: C.text }}>{g}</div>
                   </div>
                 ))}
+                {nation.ujp && (
+                  <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, fontStyle: "italic", color: C.blue, marginTop: 8, lineHeight: 1.5 }}>
+                    Out of {nation.ujp} people groups in {nation.n}, {nation.ujp_unreached} are currently listed as unreached by{" "}
+                    <a href="https://joshuaproject.net" target="_blank" rel="noopener noreferrer" style={{ color: C.orange, textDecoration: "underline" }}>Joshua Project</a>.
+                  </div>
+                )}
               </div>
 
               {/* Mission Insight */}
@@ -1034,10 +1041,6 @@ function AllNations({ gameState, updateGameState }) {
                   ✓ Prayed
                 </span>
               )}
-            </div>
-            <div style={{ ...ugBadgeStyle(c.u), borderRadius: 10, padding: "8px 10px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 12, textAlign: "center", flexShrink: 0, minWidth: 44 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{c.u}</div>
-              <div style={{ fontSize: 10, marginTop: 2 }}>UPGs</div>
             </div>
           </button>
         ))}
