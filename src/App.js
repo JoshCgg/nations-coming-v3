@@ -1746,6 +1746,11 @@ function Onboarding({ onComplete }) {
                 gameState: DEFAULT_GAME_STATE,
               });
               try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword, uid })); } catch {}
+              fetch('/api/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
+              });
             } catch (err) {
               console.error("Firebase registration error:", err);
             }
