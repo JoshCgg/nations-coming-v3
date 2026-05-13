@@ -526,6 +526,12 @@
   <script>
     function handleSignup(e) {
       e.preventDefault();
+      const emailValue = document.getElementById('signupEmail').value;
+      fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailValue, listId: 65 })
+      });
       document.getElementById('signupWrap').innerHTML =
         '<p class="signup-thanks">✓ You\'re on the list! We\'ll be in touch.</p>';
     }
