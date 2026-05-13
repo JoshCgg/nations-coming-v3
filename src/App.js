@@ -2263,13 +2263,13 @@ export default function App() {
                 {(() => {
                   let profile = null;
                   try { profile = JSON.parse(localStorage.getItem("userProfile") || "null"); } catch {}
-                  if (profile && profile.name && profile.email) {
+                  if (profile && profile.displayName && profile.email) {
                     return (
                       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                         <div style={{ display: "flex", alignItems: "center" }}>
                           <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{profile.name}</div>
+                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{profile.displayName}</div>
                             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Display name</div>
                           </div>
                         </div>
