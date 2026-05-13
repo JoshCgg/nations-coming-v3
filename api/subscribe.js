@@ -23,18 +23,18 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('Key length:', process.env.REACT_APP_BREVO_API_KEY?.length, 'First 4:', process.env.REACT_APP_BREVO_API_KEY?.substring(0, 4));
+    console.log('Key length:', process.env.BREVO_API_KEY?.length, 'First 4:', process.env.BREVO_API_KEY?.substring(0, 4));
     const response = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: {
-        'api-key': process.env.REACT_APP_BREVO_API_KEY,
+        'api-key': process.env.BREVO_API_KEY,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
       body: JSON.stringify({
         email,
         attributes: { FIRSTNAME: firstName || '' },
-        listIds: [listId],
+        listIds: [parseInt(listId, 10)],
         updateEnabled: true,
       }),
     });
