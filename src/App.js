@@ -2028,8 +2028,8 @@ export default function App() {
           <div style={{ position: "relative", zIndex: 1, padding: "14px 0 16px", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
             <div>
               <img
-                src="/images/global-gates-logo-white-BUG-transparent-background.png"
-                alt="Global Gates"
+                src="/images/pray-cup-logo-white.png"
+                alt="Pray for the Cup"
                 style={{
                   height: 36,
                   width: "auto",
