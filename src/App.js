@@ -1698,8 +1698,24 @@ function Onboarding({ onComplete }) {
             />
           </div>
 
-          <ObOrangeBtn onClick={() => {
-            try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email })); } catch {}
+          <ObOrangeBtn onClick={async () => {
+            const autoPassword = email + '_pftc_' + Date.now();
+            try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword })); } catch {}
+
+            try {
+              const cred = await createUserWithEmailAndPassword(auth, email, autoPassword);
+              const uid = cred.user.uid;
+              await setDoc(doc(db, "users", uid), {
+                name: displayName,
+                email: email,
+                createdAt: new Date().toISOString(),
+                gameState: DEFAULT_GAME_STATE,
+              });
+              try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword, uid })); } catch {}
+            } catch (err) {
+              console.error("Firebase registration error:", err);
+            }
+
             setStep(4);
           }}>
             Start My Prayer Journey →
