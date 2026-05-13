@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
+es
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 `;
@@ -59,6 +59,7 @@ const DEFAULT_GAME_STATE = {
   streakCount: 0,
   lastCheckIn: null,
   goalsAchieved: [],
+  teams: [],
 };
 
 function useGameState() {
@@ -1230,7 +1231,7 @@ function MyJourney({ gameState, setTab }) {
 
       {/* Section label */}
       <div className="jny-section-label">
-        Your Prayer Journey
+        Teams
         <div className="jny-section-sub">Today's devotional is centered · past days completed · future days locked</div>
       </div>
 
@@ -2089,7 +2090,7 @@ export default function App() {
             {[
               { id: "digest", label: "🏠  Home" },
               { id: "nations", label: "🌍  All Nations" },
-              ...(gameState.journeyMode ? [{ id: "journey", label: "🏆  My Journey" }] : []),
+              ...(gameState.journeyMode ? [{ id: "journey", label: "🏆  Teams" }] : []),
             ].map(t => (
               <button key={t.id} onClick={() => { setTab(t.id); setSelectedDayIdx(null); }} style={{
                 flex: 1,
