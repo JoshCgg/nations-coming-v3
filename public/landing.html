@@ -87,8 +87,11 @@
     }
     .hero-text { flex: 1; }
     .hero-image { flex: 1; text-align: center; }
+    .hero-image img { width: 100%; max-width: 520px; }
     @media (max-width: 768px) {
       .hero-layout { flex-direction: column; padding: 40px 24px; }
+      .hero-image { order: 1; margin-bottom: 24px; }
+      .hero-text { order: 2; }
     }
 
     /* ─── FEATURE ROWS ─── */
@@ -378,7 +381,7 @@
         </div>
 
         <div class="hero-image">
-          <img src="/images/hero-phones.png" alt="Pray for the Cup app on mobile" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;">
+          <img src="/images/hero-phones.png" alt="Pray for the Cup app on mobile" style="display: block; margin: 0 auto;">
         </div>
       </div>
 
