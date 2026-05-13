@@ -76,59 +76,10 @@
     }
 
     /* ─── PHONE MOCKUPS ─── */
-    .phones {
-      position: relative;
-      height: 320px;
-      width: 110%;
-      margin-left: -5%;
-      overflow: visible;
-      margin-top: 80px;
-      margin-bottom: 32px;
-    }
-    .phone {
-      position: absolute;
-      background: #111;
-      border-radius: 28px;
-      padding: 9px 7px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    }
-    .phone-back {
-      width: 130px;
-      left: calc(50% - 100px);
-      bottom: 0;
-      z-index: 1;
-      opacity: 0.75;
-    }
-    .phone-front {
-      width: 150px;
-      left: calc(50% - 30px);
-      bottom: 24px;
-      z-index: 2;
-    }
-    .phone-notch {
-      width: 40px; height: 8px;
-      background: #111;
-      border-radius: 0 0 8px 8px;
-      margin: 0 auto 4px;
-    }
-    .phone-screen {
-      width: 100%;
-      border-radius: 20px;
-      overflow: hidden;
-      aspect-ratio: 9 / 19;
-    }
-    .phone-screen img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: top;
-      display: block;
-    }
-    .phone-bar {
-      width: 36px; height: 4px;
-      background: rgba(255,255,255,0.25);
-      border-radius: 2px;
-      margin: 6px auto 0;
-    }
+    .phones-wrap { position: relative; width: 100%; height: 320px; margin: 20px 0 32px; }
+    .phone-img { position: absolute; height: 300px; width: auto; }
+    .phone-back { left: 5%; bottom: 0; opacity: 0.8; z-index: 1; }
+    .phone-front { right: 5%; bottom: 20px; z-index: 2; }
 
     /* ─── FEATURE ROWS ─── */
     .features {
@@ -377,21 +328,9 @@
       </p>
 
       <!-- Phone mockups -->
-      <div class="phones">
-        <div class="phone phone-back">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="images/nations-screenshot.png" alt="Nations screen">
-          </div>
-          <div class="phone-bar"></div>
-        </div>
-        <div class="phone phone-front">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <img src="images/home-screenshot.png" alt="Home screen">
-          </div>
-          <div class="phone-bar"></div>
-        </div>
+      <div class="phones-wrap">
+        <img src="images/phone-nations.png" class="phone-img phone-back" alt="Nations tab" />
+        <img src="images/phone-home.png" class="phone-img phone-front" alt="Home tab" />
       </div>
 
       <!-- Feature rows -->
