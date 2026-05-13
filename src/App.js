@@ -2260,14 +2260,40 @@ export default function App() {
               {/* Account row */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Account</div>
-                <div onClick={() => setShowSettings(false)} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                  <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Sign In / Register</div>
-                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Save your progress and join the prayer leaderboard</div>
-                  </div>
-                  <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
-                </div>
+                {(() => {
+                  let profile = null;
+                  try { profile = JSON.parse(localStorage.getItem("userProfile") || "null"); } catch {}
+                  if (profile && profile.name && profile.email) {
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{profile.name}</div>
+                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Display name</div>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <span style={{ fontSize: 20, marginRight: 12 }}>✉️</span>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{profile.email}</div>
+                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Account email</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div onClick={() => setShowSettings(false)} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                      <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Sign In / Register</div>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Save your progress and track your prayer journey</div>
+                      </div>
+                      <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Version line */}
