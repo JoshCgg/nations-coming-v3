@@ -23,7 +23,6 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('Key length:', process.env.BREVO_API_KEY?.length, 'First 4:', process.env.BREVO_API_KEY?.substring(0, 4));
     const response = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: {
@@ -41,12 +40,7 @@ module.exports = async (req, res) => {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
-      return res.status(500).json({
-        success: false,
-        error: errorBody,
-        keyLength: process.env.BREVO_API_KEY?.length || 0,
-        keyStart: process.env.BREVO_API_KEY?.substring(0, 4) || 'empty'
-      });
+      return res.status(500).json({ success: false, error: errorBody });
     }
 
     return res.status(200).json({ success: true });
