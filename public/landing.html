@@ -85,9 +85,11 @@
       margin: 0 auto;
       padding: 60px 48px;
     }
-    .hero-text {
+    .hero-left {
       flex: 1;
       min-width: 0;
+      display: flex;
+      flex-direction: column;
     }
     .hero-image {
       flex: 1;
@@ -110,11 +112,10 @@
         flex-direction: column;
         padding: 32px 24px;
       }
-      .hero-text { width: 100%; }
-      .hero-image {
-        width: 100%;
-        justify-content: center;
-      }
+      .hero-left { display: contents; }
+      .hero-text { order: 1; width: 100%; }
+      .hero-image { order: 2; width: 100%; justify-content: center; }
+      .hero-features { order: 3; width: 100%; }
       .hero-img-desktop { display: none; }
       .hero-img-mobile {
         display: block;
@@ -360,54 +361,58 @@
       </div>
 
       <div class="hero-layout">
-        <div class="hero-text">
-          <p class="eyebrow">2026 FIFA World Cup &middot; June 11 — July 19</p>
+        <div class="hero-left">
+          <div class="hero-text">
+            <p class="eyebrow">2026 FIFA World Cup &middot; June 11 — July 19</p>
 
-          <h1 class="headline">
-            <span class="white">48 nations.</span>
-            <span class="orange">One tournament.</span>
-            <span class="white">Pray for them all.</span>
-          </h1>
+            <h1 class="headline">
+              <span class="white">48 nations.</span>
+              <span class="orange">One tournament.</span>
+              <span class="white">Pray for them all.</span>
+            </h1>
 
-          <p class="verse">
-            "Ask of me, and I will make the nations your heritage." — Psalm 2:8
-          </p>
-
-          <!-- Feature rows -->
-          <div class="features">
-            <div class="feature-card">
-              <div class="feature-icon">📖</div>
-              <div>
-                <div class="feature-title">Daily Devotionals</div>
-                <div class="feature-desc">20 days of Scripture-rooted prayer content tied to the tournament schedule</div>
-              </div>
-            </div>
-            <div class="feature-card">
-              <div class="feature-icon">🔥</div>
-              <div>
-                <div class="feature-title">Prayer Habit Tracker</div>
-                <div class="feature-desc">Build a daily rhythm — streaks, milestones, and a team to pray with</div>
-              </div>
-            </div>
-            <div class="feature-card">
-              <div class="feature-icon">🌍</div>
-              <div>
-                <div class="feature-title">48 Nation Profiles</div>
-                <div class="feature-desc">People groups, diaspora communities, and mission insight for every World Cup nation</div>
-              </div>
-            </div>
+            <p class="verse">
+              "Ask of me, and I will make the nations your heritage." — Psalm 2:8
+            </p>
           </div>
 
-          <!-- Email signup -->
-          <div id="signupWrap">
-            <div class="signup-label">Get Notified at Launch</div>
-            <form id="signupForm" onsubmit="handleSignup(event)">
-              <div class="signup-row">
-                <input type="email" class="signup-input" id="signupEmail" placeholder="your@email.com" required>
-                <button type="submit" class="signup-btn">Notify Me</button>
+          <div class="hero-features">
+            <!-- Feature rows -->
+            <div class="features">
+              <div class="feature-card">
+                <div class="feature-icon">📖</div>
+                <div>
+                  <div class="feature-title">Daily Devotionals</div>
+                  <div class="feature-desc">20 days of Scripture-rooted prayer content tied to the tournament schedule</div>
+                </div>
               </div>
-              <p class="signup-note">Launch announcement only. No spam.</p>
-            </form>
+              <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <div>
+                  <div class="feature-title">Prayer Habit Tracker</div>
+                  <div class="feature-desc">Build a daily rhythm — streaks, milestones, and a team to pray with</div>
+                </div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <div>
+                  <div class="feature-title">48 Nation Profiles</div>
+                  <div class="feature-desc">People groups, diaspora communities, and mission insight for every World Cup nation</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email signup -->
+            <div id="signupWrap">
+              <div class="signup-label">Get Notified at Launch</div>
+              <form id="signupForm" onsubmit="handleSignup(event)">
+                <div class="signup-row">
+                  <input type="email" class="signup-input" id="signupEmail" placeholder="your@email.com" required>
+                  <button type="submit" class="signup-btn">Notify Me</button>
+                </div>
+                <p class="signup-note">Launch announcement only. No spam.</p>
+              </form>
+            </div>
           </div>
         </div>
 
