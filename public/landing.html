@@ -75,30 +75,20 @@
       margin-bottom: 36px;
     }
 
-    /* ─── PHONE MOCKUPS ─── */
-    .phones-wrap {
-      position: relative;
-      width: 100%;
-      height: 480px;
-      margin: 20px 0 32px;
-      overflow: visible;
+    /* ─── HERO LAYOUT ─── */
+    .hero-layout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 32px;
     }
-    .phone-back {
-      position: absolute;
-      height: 420px;
-      width: auto;
-      left: 0%;
-      bottom: 0;
-      z-index: 1;
-      opacity: 0.8;
-    }
-    .phone-front {
-      position: absolute;
-      height: 460px;
-      width: auto;
-      left: 32%;
-      bottom: 20px;
-      z-index: 2;
+    .hero-text { flex: 1; }
+    .hero-image { flex: 1; text-align: center; }
+    @media (max-width: 768px) {
+      .hero-layout { flex-direction: column; padding: 40px 24px; }
     }
 
     /* ─── FEATURE ROWS ─── */
@@ -335,59 +325,61 @@
         <img src="images/pray-cup-logo.png" alt="Pray for the Cup">
       </div>
 
-      <p class="eyebrow">2026 FIFA World Cup &middot; June 11 — July 19</p>
+      <div class="hero-layout">
+        <div class="hero-text">
+          <p class="eyebrow">2026 FIFA World Cup &middot; June 11 — July 19</p>
 
-      <h1 class="headline">
-        <span class="white">48 nations.</span>
-        <span class="orange">One tournament.</span>
-        <span class="white">Pray for them all.</span>
-      </h1>
+          <h1 class="headline">
+            <span class="white">48 nations.</span>
+            <span class="orange">One tournament.</span>
+            <span class="white">Pray for them all.</span>
+          </h1>
 
-      <p class="verse">
-        "Ask of me, and I will make the nations your heritage." — Psalm 2:8
-      </p>
+          <p class="verse">
+            "Ask of me, and I will make the nations your heritage." — Psalm 2:8
+          </p>
 
-      <!-- Phone mockups -->
-      <div class="phones-wrap">
-        <img src="images/phone-nations.png" class="phone-img phone-back" alt="Nations tab" />
-        <img src="images/phone-home.png" class="phone-img phone-front" alt="Home tab" />
-      </div>
+          <!-- Feature rows -->
+          <div class="features">
+            <div class="feature-card">
+              <div class="feature-icon">📖</div>
+              <div>
+                <div class="feature-title">Daily Devotionals</div>
+                <div class="feature-desc">20 days of Scripture-rooted prayer content tied to the tournament schedule</div>
+              </div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🔥</div>
+              <div>
+                <div class="feature-title">Prayer Habit Tracker</div>
+                <div class="feature-desc">Build a daily rhythm — streaks, milestones, and a team to pray with</div>
+              </div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🌍</div>
+              <div>
+                <div class="feature-title">48 Nation Profiles</div>
+                <div class="feature-desc">People groups, diaspora communities, and mission insight for every World Cup nation</div>
+              </div>
+            </div>
+          </div>
 
-      <!-- Feature rows -->
-      <div class="features">
-        <div class="feature-card">
-          <div class="feature-icon">📖</div>
-          <div>
-            <div class="feature-title">Daily Devotionals</div>
-            <div class="feature-desc">20 days of Scripture-rooted prayer content tied to the tournament schedule</div>
+          <!-- Email signup -->
+          <div id="signupWrap">
+            <div class="signup-label">Get Notified at Launch</div>
+            <form id="signupForm" onsubmit="handleSignup(event)">
+              <div class="signup-row">
+                <input type="email" class="signup-input" id="signupEmail" placeholder="your@email.com" required>
+                <button type="submit" class="signup-btn">Notify Me</button>
+              </div>
+              <p class="signup-note">Launch announcement only. No spam.</p>
+            </form>
           </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔥</div>
-          <div>
-            <div class="feature-title">Prayer Habit Tracker</div>
-            <div class="feature-desc">Build a daily rhythm — streaks, milestones, and a team to pray with</div>
-          </div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🌍</div>
-          <div>
-            <div class="feature-title">48 Nation Profiles</div>
-            <div class="feature-desc">People groups, diaspora communities, and mission insight for every World Cup nation</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Email signup -->
-      <div id="signupWrap">
-        <div class="signup-label">Get Notified at Launch</div>
-        <form id="signupForm" onsubmit="handleSignup(event)">
-          <div class="signup-row">
-            <input type="email" class="signup-input" id="signupEmail" placeholder="your@email.com" required>
-            <button type="submit" class="signup-btn">Notify Me</button>
-          </div>
-          <p class="signup-note">Launch announcement only. No spam.</p>
-        </form>
+        <div class="hero-image">
+          <img src="/images/hero-phones.png" alt="Pray for the Cup app on mobile" style="width: 100%; max-width: 600px; display: block; margin: 0 auto;">
+        </div>
       </div>
 
     </div>
