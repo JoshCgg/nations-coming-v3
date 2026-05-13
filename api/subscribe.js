@@ -23,6 +23,7 @@ module.exports = async (req, res) => {
   }
 
   try {
+    console.log('Key length:', process.env.REACT_APP_BREVO_API_KEY?.length, 'First 4:', process.env.REACT_APP_BREVO_API_KEY?.substring(0, 4));
     const response = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: {
