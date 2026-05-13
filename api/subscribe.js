@@ -41,7 +41,12 @@ module.exports = async (req, res) => {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
-      return res.status(500).json({ success: false, error: errorBody });
+      return res.status(500).json({
+        success: false,
+        error: errorBody,
+        keyLength: process.env.BREVO_API_KEY?.length || 0,
+        keyStart: process.env.BREVO_API_KEY?.substring(0, 4) || 'empty'
+      });
     }
 
     return res.status(200).json({ success: true });
