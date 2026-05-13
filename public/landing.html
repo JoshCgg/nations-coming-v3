@@ -80,27 +80,28 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 48px;
-      max-width: 100%;
+      justify-content: center;
+      max-width: 1300px;
       margin: 0 auto;
-      padding: 60px 8%;
+      padding: 40px 5%;
+      gap: 0;
     }
     .hero-left {
-      flex: 1.5;
-      min-width: 0;
+      flex: 1;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      padding-right: 40px;
     }
     .hero-image {
-      flex: 1;
-      min-width: 0;
+      flex: 1.1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding-left: 24px;
     }
     .hero-img-desktop {
       width: 100%;
+      max-width: 680px;
       height: auto;
       display: block;
     }
@@ -112,10 +113,14 @@
         flex-direction: column;
         padding: 32px 24px;
       }
-      .hero-left { display: contents; }
-      .hero-text { order: 1; width: 100%; }
-      .hero-image { order: 2; width: 100%; justify-content: center; }
-      .hero-features { order: 3; width: 100%; }
+      .hero-left {
+        padding-right: 0;
+        width: 100%;
+      }
+      .hero-image {
+        width: 100%;
+        margin-top: 24px;
+      }
       .hero-img-desktop { display: none; }
       .hero-img-mobile {
         display: block;
@@ -421,7 +426,7 @@
         </div>
 
         <div class="hero-image">
-          <img src="/images/hero-phones.png" alt="Pray for the Cup app on mobile" class="hero-img-desktop">
+          <img src="/images/hero-phones-desktop.png" alt="Pray for the Cup app on mobile" class="hero-img-desktop">
           <img src="/images/hero-phones-mobile.png" alt="Pray for the Cup app on mobile" class="hero-img-mobile">
         </div>
       </div>
