@@ -1998,6 +1998,12 @@ function Onboarding({ onComplete }) {
 
 /* ─── MAIN APP ─── */
 export default function App() {
+  const LAUNCH_DATE = new Date('2026-06-11');
+  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
+  const isLaunched = new Date() >= LAUNCH_DATE;
+  const showApp = isLaunched || isPreview;
+  const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
+
   const [tab, setTab] = useState("digest");
   const [selectedDayIdx, setSelectedDayIdx] = useState(null);
   const [showBanner, setShowBanner] = useState(true);
@@ -2026,6 +2032,33 @@ export default function App() {
       setToastQueue(q => q.slice(1));
     }
   }, [toastQueue, pendingToast]);
+
+  if (!showApp) {
+    return (
+      <div style={{
+        minHeight: "100vh", background: "#00476B",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        fontFamily: "Montserrat, sans-serif", padding: "40px 24px", boxSizing: "border-box",
+      }}>
+        <style>{FONTS}</style>
+        <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ width: 200, marginBottom: 32 }} />
+        <div style={{ fontSize: 28, fontWeight: 900, color: "#ffffff", textAlign: "center", marginBottom: 12 }}>
+          Coming June 11, 2026
+        </div>
+        <div style={{ fontSize: 16, color: "#8ADBFF", textAlign: "center", marginBottom: 32, maxWidth: 300 }}>
+          A prayer guide for the 2026 FIFA World Cup
+        </div>
+        <div style={{ fontSize: 48, fontWeight: 900, color: "#ffffff", lineHeight: 1 }}>
+          {daysRemaining}
+        </div>
+        <div style={{ fontSize: 13, color: "#8ADBFF", marginTop: 6, letterSpacing: 1.5, textTransform: "uppercase" }}>
+          Days to go
+        </div>
+        <div style={{ flex: 1 }} />
+        <img src="/images/gg-wordmark.png" alt="Global Gates" style={{ width: 140, opacity: 0.7 }} />
+      </div>
+    );
+  }
 
   if (!gameState.hasOnboarded) {
     return (
