@@ -78,31 +78,52 @@
     /* ─── HERO LAYOUT ─── */
     .hero-layout {
       display: flex;
+      flex-direction: row;
       align-items: center;
-      justify-content: space-between;
-      gap: 40px;
-      max-width: 1100px;
+      gap: 48px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 60px 32px;
+      padding: 60px 48px;
     }
-    .hero-text { flex: 1; }
-    .hero-image {
+    .hero-text {
       flex: 1;
+      min-width: 0;
+    }
+    .hero-image {
+      flex: 1.2;
+      min-width: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .hero-image img {
+    .hero-img-desktop {
       width: 100%;
-      max-width: 680px;
       height: auto;
       display: block;
     }
+    .hero-img-mobile {
+      display: none;
+    }
     @media (max-width: 768px) {
-      .hero-layout { flex-direction: column; padding: 40px 24px; }
-      .hero-image { order: 1; margin-bottom: 24px; width: 100%; }
-      .hero-image img { max-width: 100%; width: 100%; }
-      .hero-text { order: 2; }
+      .hero-layout {
+        flex-direction: column;
+        padding: 32px 24px;
+      }
+      .hero-text { width: 100%; }
+      .hero-image {
+        width: 100%;
+        justify-content: center;
+        order: 2;
+      }
+      .hero-text { order: 1; }
+      .hero-img-desktop { display: none; }
+      .hero-img-mobile {
+        display: block;
+        width: 85%;
+        max-width: 340px;
+        height: auto;
+        margin: 0 auto;
+      }
     }
 
     /* ─── FEATURE ROWS ─── */
@@ -392,7 +413,8 @@
         </div>
 
         <div class="hero-image">
-          <img src="/images/hero-phones.png" alt="Pray for the Cup app on mobile">
+          <img src="/images/hero-phones.png" alt="Pray for the Cup app on mobile" class="hero-img-desktop">
+          <img src="/images/hero-phones-mobile.png" alt="Pray for the Cup app on mobile" class="hero-img-mobile">
         </div>
       </div>
 
