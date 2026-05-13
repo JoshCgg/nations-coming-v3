@@ -75,6 +75,30 @@ function useGameState() {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    async function restoreFromFirestore() {
+      try {
+        const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+        if (!profile.uid) return;
+        const snap = await getDoc(doc(db, "users", profile.uid));
+        if (!snap.exists()) return;
+        const fsState = snap.data().gameState;
+        if (!fsState) return;
+        const localRaw = localStorage.getItem("pftc_game");
+        const localState = localRaw ? JSON.parse(localRaw) : DEFAULT_GAME_STATE;
+        const fsNations = (fsState.prayedNations || []).length;
+        const localNations = (localState.prayedNations || []).length;
+        if (fsNations > localNations) {
+          setGameState({ ...DEFAULT_GAME_STATE, ...fsState });
+          try { localStorage.setItem("pftc_game", JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
+        }
+      } catch (err) {
+        console.error("Firestore restore error:", err);
+      }
+    }
+    restoreFromFirestore();
+  }, []);
+
   function updateGameState(changes) {
     setGameState(prev => {
       const next = { ...prev, ...changes };
