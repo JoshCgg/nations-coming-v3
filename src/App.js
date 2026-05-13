@@ -81,6 +81,16 @@ function useGameState() {
       try {
         localStorage.setItem("pftc_game", JSON.stringify(next));
       } catch {}
+      try {
+        const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+        if (profile.uid) {
+          updateDoc(doc(db, "users", profile.uid), { gameState: next }).catch(err =>
+            console.error("Firestore sync error:", err)
+          );
+        }
+      } catch (err) {
+        console.error("Firestore sync error:", err);
+      }
       return next;
     });
   }
