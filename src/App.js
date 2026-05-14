@@ -229,8 +229,9 @@ const RAW_COUNTRIES = [
     r: "Americas", cf: "CONCACAF", pop: "38M",
     rel: "Christianity", cap: "Ottawa", lang: "English, French",
     ug: ["Punjabi Sikhs in Vancouver", "Ismaili Muslims", "Secular Québécois"],
-    m: "Canada is home to one of the world's largest Sikh diaspora communities, concentrated in Vancouver and Toronto, as well as hundreds of thousands of Muslims from South Asia, the Middle East, and East Africa. Canada's multicultural cities are extraordinary mission fields — and Canadian churches are only beginning to recognize the unreached peoples living next door. Gateway Cities Canada is engaging unreached diaspora peoples in cities across Canada — learn more at gatewaycities.ca",
-    diaspora: "gatewaycities.ca",
+    m: "Canada is home to one of the world's largest Sikh diaspora communities, concentrated in Vancouver and Toronto, as well as hundreds of thousands of Muslims from South Asia, the Middle East, and East Africa. Canada's multicultural cities are extraordinary mission fields — and Canadian churches are only beginning to recognize the unreached peoples living next door. Global Gates Canada is engaging unreached diaspora peoples in cities across Canada.",
+    diasporaLink: { text: "gatewaycities.ca", url: "https://gatewaycities.ca" },
+    diaspora: "",
     ujp: 244, ujp_unreached: 53,
   },
   {
@@ -803,6 +804,11 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
               <div style={{ background: `${C.indigo}10`, borderLeft: `4px solid ${C.indigo}`, borderRadius: "0 10px 10px 0", padding: 14, marginBottom: 16 }}>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, color: C.indigo, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>Mission Insight</div>
                 <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, lineHeight: 1.6, color: C.text, fontStyle: "italic" }}>{nation.m}</div>
+                {nation.diasporaLink && (
+                  <div style={{ marginTop: 8 }}>
+                    <a href={nation.diasporaLink.url} target="_blank" rel="noreferrer" style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, fontWeight: 700, color: C.orange }}>{nation.diasporaLink.text}</a>
+                  </div>
+                )}
               </div>
 
               {nation.diaspora && (
