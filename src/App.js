@@ -1381,10 +1381,17 @@ function MyJourney({ gameState, setTab }) {
 }
 
 /* ─── ACHIEVEMENT TOAST ─── */
+const BIG_ACHIEVEMENTS = new Set([
+  'hat_trick', 'golden_boot', 'world_tour',
+  'through_the_groups', 'final_whistle', 'sent', 'full_squad'
+]);
+
 function AchievementToast({ achievement, onDismiss }) {
   useEffect(() => {
     if (!achievement) return;
-    const timer = setTimeout(onDismiss, 3000);
+    const duration = BIG_ACHIEVEMENTS.has(achievement) ? 0 : 3500;
+    if (duration === 0) return;
+    const timer = setTimeout(onDismiss, duration);
     return () => clearTimeout(timer);
   }, [achievement, onDismiss]);
 
@@ -1392,38 +1399,160 @@ function AchievementToast({ achievement, onDismiss }) {
   const info = ACHIEVEMENT_LABELS[achievement];
   if (!info) return null;
 
+  if (BIG_ACHIEVEMENTS.has(achievement)) {
+    return (
+      <div
+        onClick={onDismiss}
+        style={{
+          position: "fixed", inset: 0,
+          background: "rgba(0,28,46,0.72)",
+          zIndex: 3000,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            background: "#00476B",
+            border: "1.5px solid #00BAF8",
+            borderRadius: 20,
+            padding: "28px 24px 22px",
+            width: 260,
+            textAlign: "center",
+          }}
+        >
+          <div style={{
+            width: 64, height: 64,
+            background: "#E06520",
+            border: "3px solid #FF8844",
+            borderRadius: "50%",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 28,
+            margin: "0 auto 14px",
+          }}>
+            {info.icon}
+          </div>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 800, fontSize: 11,
+            color: "#00BAF8",
+            letterSpacing: "1.5px",
+            textTransform: "uppercase",
+            marginBottom: 6,
+          }}>
+            Achievement unlocked
+          </div>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 900, fontSize: 18,
+            color: "#fff",
+            marginBottom: 4,
+          }}>
+            {info.label}
+          </div>
+          <div style={{
+            fontFamily: "Libre Baskerville, serif",
+            fontStyle: "italic",
+            fontSize: 12,
+            color: "#8ADBFF",
+            lineHeight: 1.5,
+            marginBottom: 20,
+          }}>
+            {info.desc}
+          </div>
+          <button
+            onClick={onDismiss}
+            style={{
+              background: "#E06520",
+              border: "none",
+              borderRadius: 20,
+              color: "#fff",
+              fontFamily: "Montserrat, sans-serif",
+              fontWeight: 800,
+              fontSize: 12,
+              letterSpacing: "0.5px",
+              padding: "9px 24px",
+              cursor: "pointer",
+            }}
+          >
+            Keep going
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{
-      position: "fixed",
-      bottom: 80,
-      left: "50%",
-      transform: "translateX(-50%)",
-      zIndex: 3000,
-      width: "calc(100% - 48px)",
-      maxWidth: 480,
-      background: C.indigo,
-      borderRadius: 16,
-      padding: 16,
-      display: "flex",
-      alignItems: "flex-start",
-      gap: 12,
-      boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-    }}>
-      <span style={{ fontSize: 24 }}>{info.icon}</span>
+    <div
+      onClick={onDismiss}
+      style={{
+        position: "fixed",
+        bottom: 80,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 3000,
+        width: "calc(100% - 48px)",
+        maxWidth: 400,
+        background: "#00476B",
+        border: "1.5px solid #00BAF8",
+        borderRadius: 20,
+        padding: "10px 14px 10px 10px",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        cursor: "pointer",
+      }}
+    >
+      <div style={{
+        width: 40, height: 40,
+        background: "#E06520",
+        borderRadius: "50%",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 20,
+        flexShrink: 0,
+      }}>
+        {info.icon}
+      </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, color: C.white }}>
+        <div style={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 800, fontSize: 10,
+          color: "#FF8844",
+          letterSpacing: "0.5px",
+          textTransform: "uppercase",
+          marginBottom: 2,
+        }}>
+          Achievement unlocked
+        </div>
+        <div style={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 800, fontSize: 13,
+          color: "#fff",
+        }}>
           {info.label}
         </div>
-        <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.8)", fontStyle: "italic", marginTop: 3 }}>
+        <div style={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 700, fontSize: 11,
+          color: "#8ADBFF",
+          marginTop: 1,
+        }}>
           {info.desc}
         </div>
       </div>
-      <button onClick={onDismiss} style={{
-        background: "none", border: "none",
-        color: "rgba(255,255,255,0.6)", fontSize: 16,
-        cursor: "pointer", padding: "0 0 0 4px",
-        fontFamily: "Montserrat, sans-serif", fontWeight: 700,
-      }}>✕</button>
+      <button
+        onClick={onDismiss}
+        style={{
+          background: "none", border: "none",
+          color: "rgba(255,255,255,0.5)",
+          fontSize: 16, cursor: "pointer",
+          padding: "0 0 0 4px",
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 700,
+        }}
+      >
+        ✕
+      </button>
     </div>
   );
 }
