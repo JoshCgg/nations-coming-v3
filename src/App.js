@@ -136,12 +136,7 @@ const ACHIEVEMENT_RULES = [
   { id: 'hat_trick',          check: g => g.streakCount >= 3 },
   { id: 'clean_sheet',        check: g => g.checkedInDays.length >= 1 && g.completedDevotionals.length >= 1 },
   { id: 'golden_boot',        check: g => g.streakCount >= 7 },
-  { id: 'full_squad',         check: g => {
-      const regions = ['Americas','Europe','Africa','Asia','Oceania'];
-      return regions.some(r =>
-        RAW_COUNTRIES.filter(c => c.r === r).every(c => g.prayedNations.includes(c.n))
-      );
-  }},
+  { id: 'full_squad',         check: (gs) => gs.teams && gs.teams.length > 0 && gs.prayedNations.length >= 48 },
   { id: 'world_tour',         check: g => {
       const regions = ['Americas','Europe','Africa','Asia','Oceania'];
       return regions.every(r =>
