@@ -166,6 +166,33 @@ function checkAchievements(gameState) {
     .map(r => r.id);
 }
 
+/* ─── TEAM KITS ─── */
+const TEAM_KITS = [
+  { id:'brazil',       label:'Brazil',       primary:'#009C3B', accent:'#FFDF00', bgCircle:'navy' },
+  { id:'argentina',    label:'Argentina',    primary:'#74ACDF', accent:'#FFFFFF', bgCircle:'white' },
+  { id:'france',       label:'France',       primary:'#002395', accent:'#ED2939', bgCircle:'navy' },
+  { id:'germany',      label:'Germany',      primary:'#FFFFFF', accent:'#DD0000', bgCircle:'navy' },
+  { id:'spain',        label:'Spain',        primary:'#AA151B', accent:'#F1BF00', bgCircle:'navy' },
+  { id:'usa',          label:'USA',          primary:'#002868', accent:'#BF0A30', bgCircle:'navy' },
+  { id:'mexico',       label:'Mexico',       primary:'#006847', accent:'#FFFFFF', bgCircle:'navy' },
+  { id:'portugal',     label:'Portugal',     primary:'#CC0000', accent:'#FFD700', bgCircle:'navy' },
+  { id:'england',      label:'England',      primary:'#FFFFFF', accent:'#CF091D', bgCircle:'navy' },
+  { id:'netherlands',  label:'Netherlands',  primary:'#FF6600', accent:'#003DA5', bgCircle:'navy' },
+  { id:'morocco',      label:'Morocco',      primary:'#C1272D', accent:'#006233', bgCircle:'navy' },
+  { id:'senegal',      label:'Senegal',      primary:'#00853F', accent:'#FDEF42', bgCircle:'navy' },
+  { id:'japan',        label:'Japan',        primary:'#003087', accent:'#BC002D', bgCircle:'navy' },
+  { id:'nigeria',      label:'Nigeria',      primary:'#008751', accent:'#FFFFFF', bgCircle:'navy' },
+  { id:'australia',    label:'Australia',    primary:'#FFD700', accent:'#003087', bgCircle:'white' },
+  { id:'southkorea',   label:'S. Korea',     primary:'#FFFFFF', accent:'#CD2E3A', bgCircle:'navy' },
+];
+
+const TEAM_ACHIEVEMENTS = [
+  { id: 'kickoff',      label: 'Kickoff',          icon: '🤝', desc: 'Create or join a team' },
+  { id: 'full_squad',   label: 'Full Squad',        icon: '🌍', desc: 'All members are praying' },
+  { id: 'on_fire',      label: 'On Fire',           icon: '🔥', desc: 'Team 7-day streak' },
+  { id: 'house_prayer', label: 'House of Prayer',   icon: '⛪', desc: '30 days of team prayer' },
+];
+
 /* ═══════════════════════════════════════════════════════════════
    END OF GAMIFICATION SCAFFOLDING
    Everything below this line is identical to v2.
@@ -1555,6 +1582,7 @@ const JOURNEY_CSS = `
   .jny-trophy-thumb { font-size: 44px; }
 `;
 
+// eslint-disable-next-line no-unused-vars
 function MyJourney({ gameState, setTab }) {
   const score = calcScore(gameState);
   const earned = gameState.goalsAchieved || [];
@@ -1919,6 +1947,625 @@ function ToggleSwitch({ value, onToggle }) {
     </div>
   );
 }
+
+/* ─── KIT BADGE ─── */
+const KitBadge = ({ kitId, size = 32 }) => {
+  const kit = TEAM_KITS.find(k => k.id === kitId) || TEAM_KITS[0];
+  const bg = kit.bgCircle === 'navy' ? '#00476B' : '#FFFFFF';
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: bg,
+      border: '1.5px solid rgba(0,186,248,0.25)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      {/* PLACEHOLDER — replace contents with <img src={`/images/jerseys/jersey-${kitId}.svg`} width={size*0.65} height={size*0.65} alt={kit.label} /> once SVG files are in public/images/jerseys/ */}
+      <div style={{ width: size*0.5, height: size*0.6, background: kit.primary, borderRadius: '3px 3px 2px 2px', border: `1.5px solid ${kit.accent}` }} />
+    </div>
+  );
+};
+
+/* ─── TEAMS TAB ─── */
+const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
+  const teams = gameState.teams || [];
+  const [view, setView] = useState(teams.length > 0 ? 'myteam' : 'empty');
+  const [activeTeamIndex, setActiveTeamIndex] = useState(0);
+  const [teamNameInput, setTeamNameInput] = useState('');
+  const [selectedKit, setSelectedKit] = useState('brazil');
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+  const [teamCode, setTeamCode] = useState('');
+
+  useEffect(() => {
+    if (view === 'create') {
+      setTeamCode(Math.random().toString(36).substring(2, 8).toUpperCase());
+    }
+  }, [view]);
+
+  useEffect(() => {
+    if ((gameState.teams || []).length > 0 && view === 'empty') {
+      setView('myteam');
+    }
+  }, [gameState.teams, view]);
+
+  function getInitials(name) {
+    if (!name) return '?';
+    return name.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  function avatarColor(str) {
+    const palette = ['#E06520', '#3E67AC', '#009C3B', '#CC0000', '#74ACDF', '#006847'];
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return palette[Math.abs(hash) % palette.length];
+  }
+
+  function copyToClipboard(text) {
+    try { navigator.clipboard.writeText(text); } catch {}
+  }
+
+  function handleCreateTeam() {
+    if (!teamNameInput.trim()) return;
+    const displayName = (userProfile && userProfile.displayName) ? userProfile.displayName : 'Anonymous';
+    const uid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
+    const newTeam = {
+      id: teamCode,
+      name: teamNameInput.trim(),
+      kitNation: selectedKit,
+      role: 'Team Leader',
+      createdAt: new Date().toISOString(),
+      memberCount: 1,
+      collectiveNations: (gameState.prayedNations || []).length,
+      collectiveDays: (gameState.checkedInDays || []).length,
+      memberSummaries: [{
+        id: uid,
+        name: displayName,
+        role: 'Team Leader',
+        initials: getInitials(displayName),
+        nations: (gameState.prayedNations || []).length,
+        streak: gameState.streakCount || 0,
+        inactiveDays: 0,
+      }],
+      achievements: [],
+    };
+    const updatedTeams = [...teams, newTeam];
+    try { updateGameState({ teams: updatedTeams }); } catch {}
+    setView('myteam');
+    setActiveTeamIndex(updatedTeams.length - 1);
+    setTeamNameInput('');
+    setSelectedKit('brazil');
+  }
+
+  function handleJoinTeam() {
+    const mockTeam = {
+      id: joinCodeInput.toUpperCase(),
+      name: 'The Praying Squad',
+      kitNation: 'brazil',
+      role: 'Member',
+      createdAt: new Date().toISOString(),
+      memberCount: 3,
+      collectiveNations: 12,
+      collectiveDays: 5,
+      memberSummaries: [],
+      achievements: [],
+    };
+    const updatedTeams = [...teams, mockTeam];
+    try { updateGameState({ teams: updatedTeams }); } catch {}
+    setView('myteam');
+    setActiveTeamIndex(updatedTeams.length - 1);
+    setJoinCodeInput('');
+  }
+
+  const safeIndex = Math.min(activeTeamIndex, Math.max(0, teams.length - 1));
+  const activeTeam = teams.length > 0 ? (teams[safeIndex] || null) : null;
+  const activeKit = activeTeam ? (TEAM_KITS.find(k => k.id === activeTeam.kitNation) || TEAM_KITS[0]) : TEAM_KITS[0];
+
+  /* ── EMPTY STATE ── */
+  if (view === 'empty') {
+    return (
+      <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
+        {/* Hero */}
+        <div style={{
+          background: '#00476B',
+          padding: '36px 24px 44px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+        }}>
+          <div style={{ marginBottom: 16 }}>
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 22, color: '#FFFFFF', marginBottom: 8, lineHeight: 1.3 }}>
+            Pray together. Go further.
+          </div>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 28, maxWidth: 280, lineHeight: 1.5 }}>
+            Form a prayer team with friends, track collective progress, and cheer each other on.
+          </div>
+          <button
+            onClick={() => setView('create')}
+            style={{
+              width: '100%', maxWidth: 320, background: '#E06520', border: 'none',
+              borderRadius: 12, padding: '14px 0', fontFamily: 'Montserrat, sans-serif',
+              fontWeight: 700, fontSize: 15, color: '#FFFFFF', cursor: 'pointer', marginBottom: 12,
+            }}
+          >
+            + Create a team
+          </button>
+          <button
+            onClick={() => setView('join')}
+            style={{
+              width: '100%', maxWidth: 320, background: 'transparent',
+              border: '2px solid #00BAF8', borderRadius: 12, padding: '12px 0',
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+              color: '#00BAF8', cursor: 'pointer',
+            }}
+          >
+            Enter team code
+          </button>
+        </div>
+
+        {/* Locked achievements */}
+        <div style={{ padding: '24px 16px' }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+            Team Achievements
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {TEAM_ACHIEVEMENTS.map(ach => (
+              <div key={ach.id} style={{
+                background: '#FFFFFF', borderRadius: 12, padding: '14px 12px',
+                display: 'flex', alignItems: 'center', gap: 10,
+                filter: 'grayscale(1)', opacity: 0.4,
+              }}>
+                <span style={{ fontSize: 22 }}>{ach.icon}</span>
+                <div>
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: '#1B2B3A' }}>{ach.label}</div>
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, color: '#3E67AC', marginTop: 2 }}>{ach.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── MY TEAM STATE ── */
+  if (view === 'myteam') {
+    return (
+      <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
+
+        {/* Pill switcher (only when >1 team) */}
+        {teams.length > 1 && (
+          <div style={{ background: '#00476B', padding: '12px 16px', display: 'flex', gap: 8, overflowX: 'auto' }}>
+            {teams.map((team, i) => (
+              <button
+                key={team.id}
+                onClick={() => setActiveTeamIndex(i)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'transparent',
+                  border: i === safeIndex ? '2px solid #FFFFFF' : '2px solid rgba(255,255,255,0.25)',
+                  borderRadius: 999, padding: '6px 12px 6px 8px',
+                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+                  color: '#FFFFFF', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                }}
+              >
+                <KitBadge kitId={team.kitNation} size={20} />
+                {team.name}
+              </button>
+            ))}
+            {teams.length < 3 && (
+              <button
+                onClick={() => setView('create')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'transparent',
+                  border: '2px dashed rgba(255,255,255,0.35)',
+                  borderRadius: 999, padding: '6px 14px',
+                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+                  color: 'rgba(255,255,255,0.6)', cursor: 'pointer', flexShrink: 0,
+                }}
+              >
+                + Team
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Team hero card */}
+        {activeTeam && (
+          <div style={{
+            background: '#00476B',
+            borderLeft: `4px solid ${activeKit.accent}`,
+            margin: 16, borderRadius: 14, padding: 16,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <KitBadge kitId={activeTeam.kitNation} size={28} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: '#FFFFFF' }}>
+                  {activeTeam.name}
+                </div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
+                  {activeTeam.memberCount} {activeTeam.memberCount === 1 ? 'member' : 'members'} · Code: {activeTeam.id}
+                </div>
+              </div>
+              <button
+                onClick={() => copyToClipboard(activeTeam.id)}
+                style={{
+                  background: '#E06520', border: 'none', borderRadius: 8,
+                  padding: '7px 14px', fontFamily: 'Montserrat, sans-serif',
+                  fontWeight: 700, fontSize: 13, color: '#FFFFFF', cursor: 'pointer', flexShrink: 0,
+                }}
+              >
+                Invite
+              </button>
+            </div>
+
+            {/* Nations progress bar */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                Nations prayed
+              </div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, fontWeight: 700, color: '#FFFFFF' }}>
+                {activeTeam.collectiveNations} of 48
+              </div>
+            </div>
+            <div style={{ height: 6, background: 'rgba(255,255,255,0.15)', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.min((activeTeam.collectiveNations / 48) * 100, 100)}%`,
+                background: activeKit.primary,
+                borderRadius: 3,
+              }} />
+            </div>
+          </div>
+        )}
+
+        {/* Members */}
+        {activeTeam && activeTeam.memberSummaries && activeTeam.memberSummaries.length > 0 && (
+          <div style={{ padding: '0 16px 16px' }}>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
+              Members
+            </div>
+            {activeTeam.memberSummaries.map(member => {
+              const isInactive = member.inactiveDays > 0;
+              return (
+                <div key={member.id} style={{
+                  background: '#FFFFFF', borderRadius: 12, padding: 14,
+                  marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12,
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: avatarColor(member.id),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 14,
+                    color: '#FFFFFF', flexShrink: 0,
+                  }}>
+                    {member.initials}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                      <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14, color: '#1B2B3A' }}>
+                        {member.name}
+                      </span>
+                      <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, color: '#3E67AC' }}>
+                        {member.role}
+                      </span>
+                      {isInactive && (
+                        <span style={{
+                          background: '#FFF3CD', color: '#856404',
+                          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 10,
+                          borderRadius: 6, padding: '2px 6px',
+                        }}>
+                          {member.inactiveDays} days inactive
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div>
+                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', lineHeight: 1 }}>
+                          {member.nations}
+                        </div>
+                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 10, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 2 }}>
+                          Nations
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', lineHeight: 1 }}>
+                          {member.streak}
+                        </div>
+                        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 10, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 0.8, marginTop: 2 }}>
+                          Streak
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {isInactive && (
+                    <button
+                      onClick={() => console.log('nudge:', member.name)}
+                      style={{
+                        background: 'transparent', border: '1.5px solid #FFC107',
+                        borderRadius: 8, padding: '6px 8px', cursor: 'pointer',
+                        fontSize: 16, flexShrink: 0,
+                      }}
+                      title={`Nudge ${member.name}`}
+                    >
+                      ⚠
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Team achievements */}
+        {activeTeam && (
+          <div style={{ padding: '0 16px 32px' }}>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
+              Team Achievements
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {TEAM_ACHIEVEMENTS.map(ach => {
+                const earned = (activeTeam.achievements || []).includes(ach.id);
+                return (
+                  <div key={ach.id} style={{
+                    background: '#FFFFFF', borderRadius: 12, padding: '14px 12px',
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    filter: earned ? 'none' : 'grayscale(1)',
+                    opacity: earned ? 1 : 0.4,
+                  }}>
+                    <span style={{ fontSize: 22 }}>{ach.icon}</span>
+                    <div>
+                      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: '#1B2B3A' }}>{ach.label}</div>
+                      <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, color: '#3E67AC', marginTop: 2 }}>{ach.desc}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* No-team safety fallback */}
+        {!activeTeam && (
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <button
+              onClick={() => setView('empty')}
+              style={{ background: 'none', border: 'none', color: '#3E67AC', fontFamily: 'Montserrat, sans-serif', fontSize: 14, cursor: 'pointer' }}
+            >
+              ← Back
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ── CREATE SHEET ── */
+  if (view === 'create') {
+    return (
+      <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
+        <div
+          onClick={() => setView(teams.length > 0 ? 'myteam' : 'empty')}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'fixed', bottom: 0, left: 0, right: 0,
+              background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+              padding: '24px 20px 36px', maxHeight: '88vh', overflowY: 'auto',
+            }}
+          >
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 20, color: '#1B2B3A', marginBottom: 20 }}>
+              Create a team
+            </div>
+
+            {/* Team name */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                Team name
+              </div>
+              <input
+                type="text"
+                placeholder="e.g. The Praying Eagles"
+                value={teamNameInput}
+                onChange={e => setTeamNameInput(e.target.value)}
+                maxLength={40}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  border: '2px solid #ECF1EE', borderRadius: 10, padding: '12px 14px',
+                  fontFamily: 'Montserrat, sans-serif', fontSize: 15, color: '#1B2B3A', outline: 'none',
+                }}
+              />
+            </div>
+
+            {/* Kit picker */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                Choose a kit
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                {TEAM_KITS.map(kit => (
+                  <div
+                    key={kit.id}
+                    onClick={() => setSelectedKit(kit.id)}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      cursor: 'pointer', borderRadius: 10, padding: '8px 4px',
+                      background: selectedKit === kit.id ? 'rgba(0,71,107,0.08)' : 'transparent',
+                      boxShadow: selectedKit === kit.id ? '0 0 0 3px #00476B' : 'none',
+                    }}
+                  >
+                    <KitBadge kitId={kit.id} size={40} />
+                    <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 10, fontWeight: 600, color: '#1B2B3A', textAlign: 'center', lineHeight: 1.2 }}>
+                      {kit.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                <KitBadge kitId={selectedKit} size={24} />
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, fontWeight: 600, color: '#1B2B3A' }}>
+                  {(TEAM_KITS.find(k => k.id === selectedKit) || TEAM_KITS[0]).label}
+                </span>
+              </div>
+            </div>
+
+            {/* Team code */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                Your team code
+              </div>
+              <div style={{
+                background: '#F5F7F8', borderRadius: 10, padding: '14px 16px',
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 28,
+                letterSpacing: 6, color: '#00476B', textAlign: 'center', marginBottom: 10,
+              }}>
+                {teamCode}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => copyToClipboard(teamCode)}
+                  style={{
+                    flex: 1, background: '#ECF1EE', border: 'none', borderRadius: 8,
+                    padding: '10px 0', fontFamily: 'Montserrat, sans-serif',
+                    fontWeight: 700, fontSize: 13, color: '#1B2B3A', cursor: 'pointer',
+                  }}
+                >
+                  Copy code
+                </button>
+                <button
+                  onClick={() => copyToClipboard(`https://prayforcup.com/join/${teamCode}`)}
+                  style={{
+                    flex: 1, background: '#ECF1EE', border: 'none', borderRadius: 8,
+                    padding: '10px 0', fontFamily: 'Montserrat, sans-serif',
+                    fontWeight: 700, fontSize: 13, color: '#1B2B3A', cursor: 'pointer',
+                  }}
+                >
+                  Copy link
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={handleCreateTeam}
+              disabled={!teamNameInput.trim()}
+              style={{
+                width: '100%', background: teamNameInput.trim() ? '#E06520' : '#ccc',
+                border: 'none', borderRadius: 12, padding: '15px 0',
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                color: '#FFFFFF', cursor: teamNameInput.trim() ? 'pointer' : 'default',
+                marginBottom: 10,
+              }}
+            >
+              Done — go to my team
+            </button>
+            <button
+              onClick={() => setView(teams.length > 0 ? 'myteam' : 'empty')}
+              style={{
+                width: '100%', background: 'transparent', border: 'none',
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                color: '#3E67AC', cursor: 'pointer', padding: '8px 0',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── JOIN SHEET ── */
+  const joinPreview = joinCodeInput.length === 6;
+  return (
+    <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
+      <div
+        onClick={() => setView(teams.length > 0 ? 'myteam' : 'empty')}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200 }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0,
+            background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+            padding: '24px 20px 36px',
+          }}
+        >
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 20, color: '#1B2B3A', marginBottom: 20 }}>
+            Join a team
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+              Enter team code
+            </div>
+            <input
+              type="text"
+              placeholder="e.g. A3X7F2"
+              value={joinCodeInput}
+              onChange={e => setJoinCodeInput(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6))}
+              maxLength={6}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                border: '2px solid #ECF1EE', borderRadius: 10, padding: '16px 14px',
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 28,
+                letterSpacing: 6, color: '#00476B', textAlign: 'center', outline: 'none',
+              }}
+            />
+          </div>
+
+          {/* Mock team preview — real Firestore lookup in Phase 4 */}
+          {joinPreview && (
+            <div style={{
+              background: '#F5F7F8', borderRadius: 12, padding: '14px 16px',
+              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
+              border: '2px solid #00BAF8',
+            }}>
+              <KitBadge kitId="brazil" size={40} />
+              <div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: '#1B2B3A' }}>
+                  The Praying Squad
+                </div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#3E67AC', marginTop: 3 }}>
+                  3 members
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={handleJoinTeam}
+            disabled={!joinPreview}
+            style={{
+              width: '100%', background: joinPreview ? '#E06520' : '#ccc',
+              border: 'none', borderRadius: 12, padding: '15px 0',
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+              color: '#FFFFFF', cursor: joinPreview ? 'pointer' : 'default', marginBottom: 10,
+            }}
+          >
+            Join this team
+          </button>
+          <button
+            onClick={() => setView(teams.length > 0 ? 'myteam' : 'empty')}
+            style={{
+              width: '100%', background: 'transparent', border: 'none',
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+              color: '#3E67AC', cursor: 'pointer', padding: '8px 0',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /* ─── ONBOARDING ─── */
 const OB = {
@@ -2486,6 +3133,9 @@ export default function App() {
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
+  const [userProfile] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
+  });
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
     updateGameState({ hasOnboarded: true, journeyMode });
@@ -2651,7 +3301,7 @@ export default function App() {
             {[
               { id: "digest", label: "🏠  Home" },
               { id: "nations", label: "🌍  All Nations" },
-              ...(gameState.journeyMode ? [{ id: "journey", label: "🏆  Teams" }] : []),
+              { id: "teams", label: "🏆  Teams" },
             ].map(t => (
               <button key={t.id} onClick={() => { setTab(t.id); setSelectedDayIdx(null); }} style={{
                 flex: 1,
@@ -2683,8 +3333,8 @@ export default function App() {
                   updateGameState={handleGameStateUpdate}
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} />
-          ) : tab === "journey" ? (
-            <MyJourney gameState={gameState} setTab={setTab} />
+          ) : tab === "teams" ? (
+            <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} />
           ) : (
             <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} />
           )}
