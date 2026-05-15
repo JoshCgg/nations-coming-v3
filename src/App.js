@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
+import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
@@ -1957,20 +1958,7 @@ function ToggleSwitch({ value, onToggle }) {
 
 /* ─── KIT BADGE ─── */
 const KitBadge = ({ kitId, size = 32 }) => {
-  const kit = TEAM_KITS.find(k => k.id === kitId) || TEAM_KITS[0];
-  const bg = kit.bgCircle === 'navy' ? '#00476B' : '#FFFFFF';
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: bg,
-      border: '1.5px solid rgba(0,186,248,0.25)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
-    }}>
-      {/* PLACEHOLDER — replace contents with <img src={`/images/jerseys/jersey-${kitId}.svg`} width={size*0.65} height={size*0.65} alt={kit.label} /> once SVG files are in public/images/jerseys/ */}
-      <div style={{ width: size*0.5, height: size*0.6, background: kit.primary, borderRadius: '3px 3px 2px 2px', border: `1.5px solid ${kit.accent}` }} />
-    </div>
-  );
+  return <SoccerBallKit kitId={kitId} size={size * 0.85} />;
 };
 
 /* ─── TEAMS TAB ─── */
