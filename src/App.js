@@ -1968,6 +1968,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
   const [selectedKit, setSelectedKit] = useState('brazil');
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [teamCode, setTeamCode] = useState('');
+  const [teamSheetMode, setTeamSheetMode] = useState(null);
 
   useEffect(() => {
     if (view === 'create') {
@@ -2131,43 +2132,41 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
     return (
       <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
 
-        {/* Pill switcher (only when >1 team) */}
-        {teams.length > 1 && (
-          <div style={{ background: '#00476B', padding: '12px 16px', display: 'flex', gap: 8, overflowX: 'auto' }}>
-            {teams.map((team, i) => (
-              <button
-                key={team.id}
-                onClick={() => setActiveTeamIndex(i)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'transparent',
-                  border: i === safeIndex ? '2px solid #FFFFFF' : '2px solid rgba(255,255,255,0.25)',
-                  borderRadius: 999, padding: '6px 12px 6px 8px',
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
-                  color: '#FFFFFF', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                }}
-              >
-                <KitBadge kitId={team.kitNation} size={20} />
-                {team.name}
-              </button>
-            ))}
-            {teams.length < 3 && (
-              <button
-                onClick={() => setView('create')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: 'transparent',
-                  border: '2px dashed rgba(255,255,255,0.35)',
-                  borderRadius: 999, padding: '6px 14px',
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
-                  color: 'rgba(255,255,255,0.6)', cursor: 'pointer', flexShrink: 0,
-                }}
-              >
-                + Team
-              </button>
-            )}
-          </div>
-        )}
+        {/* Pill switcher */}
+        <div style={{ background: '#00476B', padding: '12px 16px', display: 'flex', gap: 8, overflowX: 'auto' }}>
+          {teams.map((team, i) => (
+            <button
+              key={team.id}
+              onClick={() => setActiveTeamIndex(i)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: 'transparent',
+                border: i === safeIndex ? '2px solid #FFFFFF' : '2px solid rgba(255,255,255,0.25)',
+                borderRadius: 999, padding: '6px 12px 6px 8px',
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+                color: '#FFFFFF', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+              }}
+            >
+              <KitBadge kitId={team.kitNation} size={20} />
+              {team.name}
+            </button>
+          ))}
+          {teams.length < 3 && (
+            <button
+              onClick={() => setTeamSheetMode('choose')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: 'transparent',
+                border: '2px dashed rgba(255,255,255,0.35)',
+                borderRadius: 999, padding: '6px 14px',
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+                color: 'rgba(255,255,255,0.6)', cursor: 'pointer', flexShrink: 0,
+              }}
+            >
+              + Team
+            </button>
+          )}
+        </div>
 
         {/* Team hero card */}
         {activeTeam && (
@@ -2334,6 +2333,48 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
             >
               ← Back
             </button>
+          </div>
+        )}
+
+        {/* Choose sheet — create or join */}
+        {teamSheetMode === 'choose' && (
+          <div
+            onClick={() => setTeamSheetMode(null)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200 }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0,
+                background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+                padding: '24px 24px 36px',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', marginBottom: 20 }}>
+                Add a team
+              </div>
+              <button
+                onClick={() => { setTeamSheetMode(null); setView('create'); }}
+                style={{
+                  width: '100%', background: '#E06520', border: 'none',
+                  borderRadius: 12, padding: '14px 0', fontFamily: 'Montserrat, sans-serif',
+                  fontWeight: 700, fontSize: 15, color: '#FFFFFF', cursor: 'pointer', marginBottom: 12,
+                }}
+              >
+                + Create a team
+              </button>
+              <button
+                onClick={() => { setTeamSheetMode(null); setView('join'); }}
+                style={{
+                  width: '100%', background: 'transparent',
+                  border: '2px solid #00BAF8', borderRadius: 12, padding: '12px 0',
+                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                  color: '#00BAF8', cursor: 'pointer',
+                }}
+              >
+                Enter team code
+              </button>
+            </div>
           </div>
         )}
       </div>
