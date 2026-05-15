@@ -2006,6 +2006,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
   const [teamSheetMode, setTeamSheetMode] = useState(null);
   const [nudgeModal, setNudgeModal] = useState(null);
   const [nudgeMessageIndex, setNudgeMessageIndex] = useState(0);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   const NUDGE_MESSAGES = [
     {
@@ -2057,6 +2058,24 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
   function copyToClipboard(text) {
     try { navigator.clipboard.writeText(text); } catch {}
   }
+
+  const handleInvite = (team) => {
+    const inviteUrl = `https://prayforthecup.com/app?join=${team.id}`;
+    const shareText = `Join my prayer team "${team.name}" on Pray for the Cup — praying through all 48 nations of the 2026 World Cup. Join here:`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Join my team on Pray for the Cup',
+        text: shareText,
+        url: inviteUrl,
+      }).catch(() => {}); // user cancelled — silently ignore
+    } else {
+      navigator.clipboard.writeText(`${shareText} ${inviteUrl}`)
+        .then(() => setInviteCopied(true))
+        .catch(() => setInviteCopied(true)); // show feedback either way
+      setTimeout(() => setInviteCopied(false), 2500);
+    }
+  };
 
   function handleCreateTeam() {
     if (!teamNameInput.trim()) return;
@@ -2246,14 +2265,15 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
                 </div>
               </div>
               <button
-                onClick={() => copyToClipboard(activeTeam.id)}
+                onClick={() => handleInvite(activeTeam)}
                 style={{
-                  background: '#E06520', border: 'none', borderRadius: 8,
+                  background: inviteCopied ? '#00476B' : '#E06520', border: 'none', borderRadius: 8,
                   padding: '7px 14px', fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 700, fontSize: 13, color: '#FFFFFF', cursor: 'pointer', flexShrink: 0,
+                  transition: 'background 0.2s',
                 }}
               >
-                Invite
+                {inviteCopied ? 'Link copied! 📋' : '🔗 Invite'}
               </button>
             </div>
 
