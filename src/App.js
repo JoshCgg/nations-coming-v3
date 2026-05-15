@@ -747,7 +747,21 @@ function HomeScreenBanner({ onDismiss }) {
 /* ─── NATION MODAL ─── */
 // TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
+  const touchStartY = useRef(null);
+
   if (!nation) return null;
+
+  function handleTouchStart(e) {
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleTouchEnd(e) {
+    if (touchStartY.current === null) return;
+    const delta = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartY.current = null;
+    if (delta > 60) onClose();
+  }
+
   return (
     <div onClick={onClose} style={{
       position: "fixed", inset: 0, background: "rgba(27,45,58,0.7)",
@@ -758,19 +772,29 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
         borderRadius: "20px 20px 0 0",
         width: "100%",
         maxWidth: 520,
-        maxHeight: "88vh",
+        maxHeight: "90vh",
         overflowY: "auto",
         padding: "0 0 40px 0",
       }}>
-        {/* Header */}
-        <div style={{
-          background: C.indigo,
-          borderRadius: "20px 20px 0 0",
-          padding: "20px 20px 20px 20px",
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-        }}>
+        {/* Header — sticky so it stays visible while scrolling */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            position: "sticky", top: 0, zIndex: 10,
+            background: C.indigo,
+            borderRadius: "20px 20px 0 0",
+            padding: "20px 20px 20px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          {/* Drag handle */}
+          <div style={{
+            position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
+            width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.3)",
+          }} />
           <FlagImg iso={nation.iso} f={nation.f} size={52} />
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: "#fff", lineHeight: 1.2 }}>
@@ -792,6 +816,17 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
               );
             })()}
           </div>
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{
+              background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%",
+              width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", flexShrink: 0, color: "#fff", fontSize: 18, lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
         </div>
 
         <div style={{ padding: "20px 20px 0 20px" }}>
