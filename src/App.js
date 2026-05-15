@@ -3325,6 +3325,22 @@ export default function App() {
     }
   }, [toastQueue, pendingToast]);
 
+  useEffect(() => {
+    fetch('/schedule-overrides.json')
+      .then(r => r.json())
+      .then(data => {
+        if (data.overrides && data.overrides.length > 0) {
+          data.overrides.forEach(override => {
+            const idx = RAW_SCHEDULE.findIndex(day => day.d === override.d);
+            if (idx !== -1) {
+              RAW_SCHEDULE[idx] = { ...RAW_SCHEDULE[idx], ...override };
+            }
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   if (!showApp) {
     return (
       <div style={{
