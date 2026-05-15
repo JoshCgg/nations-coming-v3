@@ -2336,7 +2336,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
                       </div>
                     </div>
                   </div>
-                  {isInactive && (
+                  {true /* TEMP TEST - remove before launch */ && (
                     <button
                       onClick={() => {
                         setNudgeMessageIndex(Math.floor(Math.random() * NUDGE_MESSAGES.length));
