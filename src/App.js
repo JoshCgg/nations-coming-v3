@@ -839,17 +839,15 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
               <div style={{ background: `${C.indigo}10`, borderLeft: `4px solid ${C.indigo}`, borderRadius: "0 10px 10px 0", padding: 14, marginBottom: 16 }}>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, color: C.indigo, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>Mission Insight</div>
                 <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, lineHeight: 1.6, color: C.text, fontStyle: "italic" }}>{nation.m}</div>
-                {nation.diasporaLink && (
-                  <div style={{ marginTop: 8 }}>
-                    <a href={nation.diasporaLink.url} target="_blank" rel="noreferrer" style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, fontWeight: 700, color: C.orange }}>{nation.diasporaLink.text}</a>
-                  </div>
-                )}
               </div>
 
-              {nation.diaspora && (
+              {(nation.diasporaLink || nation.diaspora) && (
                 <div style={{ background: "#EEF3FA", borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                  <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, color: C.indigo, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>Diaspora Presence</div>
                   <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, lineHeight: 1.6, color: C.text }}>
-                    {(() => {
+                    {nation.diasporaLink ? (
+                      <a href={nation.diasporaLink.url} target="_blank" rel="noreferrer" style={{ color: "#E06520", fontWeight: 600 }}>{nation.diasporaLink.text}</a>
+                    ) : (() => {
                       const lm = nation.diaspora.match(/\[([^\]]+)\]\(([^)]+)\)/);
                       if (!lm) return nation.diaspora;
                       return <>{nation.diaspora.slice(0, lm.index)}<a href={lm[2]} target="_blank" rel="noreferrer" style={{ color: C.blue, fontWeight: 600 }}>{lm[1]}</a></>;
