@@ -168,29 +168,36 @@ function checkAchievements(gameState) {
 
 /* ─── TEAM KITS ─── */
 const TEAM_KITS = [
-  { id:'brazil',       label:'Brazil',       primary:'#009C3B', accent:'#FFDF00', bgCircle:'navy' },
-  { id:'argentina',    label:'Argentina',    primary:'#74ACDF', accent:'#FFFFFF', bgCircle:'white' },
-  { id:'france',       label:'France',       primary:'#002395', accent:'#ED2939', bgCircle:'navy' },
-  { id:'germany',      label:'Germany',      primary:'#FFFFFF', accent:'#DD0000', bgCircle:'navy' },
-  { id:'spain',        label:'Spain',        primary:'#AA151B', accent:'#F1BF00', bgCircle:'navy' },
-  { id:'usa',          label:'USA',          primary:'#002868', accent:'#BF0A30', bgCircle:'navy' },
-  { id:'mexico',       label:'Mexico',       primary:'#006847', accent:'#FFFFFF', bgCircle:'navy' },
-  { id:'portugal',     label:'Portugal',     primary:'#CC0000', accent:'#FFD700', bgCircle:'navy' },
-  { id:'england',      label:'England',      primary:'#FFFFFF', accent:'#CF091D', bgCircle:'navy' },
-  { id:'netherlands',  label:'Netherlands',  primary:'#FF6600', accent:'#003DA5', bgCircle:'navy' },
-  { id:'morocco',      label:'Morocco',      primary:'#C1272D', accent:'#006233', bgCircle:'navy' },
-  { id:'senegal',      label:'Senegal',      primary:'#00853F', accent:'#FDEF42', bgCircle:'navy' },
-  { id:'japan',        label:'Japan',        primary:'#003087', accent:'#BC002D', bgCircle:'navy' },
-  { id:'nigeria',      label:'Nigeria',      primary:'#008751', accent:'#FFFFFF', bgCircle:'navy' },
-  { id:'australia',    label:'Australia',    primary:'#FFD700', accent:'#003087', bgCircle:'white' },
-  { id:'southkorea',   label:'S. Korea',     primary:'#FFFFFF', accent:'#CD2E3A', bgCircle:'navy' },
+  { id:'brazil',      label:'Brazil',       primary:'#009C3B', accent:'#FFDF00', bgCircle:'white' },
+  { id:'argentina',   label:'Argentina',    primary:'#74ACDF', accent:'#FFFFFF', bgCircle:'navy' },
+  { id:'france',      label:'France',       primary:'#002395', accent:'#ED2939', bgCircle:'white' },
+  { id:'germany',     label:'Germany',      primary:'#FFFFFF', accent:'#000000', bgCircle:'navy' },
+  { id:'spain',       label:'Spain',        primary:'#AA151B', accent:'#F1BF00', bgCircle:'white' },
+  { id:'usa',         label:'USA',          primary:'#002868', accent:'#BF0A30', bgCircle:'white' },
+  { id:'mexico',      label:'Mexico',       primary:'#006847', accent:'#FFFFFF', bgCircle:'white' },
+  { id:'canada',      label:'Canada',       primary:'#FF0000', accent:'#FFFFFF', bgCircle:'white' },
+  { id:'portugal',    label:'Portugal',     primary:'#CC0000', accent:'#006600', bgCircle:'white' },
+  { id:'nigeria',     label:'Nigeria',      primary:'#008751', accent:'#FFFFFF', bgCircle:'white' },
+  { id:'morocco',     label:'Morocco',      primary:'#C1272D', accent:'#006233', bgCircle:'white' },
+  { id:'senegal',     label:'Senegal',      primary:'#FFFFFF', accent:'#00853F', bgCircle:'navy' },
+  { id:'japan',       label:'Japan',        primary:'#003087', accent:'#BC002D', bgCircle:'white' },
+  { id:'saudi',       label:'Saudi Arabia', primary:'#006C35', accent:'#FFFFFF', bgCircle:'white' },
+  { id:'netherlands', label:'Netherlands',  primary:'#FF6600', accent:'#003DA5', bgCircle:'navy' },
+  { id:'jordan',      label:'Jordan',       primary:'#CE1126', accent:'#000000', bgCircle:'white' },
+  { id:'australia',   label:'Australia',    primary:'#FFD700', accent:'#00843D', bgCircle:'navy' },
+  { id:'southkorea',  label:'S. Korea',     primary:'#FFFFFF', accent:'#CD2E3A', bgCircle:'navy' },
+  { id:'england',     label:'England',      primary:'#FFFFFF', accent:'#CF091D', bgCircle:'navy' },
+  { id:'scotland',    label:'Scotland',     primary:'#FFFFFF', accent:'#003F87', bgCircle:'navy' },
 ];
 
 const TEAM_ACHIEVEMENTS = [
-  { id: 'kickoff',      label: 'Kickoff',          icon: '🤝', desc: 'Create or join a team' },
-  { id: 'full_squad',   label: 'Full Squad',        icon: '🌍', desc: 'All members are praying' },
-  { id: 'on_fire',      label: 'On Fire',           icon: '🔥', desc: 'Team 7-day streak' },
-  { id: 'house_prayer', label: 'House of Prayer',   icon: '⛪', desc: '30 days of team prayer' },
+  { id:'kickoff',       label:'Kickoff',         icon:'🤝', desc:'First member joins' },
+  { id:'full_squad',    label:'Full Squad',       icon:'🌍', desc:'All 48 nations covered' },
+  { id:'on_fire',       label:'On Fire',          icon:'🔥', desc:'Everyone has a 3-day streak' },
+  { id:'chapter_verse', label:'Chapter & Verse',  icon:'📖', desc:'All 20 devotionals collectively' },
+  { id:'around_world',  label:'Around the World', icon:'🗺️', desc:'Every region covered' },
+  { id:'house_prayer',  label:'House of Prayer',  icon:'⛪', desc:'All members check in same day' },
+  { id:'sent_together', label:'Sent Together',    icon:'🏆', desc:'Every member prays 10+ nations' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2113,11 +2120,12 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
             Team Achievements
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {TEAM_ACHIEVEMENTS.map(ach => (
+            {TEAM_ACHIEVEMENTS.map((ach, i) => (
               <div key={ach.id} style={{
                 background: '#FFFFFF', borderRadius: 12, padding: '14px 12px',
                 display: 'flex', alignItems: 'center', gap: 10,
                 filter: 'grayscale(1)', opacity: 0.4,
+                gridColumn: i === TEAM_ACHIEVEMENTS.length - 1 && TEAM_ACHIEVEMENTS.length % 2 !== 0 ? '1 / -1' : undefined,
               }}>
                 <span style={{ fontSize: 22 }}>{ach.icon}</span>
                 <div>
@@ -2309,7 +2317,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
               Team Achievements
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {TEAM_ACHIEVEMENTS.map(ach => {
+              {TEAM_ACHIEVEMENTS.map((ach, i) => {
                 const earned = (activeTeam.achievements || []).includes(ach.id);
                 return (
                   <div key={ach.id} style={{
@@ -2317,6 +2325,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
                     display: 'flex', alignItems: 'center', gap: 10,
                     filter: earned ? 'none' : 'grayscale(1)',
                     opacity: earned ? 1 : 0.4,
+                    gridColumn: i === TEAM_ACHIEVEMENTS.length - 1 && TEAM_ACHIEVEMENTS.length % 2 !== 0 ? '1 / -1' : undefined,
                   }}>
                     <span style={{ fontSize: 22 }}>{ach.icon}</span>
                     <div>
