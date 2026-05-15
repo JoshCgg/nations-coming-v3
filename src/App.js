@@ -2434,8 +2434,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
               }}>
                 {NUDGE_MESSAGES[nudgeMessageIndex].sub}
               </p>
-              {/* Swap this div for <img src="/images/nudge-ref.svg"> once Canva export is ready */}
-              <div style={{ height: 8 }} />
+              <img src='/images/nudge-ref.webp' width={110} height={110} alt='referee' style={{ display: 'block', margin: '0 auto 4px' }} />
               <button onClick={() => setNudgeModal(null)} style={{
                 background: '#E06520', color: 'white', border: 'none',
                 borderRadius: '12px', padding: '12px 32px',
