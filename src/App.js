@@ -975,6 +975,12 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDismissing, setIsDismissing] = useState(false);
 
+  useEffect(() => {
+    if (!nation) return;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [nation]);
+
   if (!nation) return null;
 
   return (
