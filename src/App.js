@@ -1119,7 +1119,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
           </button>
         </div>
 
-        <div key={nation.n} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "16px" }}>
+        <div key={nation.n} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "16px", paddingBottom: 24 }}>
           {nation.contenders ? (
             <div style={{ background: C.brightGray, borderRadius: 12, padding: 16, marginBottom: 16 }}>
               <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, color: C.indigo, marginBottom: 6 }}>PLAYOFF CONTENDERS</div>
@@ -1218,7 +1218,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
               )}
             </>
           )}
-          <button onClick={onClose} style={{
+          <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{
             display: "block", width: "100%", marginTop: 20,
             background: C.brightGray, border: "none",
             borderRadius: 12, paddingTop: 18, paddingBottom: 18, paddingLeft: 16, paddingRight: 16,
