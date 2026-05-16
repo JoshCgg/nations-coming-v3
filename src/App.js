@@ -749,6 +749,7 @@ function HomeScreenBanner({ onDismiss }) {
 function NationModal({ nation, onClose, gameState, updateGameState }) {
   const [dragStartY, setDragStartY] = useState(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   if (!nation) return null;
 
@@ -775,8 +776,8 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
         flexDirection: "column",
         background: "white",
         overflow: "hidden",
-        transform: `translateY(${dragOffsetY}px)`,
-        transition: dragOffsetY === 0 ? "transform 0.2s ease" : "none",
+        transform: isDismissing ? "translateY(110vh)" : `translateY(${dragOffsetY}px)`,
+        transition: (isDismissing || dragOffsetY === 0) ? "transform 0.3s ease" : "none",
       }}>
         {/* Drag handle — above header, touch target for dismiss */}
         <div
@@ -794,9 +795,17 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
           }}
           onTouchEnd={(e) => {
             e.stopPropagation();
-            if (dragOffsetY > 80) onClose();
+            if (dragOffsetY > 80) {
+              setIsDismissing(true);
+              setTimeout(() => {
+                onClose();
+                setIsDismissing(false);
+                setDragOffsetY(0);
+              }, 300);
+            } else {
+              setDragOffsetY(0);
+            }
             setDragStartY(null);
-            setDragOffsetY(0);
           }}
           style={{
             flexShrink: 0,
@@ -828,9 +837,17 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
           }}
           onTouchEnd={(e) => {
             e.stopPropagation();
-            if (dragOffsetY > 80) onClose();
+            if (dragOffsetY > 80) {
+              setIsDismissing(true);
+              setTimeout(() => {
+                onClose();
+                setIsDismissing(false);
+                setDragOffsetY(0);
+              }, 300);
+            } else {
+              setDragOffsetY(0);
+            }
             setDragStartY(null);
-            setDragOffsetY(0);
           }}
           style={{
             flexShrink: 0,
