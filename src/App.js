@@ -747,27 +747,25 @@ function HomeScreenBanner({ onDismiss }) {
 /* ─── NATION MODAL ─── */
 // TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
-  const touchStartY = useRef(null);
+  const modalScrollRef = useRef(null);
+  const [dragStartY, setDragStartY] = useState(null);
+
+  useEffect(() => {
+    if (nation) {
+      setTimeout(() => {
+        if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
+      }, 0);
+    }
+  }, [nation]);
 
   if (!nation) return null;
-
-  function handleTouchStart(e) {
-    touchStartY.current = e.touches[0].clientY;
-  }
-
-  function handleTouchEnd(e) {
-    if (touchStartY.current === null) return;
-    const delta = e.changedTouches[0].clientY - touchStartY.current;
-    touchStartY.current = null;
-    if (delta > 60) onClose();
-  }
 
   return (
     <div onClick={onClose} style={{
       position: "fixed", inset: 0, background: "rgba(27,45,58,0.7)",
       zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center",
     }}>
-      <div onClick={e => e.stopPropagation()} style={{
+      <div ref={modalScrollRef} onClick={e => e.stopPropagation()} style={{
         background: C.white,
         borderRadius: "20px 20px 0 0",
         width: "100%",
@@ -779,8 +777,13 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
       }}>
         {/* Header — sticky so it stays visible while scrolling */}
         <div
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          onTouchStart={(e) => setDragStartY(e.touches[0].clientY)}
+          onTouchEnd={(e) => {
+            if (dragStartY !== null && e.changedTouches[0].clientY - dragStartY > 60) {
+              onClose();
+            }
+            setDragStartY(null);
+          }}
           style={{
             position: "sticky", top: 0, zIndex: 10,
             background: C.indigo,
