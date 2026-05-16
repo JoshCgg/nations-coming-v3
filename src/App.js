@@ -3605,6 +3605,7 @@ export default function App() {
   const [userProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
+  const [tooltipStep, setTooltipStep] = useState(null);
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
     updateGameState({ hasOnboarded: true, journeyMode });
@@ -3635,6 +3636,29 @@ export default function App() {
     }
     saveNationPrayer(nation);
   }
+
+  function advanceTooltip() {
+    setTooltipStep(s => {
+      const next = s + 1;
+      if (next > 2) {
+        localStorage.setItem('pftc_tooltips_done', 'true');
+        return null;
+      }
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    if (gameState.hasOnboarded && !localStorage.getItem('pftc_tooltips_done')) {
+      setTooltipStep(0);
+    }
+  }, [gameState.hasOnboarded]);
+
+  useEffect(() => {
+    if (tooltipStep === 0) setTab("digest");
+    else if (tooltipStep === 1) setTab("nations");
+    else if (tooltipStep === 2) setTab("teams");
+  }, [tooltipStep]);
 
   useEffect(() => {
     if (toastQueue.length > 0 && pendingToast === null) {
@@ -3953,6 +3977,22 @@ export default function App() {
                   Privacy Policy
                 </a>
               </div>
+
+              {/* Replay tutorial link */}
+              <div style={{ textAlign: "center", marginTop: 10 }}>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('pftc_tooltips_done');
+                    setTooltipStep(0);
+                    setShowSettings(false);
+                  }}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", padding: 0 }}
+                  onMouseEnter={e => e.target.style.textDecoration = "underline"}
+                  onMouseLeave={e => e.target.style.textDecoration = "none"}
+                >
+                  Replay tutorial
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -3971,6 +4011,67 @@ export default function App() {
           </a>
         </div>
       </div>
+
+      {tooltipStep !== null && (
+        <>
+          <style>{`
+            @keyframes tooltip-pulse {
+              0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+              100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+            }
+          `}</style>
+
+          {/* Dimmed overlay — tap anywhere to advance */}
+          <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+
+          {/* Pulsing dot pointing at the relevant element */}
+          <div style={{
+            position: "fixed",
+            ...(tooltipStep === 0
+              ? { bottom: 200, left: "50%" }
+              : tooltipStep === 1
+              ? { top: 180, left: 40 }
+              : { top: "50%", left: "50%" }),
+            zIndex: 101, pointerEvents: "none", width: 0, height: 0,
+          }}>
+            <div style={{
+              position: "absolute", width: 40, height: 40, borderRadius: "50%",
+              border: "2px solid #00BAF8",
+              transform: "translate(-50%, -50%)",
+              animation: "tooltip-pulse 1.5s ease-out infinite",
+            }} />
+            <div style={{
+              position: "absolute", width: 10, height: 10, borderRadius: "50%",
+              background: "#00BAF8", transform: "translate(-50%, -50%)",
+            }} />
+          </div>
+
+          {/* Tooltip card */}
+          <div onClick={advanceTooltip} style={{
+            position: "fixed", bottom: 120, left: 16, right: 16, zIndex: 101,
+            background: "#00476B", border: "1.5px solid #00BAF8", borderRadius: 14, padding: 16,
+          }}>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#00BAF8", marginBottom: 8 }}>
+              {tooltipStep === 0 ? "Home" : tooltipStep === 1 ? "Nations" : "Teams"}
+            </div>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 17, color: "#ffffff", lineHeight: 1.7, marginBottom: 12 }}>
+              {tooltipStep === 0
+                ? "Check in each day to pray for today's nations and read the devotional."
+                : tooltipStep === 1
+                ? "Tap any nation to pray. Track your progress across all 48 nations."
+                : "Create or join a team to pray together and cover all 48 nations collectively."}
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 12 }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === tooltipStep ? "#00BAF8" : "rgba(255,255,255,0.25)" }} />
+              ))}
+            </div>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#8ADBFF", fontStyle: "italic", textAlign: "center" }}>
+              {tooltipStep < 2 ? "Tap anywhere to continue →" : "Tap anywhere to finish ✓"}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
