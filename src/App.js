@@ -814,6 +814,24 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
 
         {/* Header — outside scroll container, always visible */}
         <div
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setDragStartY(e.touches[0].clientY);
+            setDragOffsetY(0);
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+            if (dragStartY !== null) {
+              const delta = e.touches[0].clientY - dragStartY;
+              if (delta > 0) setDragOffsetY(delta);
+            }
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            if (dragOffsetY > 80) onClose();
+            setDragStartY(null);
+            setDragOffsetY(0);
+          }}
           style={{
             flexShrink: 0,
             background: "#00476B",
@@ -822,6 +840,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            touchAction: "none",
           }}
         >
           <FlagImg iso={nation.iso} f={nation.f} size={52} />
