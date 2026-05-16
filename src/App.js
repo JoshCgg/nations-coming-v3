@@ -748,17 +748,16 @@ function HomeScreenBanner({ onDismiss }) {
 // TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
   const [dragStartY, setDragStartY] = useState(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
 
   if (!nation) return null;
 
   return (
     <div
       onClick={onClose}
-      onTouchMove={(e) => e.preventDefault()}
       style={{
         position: "fixed", inset: 0, background: "rgba(27,45,58,0.7)",
         zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center",
-        touchAction: "none",
       }}
     >
       <div key={nation.n} onClick={e => e.stopPropagation()} style={{
@@ -770,20 +769,11 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
         overflowY: "auto",
         WebkitOverflowScrolling: "touch",
         padding: "0 0 40px 0",
+        transform: `translateY(${dragOffsetY}px)`,
+        transition: dragOffsetY === 0 ? "transform 0.2s ease" : "none",
       }}>
         {/* Header — sticky so it stays visible while scrolling */}
         <div
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            setDragStartY(e.touches[0].clientY);
-          }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-            if (dragStartY !== null && e.changedTouches[0].clientY - dragStartY > 60) {
-              onClose();
-            }
-            setDragStartY(null);
-          }}
           style={{
             position: "sticky", top: 0, zIndex: 10,
             background: C.indigo,
@@ -792,15 +782,37 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
             display: "flex",
             alignItems: "center",
             gap: 14,
-            touchAction: "none",
-            cursor: "grab",
           }}
         >
-          {/* Drag handle */}
-          <div style={{
-            position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
-            width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.3)",
-          }} />
+          {/* Drag handle — touch target for drag-to-dismiss */}
+          <div
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              setDragStartY(e.touches[0].clientY);
+              setDragOffsetY(0);
+            }}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+              if (dragStartY !== null) {
+                const delta = e.touches[0].clientY - dragStartY;
+                if (delta > 0) setDragOffsetY(delta);
+              }
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              if (dragStartY !== null && dragOffsetY > 80) {
+                onClose();
+              }
+              setDragStartY(null);
+              setDragOffsetY(0);
+            }}
+            style={{
+              position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)",
+              width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.3)",
+              cursor: "grab", touchAction: "none", padding: "12px 24px",
+              boxSizing: "content-box", marginTop: -12, marginLeft: -24,
+            }}
+          />
           <FlagImg iso={nation.iso} f={nation.f} size={52} />
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: "#fff", lineHeight: 1.2 }}>
