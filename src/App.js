@@ -747,6 +747,9 @@ function HomeScreenBanner({ onDismiss }) {
 /* ─── NATION MODAL ─── */
 // TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
+  const [dragStartY, setDragStartY] = useState(null);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
+
   if (!nation) return null;
 
   return (
@@ -755,34 +758,70 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
       style={{
         position: "fixed",
         top: 0, left: 0, right: 0, bottom: 0,
-        height: "100%",
         background: "rgba(0,0,0,0.55)",
         zIndex: 100,
         display: "flex",
-        alignItems: "flex-end",
+        alignItems: "center",
         justifyContent: "center",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        padding: "16px",
       }}
     >
       <div onClick={e => e.stopPropagation()} style={{
         width: "100%",
-        maxHeight: "90vh",
-        borderRadius: "20px 20px 0 0",
+        maxWidth: "520px",
+        maxHeight: "80vh",
+        borderRadius: "20px",
         display: "flex",
         flexDirection: "column",
         background: "white",
         overflow: "hidden",
+        transform: `translateY(${dragOffsetY}px)`,
+        transition: dragOffsetY === 0 ? "transform 0.2s ease" : "none",
       }}>
+        {/* Drag handle — above header, touch target for dismiss */}
+        <div
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setDragStartY(e.touches[0].clientY);
+            setDragOffsetY(0);
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+            if (dragStartY !== null) {
+              const delta = e.touches[0].clientY - dragStartY;
+              if (delta > 0) setDragOffsetY(delta);
+            }
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            if (dragOffsetY > 80) onClose();
+            setDragStartY(null);
+            setDragOffsetY(0);
+          }}
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            justifyContent: "center",
+            padding: "8px 0 4px",
+            background: "white",
+            borderRadius: "20px 20px 0 0",
+            touchAction: "none",
+            cursor: "grab",
+          }}
+        >
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "#ccc" }} />
+        </div>
+
         {/* Header — outside scroll container, always visible */}
         <div
           style={{
-            background: C.indigo,
-            borderRadius: "20px 20px 0 0",
-            padding: "20px 20px 20px 20px",
+            flexShrink: 0,
+            background: "#00476B",
+            padding: "16px",
+            borderRadius: "0",
             display: "flex",
             alignItems: "center",
-            gap: 14,
-            flexShrink: 0,
+            justifyContent: "space-between",
           }}
         >
           <FlagImg iso={nation.iso} f={nation.f} size={52} />
@@ -819,7 +858,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
           </button>
         </div>
 
-        <div key={nation.n} style={{ padding: "20px 20px 40px 20px", overflowY: "auto", WebkitOverflowScrolling: "touch", flex: 1 }}>
+        <div key={nation.n} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "16px" }}>
           {nation.contenders ? (
             <div style={{ background: C.brightGray, borderRadius: 12, padding: 16, marginBottom: 16 }}>
               <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, color: C.indigo, marginBottom: 6 }}>PLAYOFF CONTENDERS</div>
