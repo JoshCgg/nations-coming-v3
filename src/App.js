@@ -1221,7 +1221,8 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
           <button onClick={onClose} style={{
             display: "block", width: "100%", marginTop: 20,
             background: C.brightGray, border: "none",
-            borderRadius: 12, padding: 16,
+            borderRadius: 12, paddingTop: 18, paddingBottom: 18, paddingLeft: 16, paddingRight: 16,
+            minHeight: 44, minWidth: 44,
             fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16,
             color: C.indigo, cursor: "pointer",
           }}>Close</button>
