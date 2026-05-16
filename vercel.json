@@ -4,6 +4,6 @@
     { "src": "/app/(.*)", "dest": "/index.html" },
     { "src": "/", "dest": "/landing.html" },
     { "src": "/privacy", "dest": "/privacy.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "(.*)", "dest": "/index.html" }
   ]
 }
