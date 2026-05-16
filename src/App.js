@@ -3078,8 +3078,6 @@ function ObOrangeBtn({ children, onClick, style = {} }) {
 function Onboarding({ onComplete }) {
   const [step, setStep] = useState(1);
   const [journeyPath, setJourneyPath] = useState(null);
-  const [tapCount, setTapCount] = useState(0);
-  const tapTimer = useRef(null);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
@@ -3087,18 +3085,6 @@ function Onboarding({ onComplete }) {
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   const isAndroid = /Android/i.test(ua);
-
-  function handleLogoTap() {
-    const next = tapCount + 1;
-    if (tapTimer.current) clearTimeout(tapTimer.current);
-    if (next >= 3) {
-      try { localStorage.removeItem("pftc_game"); } catch {}
-      setTapCount(0);
-    } else {
-      setTapCount(next);
-      tapTimer.current = setTimeout(() => setTapCount(0), 800);
-    }
-  }
 
   function finishOnboarding(opts = {}) {
     onComplete({ journeyMode: journeyPath === true, ...opts });
@@ -3119,11 +3105,9 @@ function Onboarding({ onComplete }) {
         <ObNavyHeader>
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 4 }}>
             <div
-              onClick={handleLogoTap}
               style={{
                 background: "#fff", borderRadius: 20,
                 boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
-                cursor: "pointer", userSelect: "none",
                 width: 220, height: 150,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}
@@ -3601,6 +3585,7 @@ export default function App() {
   const [selectedDayIdx, setSelectedDayIdx] = useState(null);
   const [showBanner, setShowBanner] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
@@ -4020,6 +4005,16 @@ export default function App() {
                 </a>
               </div>
 
+              {/* About & Credits link */}
+              <div style={{ textAlign: "center", marginTop: 10 }}>
+                <span
+                  onClick={() => { setShowSettings(false); setShowAbout(true); }}
+                  style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "underline", cursor: "pointer" }}
+                >
+                  About &amp; Credits
+                </span>
+              </div>
+
               {/* Replay tutorial link */}
               <div style={{ textAlign: "center", marginTop: 10 }}>
                 <button
@@ -4034,6 +4029,85 @@ export default function App() {
                 >
                   Replay tutorial
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* About & Credits Modal */}
+        {showAbout && (
+          <div
+            onClick={() => setShowAbout(false)}
+            style={{ position: "fixed", inset: 0, zIndex: 200, background: "#00476B", display: "flex", flexDirection: "column" }}
+          >
+            {/* Sticky header */}
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "20px 20px 16px",
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, color: "#FFFFFF" }}>About &amp; Credits</span>
+              <button
+                onClick={() => setShowAbout(false)}
+                style={{ background: "transparent", border: "none", fontSize: 18, cursor: "pointer", color: "#FFFFFF", padding: 4 }}
+              >✕</button>
+            </div>
+
+            {/* Scrollable content */}
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{ flex: 1, overflowY: "auto", padding: "24px 20px 40px" }}
+            >
+              {/* App blurb */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Pray for the Cup</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 1.6 }}>
+                  A World Cup 2026 prayer guide connecting believers to the nations — and to the unreached peoples attending the tournament. Built by Global Gates.
+                </div>
+              </div>
+
+              {/* Contributors */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Contributors</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 2 }}>
+                  <div>App Design &amp; Development — [coming soon]</div>
+                  <div>Content &amp; Devotionals — [coming soon]</div>
+                  <div>Nation Research — [coming soon]</div>
+                  <div>Prayer Points — [coming soon]</div>
+                </div>
+              </div>
+
+              {/* Scripture */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Scripture</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#8ADBFF", lineHeight: 1.7 }}>
+                  Scripture quotations taken from the Holy Bible, New International Version®, NIV® Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used by permission. All rights reserved worldwide.
+                </div>
+              </div>
+
+              {/* Global Gates */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>A Global Gates Ministry</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 1.6, marginBottom: 8 }}>
+                  Global Gates mobilizes the Church to reach diaspora communities in gateway cities worldwide.
+                </div>
+                <a
+                  href="https://globalgates.info"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#E06520", fontWeight: 600, textDecoration: "none" }}
+                >
+                  globalgates.info
+                </a>
+              </div>
+
+              {/* Version */}
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#8ADBFF", textAlign: "center", marginTop: 16 }}>
+                Pray for the Cup · v1.0 · 2026
               </div>
             </div>
           </div>
