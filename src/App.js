@@ -3664,10 +3664,11 @@ export default function App() {
   }, [gameState.hasOnboarded]);
 
   useEffect(() => {
+    setPulsePos(null); // clear immediately so full-dim shows while transitioning
     if (tooltipStep === 0 || tooltipStep === 1) setTab("digest");
     else if (tooltipStep === 2) setTab("nations");
     else if (tooltipStep === 3) setTab("teams");
-    else { setPulsePos(null); return; }
+    else return;
 
     // Stage 1 — find element and start scroll
     const findTimer = setTimeout(() => {
@@ -3688,7 +3689,7 @@ export default function App() {
         const rect = el.getBoundingClientRect();
         setPulsePos({ top: rect.top, left: rect.left, width: rect.width, height: rect.height, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
       }
-    }, 450);
+    }, 600);
 
     return () => {
       clearTimeout(findTimer);
@@ -4061,15 +4062,29 @@ export default function App() {
             }
           `}</style>
 
-          {/* Dimmed overlay — 4 strips leave a hole over the target once measured */}
+          {/* Dimmed overlay — SVG with evenodd cutout for rounded highlight */}
           {pulsePos ? (
             <>
-              {/* Catch-all: transparent full-screen layer behind strips, catches taps through the hole */}
+              {/* Catch-all behind SVG: catches taps through the cutout hole */}
               <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, zIndex: 99 }} />
-              <div onClick={advanceTooltip} style={{ position: "fixed", top: 0, left: 0, right: 0, height: pulsePos.top, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
-              <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top + pulsePos.height, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
-              <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top, left: 0, width: pulsePos.left, height: pulsePos.height, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
-              <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top, left: pulsePos.left + pulsePos.width, right: 0, height: pulsePos.height, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+              <svg
+                onClick={advanceTooltip}
+                style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 100, display: "block" }}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  fill="rgba(0,0,0,0.55)"
+                  d={`
+                    M 0 0 H ${window.innerWidth} V ${window.innerHeight} H 0 Z
+                    M ${pulsePos.left - 4} ${pulsePos.top - 4}
+                    h ${pulsePos.width + 8} a 12 12 0 0 1 12 12
+                    v ${pulsePos.height - 16} a 12 12 0 0 1 -12 12
+                    h -${pulsePos.width + 8} a 12 12 0 0 1 -12 -12
+                    v -${pulsePos.height - 16} a 12 12 0 0 1 12 -12 Z
+                  `}
+                />
+              </svg>
             </>
           ) : (
             <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
