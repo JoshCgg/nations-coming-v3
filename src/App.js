@@ -3759,7 +3759,11 @@ export default function App() {
                     <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Journey Mode</div>
                     <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Track streaks, achievements, and your prayer score</div>
                   </div>
-                  <ToggleSwitch value={gameState.journeyMode} onToggle={() => updateGameState({ journeyMode: !gameState.journeyMode })} />
+                  <ToggleSwitch value={gameState.journeyMode} onToggle={() => {
+                    const turningOn = !gameState.journeyMode;
+                    updateGameState({ journeyMode: turningOn });
+                    if (turningOn) { setTab("digest"); setSelectedDayIdx(null); }
+                  }} />
                 </div>
               </div>
 
