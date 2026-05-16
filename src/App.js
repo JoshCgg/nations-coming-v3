@@ -3939,6 +3939,20 @@ export default function App() {
               <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: C.blue, textAlign: "center", marginTop: 20 }}>
                 Pray for the Cup · prayforthecup.com
               </div>
+
+              {/* Privacy Policy link */}
+              <div style={{ textAlign: "center", marginTop: 16 }}>
+                <a
+                  href="https://prayforthecup.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "none" }}
+                  onMouseEnter={e => e.target.style.textDecoration = "underline"}
+                  onMouseLeave={e => e.target.style.textDecoration = "none"}
+                >
+                  Privacy Policy
+                </a>
+              </div>
             </div>
           </div>
         )}
