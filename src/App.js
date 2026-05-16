@@ -1598,7 +1598,9 @@ function DigestHome({ gameState, onCardTap }) {
           const isPrayed = isPast && (gameState.checkedInDays || []).includes(scheduleToISO(d.d));
 
           const innerStyle = d.img ? {
-            background: `linear-gradient(to top, rgba(10,20,40,0.88) 0%, rgba(10,20,40,0.35) 65%, rgba(10,20,40,0.15) 100%), url('${d.img}') center / cover no-repeat`,
+            background: locked
+              ? `linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.45) 100%), url('${d.img}') center / cover no-repeat`
+              : `linear-gradient(to top, rgba(10,20,40,0.88) 0%, rgba(10,20,40,0.35) 65%, rgba(10,20,40,0.15) 100%), url('${d.img}') center / cover no-repeat`,
           } : {};
 
           return (
@@ -1853,7 +1855,7 @@ const JOURNEY_CSS = `
   .devo-card.today { width: 220px; box-shadow: 0 8px 28px rgba(27,69,106,0.22); transform: translateY(-4px); }
   .devo-card.today:active { transform: translateY(-4px) scale(0.97); }
   .devo-card.past  { opacity: 0.85; box-shadow: 0 2px 8px rgba(27,69,106,0.08); }
-  .devo-card.future { opacity: 0.45; filter: grayscale(0.6); cursor: not-allowed; box-shadow: none; }
+  .devo-card.future { opacity: 0.45; filter: grayscale(0.6) brightness(0.7); cursor: not-allowed; box-shadow: none; }
 
   .devo-card-inner {
     height: 260px; display: flex; flex-direction: column;
@@ -2550,7 +2552,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
 
         {/* Team hero card */}
         {activeTeam && (
-          <div style={{
+          <div data-tooltip-target="team-card" style={{
             background: '#00476B',
             borderLeft: `4px solid ${activeKit.accent}`,
             margin: 16, borderRadius: 14, padding: 16,
@@ -3645,14 +3647,14 @@ export default function App() {
   }
 
   function advanceTooltip() {
-    setTooltipStep(s => {
-      const next = s + 1;
-      if (next > 3) {
-        localStorage.setItem('pftc_tooltips_done', 'true');
-        return null;
-      }
-      return next;
-    });
+    const next = tooltipStep + 1;
+    if (next > 3) {
+      localStorage.setItem('pftc_tooltips_done', 'true');
+      setTab("digest");
+      setTooltipStep(null);
+    } else {
+      setTooltipStep(next);
+    }
   }
 
   useEffect(() => {
@@ -3667,20 +3669,16 @@ export default function App() {
     else if (tooltipStep === 3) setTab("teams");
     else { setPulsePos(null); return; }
 
-    let activeEl = null;
-
-    // Stage 1 — find element, punch it through the overlay, start scroll
+    // Stage 1 — find element and start scroll
     const findTimer = setTimeout(() => {
       devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional-card"]');
       checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
       firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
-      teamsCTARef.current = document.querySelector('[data-tooltip-target="teams-cta"]');
-      activeEl = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
-      if (activeEl) {
-        activeEl.style.position = "relative";
-        activeEl.style.zIndex = "101";
-        activeEl.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      teamsCTARef.current =
+        document.querySelector('[data-tooltip-target="teams-cta"]') ||
+        document.querySelector('[data-tooltip-target="team-card"]');
+      const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 50);
 
     // Stage 2 — measure after scroll has settled
@@ -3688,17 +3686,13 @@ export default function App() {
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
       if (el) {
         const rect = el.getBoundingClientRect();
-        setPulsePos({ top: rect.top + rect.height / 2, left: rect.left + rect.width / 2 });
+        setPulsePos({ top: rect.top, left: rect.left, width: rect.width, height: rect.height, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
       }
     }, 450);
 
     return () => {
       clearTimeout(findTimer);
       clearTimeout(measureTimer);
-      if (activeEl) {
-        activeEl.style.zIndex = "";
-        activeEl.style.position = "";
-      }
     };
   }, [tooltipStep]);
 
@@ -4063,15 +4057,24 @@ export default function App() {
             }
           `}</style>
 
-          {/* Dimmed overlay — tap anywhere to advance */}
-          <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+          {/* Dimmed overlay — 4 strips leave a hole over the target once measured */}
+          {pulsePos ? (
+            <>
+              <div onClick={advanceTooltip} style={{ position: "fixed", top: 0, left: 0, right: 0, height: pulsePos.top, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+              <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top + pulsePos.height, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+              <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top, left: 0, width: pulsePos.left, height: pulsePos.height, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+              <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top, left: pulsePos.left + pulsePos.width, right: 0, height: pulsePos.height, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+            </>
+          ) : (
+            <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
+          )}
 
           {/* Pulsing dot centered on the measured target element */}
           {pulsePos && (
             <div style={{
               position: "fixed",
-              top: pulsePos.top,
-              left: pulsePos.left,
+              top: pulsePos.cy,
+              left: pulsePos.cx,
               zIndex: 101, pointerEvents: "none", width: 0, height: 0,
             }}>
               <div style={{
@@ -4102,7 +4105,9 @@ export default function App() {
                 ? "Check in each day to log your prayer and keep your streak."
                 : tooltipStep === 2
                 ? "Tap any nation to pray. Track your progress across all 48 nations."
-                : "Create or join a team to pray together and cover all 48 nations collectively."}
+                : (gameState.teams?.length > 0
+                  ? "Your team is praying together — every nation you pray counts for the whole group."
+                  : "Create or join a team to pray together and cover all 48 nations collectively.")}
             </div>
             <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 12 }}>
               {[0, 1, 2, 3].map(i => (
