@@ -712,17 +712,18 @@ function ScriptureLink({ reference }) {
         <span
           ref={tooltipRef}
           style={{
-            position: "absolute",
+            position: "fixed",
+            bottom: 80,
+            left: 16,
+            right: 16,
             zIndex: 9999,
-            maxWidth: 260,
             background: "#00476B",
             border: "1.5px solid #00BAF8",
-            borderRadius: 10,
-            padding: "12px 14px",
-            bottom: "100%",
-            left: 0,
+            borderRadius: 14,
+            padding: 16,
             display: "block",
             boxSizing: "border-box",
+            transition: "transform 0.2s ease, opacity 0.2s ease",
           }}
         >
           <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
