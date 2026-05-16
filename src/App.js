@@ -1607,7 +1607,7 @@ function DigestHome({ gameState, onCardTap }) {
               className={`devo-card ${cardClass}`}
               style={cardStyle}
               onClick={locked ? undefined : () => onCardTap(i)}
-              {...(isToday ? { 'data-tooltip-target': 'devotional' } : {})}
+              {...(isToday ? { 'data-tooltip-target': 'devotional-card' } : {})}
             >
               <div className="devo-card-inner" style={innerStyle}>
                 <div className="devo-flag-bg">{flag}</div>
@@ -3668,7 +3668,7 @@ export default function App() {
     else { setPulsePos(null); return; }
 
     const timer = setTimeout(() => {
-      devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional"]');
+      devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional-card"]');
       checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
       firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
       teamsCTARef.current = document.querySelector('[data-tooltip-target="teams-cta"]');
