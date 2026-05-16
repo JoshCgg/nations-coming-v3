@@ -1607,6 +1607,7 @@ function DigestHome({ gameState, onCardTap }) {
               className={`devo-card ${cardClass}`}
               style={cardStyle}
               onClick={locked ? undefined : () => onCardTap(i)}
+              {...(isToday ? { 'data-tooltip-target': 'checkin' } : {})}
             >
               <div className="devo-card-inner" style={innerStyle}>
                 <div className="devo-flag-bg">{flag}</div>
@@ -1736,7 +1737,7 @@ function AllNations({ gameState, updateGameState, onPray }) {
       {/* Nation Cards */}
       <div style={{ padding: "0 16px" }}>
         {filtered.map((c, i) => (
-          <button key={c.n} onClick={() => setSelectedNation(c)} style={{
+          <button key={c.n} {...(i === 0 ? { 'data-tooltip-target': 'first-nation' } : {})} onClick={() => setSelectedNation(c)} style={{
             display: "flex", alignItems: "center", gap: 14, width: "100%",
             background: C.white, border: `1px solid ${C.blue}25`,
             borderRadius: 14, padding: "14px 16px", cursor: "pointer",
@@ -2457,6 +2458,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
             Form a prayer team with friends, track collective progress, and cheer each other on.
           </div>
           <button
+            data-tooltip-target="teams-cta"
             onClick={() => setView('create')}
             style={{
               width: '100%', maxWidth: 320, background: '#E06520', border: 'none',
@@ -3606,6 +3608,10 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
   const [tooltipStep, setTooltipStep] = useState(null);
+  const checkInBtnRef = useRef(null);
+  const firstNationRef = useRef(null);
+  const teamsCTARef = useRef(null);
+  const [pulsePos, setPulsePos] = useState(null);
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
     updateGameState({ hasOnboarded: true, journeyMode });
@@ -3658,6 +3664,19 @@ export default function App() {
     if (tooltipStep === 0) setTab("digest");
     else if (tooltipStep === 1) setTab("nations");
     else if (tooltipStep === 2) setTab("teams");
+    else { setPulsePos(null); return; }
+
+    const timer = setTimeout(() => {
+      checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
+      firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
+      teamsCTARef.current = document.querySelector('[data-tooltip-target="teams-cta"]');
+      const el = [checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        setPulsePos({ top: rect.top + rect.height / 2, left: rect.left + rect.width / 2 });
+      }
+    }, 50);
+    return () => clearTimeout(timer);
   }, [tooltipStep]);
 
   useEffect(() => {
@@ -4024,27 +4043,26 @@ export default function App() {
           {/* Dimmed overlay — tap anywhere to advance */}
           <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
 
-          {/* Pulsing dot pointing at the relevant element */}
-          <div style={{
-            position: "fixed",
-            ...(tooltipStep === 0
-              ? { bottom: 200, left: "50%" }
-              : tooltipStep === 1
-              ? { top: 180, left: 40 }
-              : { top: "50%", left: "50%" }),
-            zIndex: 101, pointerEvents: "none", width: 0, height: 0,
-          }}>
+          {/* Pulsing dot centered on the measured target element */}
+          {pulsePos && (
             <div style={{
-              position: "absolute", width: 40, height: 40, borderRadius: "50%",
-              border: "2px solid #00BAF8",
-              transform: "translate(-50%, -50%)",
-              animation: "tooltip-pulse 1.5s ease-out infinite",
-            }} />
-            <div style={{
-              position: "absolute", width: 10, height: 10, borderRadius: "50%",
-              background: "#00BAF8", transform: "translate(-50%, -50%)",
-            }} />
-          </div>
+              position: "fixed",
+              top: pulsePos.top,
+              left: pulsePos.left,
+              zIndex: 101, pointerEvents: "none", width: 0, height: 0,
+            }}>
+              <div style={{
+                position: "absolute", width: 40, height: 40, borderRadius: "50%",
+                border: "2px solid #00BAF8",
+                transform: "translate(-50%, -50%)",
+                animation: "tooltip-pulse 1.5s ease-out infinite",
+              }} />
+              <div style={{
+                position: "absolute", width: 10, height: 10, borderRadius: "50%",
+                background: "#00BAF8", transform: "translate(-50%, -50%)",
+              }} />
+            </div>
+          )}
 
           {/* Tooltip card */}
           <div onClick={advanceTooltip} style={{
