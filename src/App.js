@@ -3667,18 +3667,39 @@ export default function App() {
     else if (tooltipStep === 3) setTab("teams");
     else { setPulsePos(null); return; }
 
-    const timer = setTimeout(() => {
+    let activeEl = null;
+
+    // Stage 1 — find element, punch it through the overlay, start scroll
+    const findTimer = setTimeout(() => {
       devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional-card"]');
       checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
       firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
       teamsCTARef.current = document.querySelector('[data-tooltip-target="teams-cta"]');
+      activeEl = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
+      if (activeEl) {
+        activeEl.style.position = "relative";
+        activeEl.style.zIndex = "101";
+        activeEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 50);
+
+    // Stage 2 — measure after scroll has settled
+    const measureTimer = setTimeout(() => {
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
       if (el) {
         const rect = el.getBoundingClientRect();
         setPulsePos({ top: rect.top + rect.height / 2, left: rect.left + rect.width / 2 });
       }
-    }, 50);
-    return () => clearTimeout(timer);
+    }, 450);
+
+    return () => {
+      clearTimeout(findTimer);
+      clearTimeout(measureTimer);
+      if (activeEl) {
+        activeEl.style.zIndex = "";
+        activeEl.style.position = "";
+      }
+    };
   }, [tooltipStep]);
 
   useEffect(() => {
