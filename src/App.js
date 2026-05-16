@@ -753,18 +753,25 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
     <div
       onClick={onClose}
       style={{
-        position: "fixed", inset: 0, background: "rgba(27,45,58,0.7)",
-        zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center",
+        position: "fixed",
+        top: 0, left: 0, right: 0, bottom: 0,
+        height: "100%",
+        background: "rgba(0,0,0,0.55)",
+        zIndex: 100,
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
       <div onClick={e => e.stopPropagation()} style={{
-        background: C.white,
-        borderRadius: "20px 20px 0 0",
         width: "100%",
-        maxWidth: 520,
-        maxHeight: "85vh",
+        maxHeight: "90vh",
+        borderRadius: "20px 20px 0 0",
         display: "flex",
         flexDirection: "column",
+        background: "white",
+        overflow: "hidden",
       }}>
         {/* Header — outside scroll container, always visible */}
         <div
