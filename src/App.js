@@ -1585,7 +1585,7 @@ function DigestHome({ gameState, onCardTap }) {
           const locked    = isFuture && gameState.journeyMode;
           const isActive  = i === activeCard;
           const cardClass = isActive ? "today" : (locked ? "future" : "past");
-          const cardStyle = isActive ? {} : { opacity: 0.75, transform: 'scale(0.92)' };
+          const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.75, transform: 'scale(0.92)' };
           const featNations = (d.feat || [])
             .filter(name => name !== "All Nations")
             .map(name => RAW_COUNTRIES.find(c => c.n === name))
@@ -1610,18 +1610,18 @@ function DigestHome({ gameState, onCardTap }) {
               style={cardStyle}
               onClick={locked ? undefined : () => onCardTap(i)}
               {...(isToday ? { 'data-tooltip-target': 'devotional-card' } : {})}
+              {...(locked ? { 'data-locked': 'true' } : {})}
             >
+              {locked && <div className="devo-lock">🔒</div>}
               <div className="devo-card-inner" style={innerStyle}>
                 <div className="devo-flag-bg">{flag}</div>
-                {locked ? (
-                  <div className="devo-lock">🔒</div>
-                ) : isPrayed ? (
+                {!locked && (isPrayed ? (
                   <div className="devo-checked-badge">✓ Prayed</div>
                 ) : (
                   <div className="devo-day-badge">
                     {isToday ? `Today · Day ${i + 1}` : `Day ${i + 1}`}
                   </div>
-                )}
+                ))}
                 <span className="devo-flag-main" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   {featNations.length > 0
                     ? featNations.map(n => <FlagImg key={n.n} iso={n.iso} f={n.f} size={28} />)
@@ -1855,7 +1855,7 @@ const JOURNEY_CSS = `
   .devo-card.today { width: 220px; box-shadow: 0 8px 28px rgba(27,69,106,0.22); transform: translateY(-4px); }
   .devo-card.today:active { transform: translateY(-4px) scale(0.97); }
   .devo-card.past  { opacity: 0.85; box-shadow: 0 2px 8px rgba(27,69,106,0.08); }
-  .devo-card.future { opacity: 0.45; filter: grayscale(0.6) brightness(0.7); cursor: not-allowed; box-shadow: none; }
+  .devo-card.future { cursor: not-allowed; box-shadow: none; }
 
   .devo-card-inner {
     height: 260px; display: flex; flex-direction: column;
@@ -1863,7 +1863,7 @@ const JOURNEY_CSS = `
   }
   .devo-card.today  .devo-card-inner { background: linear-gradient(160deg, #1B456A 0%, #2a6ea6 60%, #1B456A 100%); }
   .devo-card.past   .devo-card-inner { background: linear-gradient(160deg, #2a5a8a 0%, #3E67AC 100%); }
-  .devo-card.future .devo-card-inner { background: linear-gradient(160deg, #5a7a9a 0%, #8899AA 100%); }
+  .devo-card.future .devo-card-inner { background: linear-gradient(160deg, #5a7a9a 0%, #8899AA 100%); opacity: 0.45; filter: grayscale(1); }
 
   .devo-flag-bg { position: absolute; top: 12px; right: 14px; font-size: 64px; opacity: 0.25; line-height: 1; user-select: none; }
   .devo-card.today .devo-flag-bg { font-size: 72px; opacity: 0.3; }
@@ -1885,7 +1885,7 @@ const JOURNEY_CSS = `
     letter-spacing: 0.3px; font-family: 'Montserrat', sans-serif;
   }
 
-  .devo-lock { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 28px; opacity: 0.6; }
+  .devo-lock { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 28px; z-index: 2; }
 
   .devo-flag-main { font-size: 28px; margin-bottom: 6px; display: block; }
   .devo-nation { color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; }
@@ -2019,27 +2019,27 @@ function MyJourney({ gameState, setTab }) {
               key={i}
               className={`devo-card ${cardClass}`}
               onClick={isFuture ? undefined : () => setTab("digest")}
+              {...(isFuture ? { 'data-locked': 'true' } : {})}
               style={d.img ? {
                 backgroundImage: `linear-gradient(rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.88) 100%), url(${d.img})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center"
               } : undefined}
             >
+              {isFuture && <div className="devo-lock">🔒</div>}
               <div className="devo-card-inner">
                 <div className="devo-flag-bg">
                   {featNations.length > 0
                     ? <FlagImg iso={featNations[0].iso} f={featNations[0].f} size={64} />
                     : <span style={{ fontSize: 64 }}>🌍</span>}
                 </div>
-                {isFuture ? (
-                  <div className="devo-lock">🔒</div>
-                ) : isPrayed ? (
+                {!isFuture && (isPrayed ? (
                   <div className="devo-checked-badge">✓ Prayed</div>
                 ) : (
                   <div className="devo-day-badge">
                     {isToday ? `Today · Day ${i + 1}` : `Day ${i + 1}`}
                   </div>
-                )}
+                ))}
                 <span className="devo-flag-main" style={{ display:"flex", gap:4, alignItems:"center" }}>
                   {featNations.length > 0
                     ? featNations.map(n => <FlagImg key={n.n} iso={n.iso} f={n.f} size={28} />)
@@ -3679,13 +3679,13 @@ export default function App() {
         document.querySelector('[data-tooltip-target="teams-cta"]') ||
         document.querySelector('[data-tooltip-target="team-card"]');
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (el && el.dataset.locked !== 'true') el.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 50);
 
     // Stage 2 — measure after scroll has settled
     const measureTimer = setTimeout(() => {
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
-      if (el) {
+      if (el && el.dataset.locked !== 'true') {
         const rect = el.getBoundingClientRect();
         setPulsePos({ top: rect.top, left: rect.left, width: rect.width, height: rect.height, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
       }
