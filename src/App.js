@@ -747,25 +747,21 @@ function HomeScreenBanner({ onDismiss }) {
 /* ─── NATION MODAL ─── */
 // TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
-  const modalScrollRef = useRef(null);
   const [dragStartY, setDragStartY] = useState(null);
-
-  useEffect(() => {
-    if (nation) {
-      setTimeout(() => {
-        if (modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
-      }, 0);
-    }
-  }, [nation]);
 
   if (!nation) return null;
 
   return (
-    <div onClick={onClose} style={{
-      position: "fixed", inset: 0, background: "rgba(27,45,58,0.7)",
-      zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center",
-    }}>
-      <div ref={modalScrollRef} onClick={e => e.stopPropagation()} style={{
+    <div
+      onClick={onClose}
+      onTouchMove={(e) => e.preventDefault()}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(27,45,58,0.7)",
+        zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center",
+        touchAction: "none",
+      }}
+    >
+      <div key={nation.n} onClick={e => e.stopPropagation()} style={{
         background: C.white,
         borderRadius: "20px 20px 0 0",
         width: "100%",
@@ -777,8 +773,12 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
       }}>
         {/* Header — sticky so it stays visible while scrolling */}
         <div
-          onTouchStart={(e) => setDragStartY(e.touches[0].clientY)}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setDragStartY(e.touches[0].clientY);
+          }}
           onTouchEnd={(e) => {
+            e.stopPropagation();
             if (dragStartY !== null && e.changedTouches[0].clientY - dragStartY > 60) {
               onClose();
             }
@@ -792,6 +792,8 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
             display: "flex",
             alignItems: "center",
             gap: 14,
+            touchAction: "none",
+            cursor: "grab",
           }}
         >
           {/* Drag handle */}
