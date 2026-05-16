@@ -795,6 +795,90 @@ function renderDevotionalText(text) {
   return elements;
 }
 
+/* ─── NATION INTEGRITY NUDGE ─── */
+function NationIntegrityNudge({ nation, onConfirm, onCancel }) {
+  if (!nation) return null;
+  return (
+    <div
+      onClick={onCancel}
+      style={{
+        position: "fixed", inset: 0,
+        background: "rgba(0,28,46,0.72)",
+        zIndex: 3100,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 24px",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#00476B",
+          border: "1.5px solid #00BAF8",
+          borderRadius: 20,
+          padding: "28px 24px 22px",
+          width: "100%",
+          maxWidth: 320,
+          textAlign: "center",
+        }}
+      >
+        <div style={{
+          width: 64, height: 64,
+          background: "#E06520",
+          border: "3px solid #FF8844",
+          borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 28,
+          margin: "0 auto 16px",
+        }}>
+          ⚽
+        </div>
+        <div style={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 800, fontSize: 20,
+          color: "#ffffff",
+          marginBottom: 10,
+        }}>
+          Still praying?
+        </div>
+        <div style={{
+          fontFamily: "Montserrat, sans-serif",
+          fontSize: 15,
+          color: "#8ADBFF",
+          lineHeight: 1.5,
+          marginBottom: 22,
+        }}>
+          Each tap is a prayer. Take a moment with {nation.n} before moving on.
+        </div>
+        <button
+          onClick={onConfirm}
+          style={{
+            display: "block", width: "100%",
+            background: "#E06520", border: "none",
+            borderRadius: 12, padding: "14px 0",
+            fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16,
+            color: "#ffffff", cursor: "pointer", marginBottom: 10,
+          }}
+        >
+          I prayed 🙏
+        </button>
+        <button
+          onClick={onCancel}
+          style={{
+            display: "block", width: "100%",
+            background: "transparent",
+            border: "1.5px solid #00BAF8",
+            borderRadius: 12, padding: "14px 0",
+            fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16,
+            color: "#ffffff", cursor: "pointer",
+          }}
+        >
+          Let me slow down
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── HOME SCREEN BANNER ─── */
 function HomeScreenBanner({ onDismiss }) {
   const [platform, setPlatform] = useState("ios");
@@ -886,7 +970,7 @@ function HomeScreenBanner({ onDismiss }) {
 }
 
 /* ─── NATION MODAL ─── */
-function NationModal({ nation, onClose, gameState, updateGameState }) {
+function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
   const [dragStartY, setDragStartY] = useState(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
   const [isDismissing, setIsDismissing] = useState(false);
@@ -1120,7 +1204,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
                 </div>
               ) : (
                 <button
-                  onClick={() => updateGameState({ prayedNations: [...(gameState?.prayedNations || []), nation.n] })}
+                  onClick={() => onPray ? onPray(nation) : updateGameState({ prayedNations: [...(gameState?.prayedNations || []), nation.n] })}
                   style={{
                     display: "block", width: "100%", marginTop: 12,
                     background: C.orange, color: C.white, border: "none",
@@ -1148,7 +1232,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
 }
 
 /* ─── DAILY DIGEST TAB ─── */
-function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
+function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray }) {
   const today = new Date();
   const startOfTournament = new Date("2026-06-11");
   let defaultDay = 0;
@@ -1163,7 +1247,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
 
   return (
     <div style={{ paddingBottom: 100 }}>
-      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} />
+      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} onPray={onPray} />
 
       {onBack && (
         <button onClick={onBack} style={{
@@ -1582,7 +1666,7 @@ function DigestHome({ gameState, onCardTap }) {
 }
 
 /* ─── ALL NATIONS TAB ─── */
-function AllNations({ gameState, updateGameState }) {
+function AllNations({ gameState, updateGameState, onPray }) {
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("All");
   const [selectedNation, setSelectedNation] = useState(null);
@@ -1596,7 +1680,7 @@ function AllNations({ gameState, updateGameState }) {
 
   return (
     <div style={{ paddingBottom: 100 }}>
-      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} />
+      <NationModal nation={selectedNation} onClose={() => setSelectedNation(null)} gameState={gameState} updateGameState={updateGameState} onPray={onPray} />
 
       {/* Search & Filter */}
       <div style={{ background: C.indigo, padding: "14px 16px 16px" }}>
@@ -3506,6 +3590,9 @@ export default function App() {
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
+  const [showNationNudge, setShowNationNudge] = useState(false);
+  const [pendingNationPray, setPendingNationPray] = useState(null);
+  const nationTapTimes = useRef([]);
   const [userProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
@@ -3522,6 +3609,22 @@ export default function App() {
       updateGameState({ goalsAchieved: [...(gameState.goalsAchieved || []), ...newlyEarned] });
       setToastQueue(q => [...q, ...newlyEarned]);
     }
+  }
+
+  function saveNationPrayer(nation) {
+    handleGameStateUpdate({ prayedNations: [...(gameState.prayedNations || []), nation.n] });
+  }
+
+  function handleNationPray(nation) {
+    const now = Date.now();
+    nationTapTimes.current = nationTapTimes.current.filter(t => now - t < 60000);
+    nationTapTimes.current.push(now);
+    if (nationTapTimes.current.length >= 5) {
+      setPendingNationPray(nation);
+      setShowNationNudge(true);
+      return;
+    }
+    saveNationPrayer(nation);
   }
 
   useEffect(() => {
@@ -3720,16 +3823,30 @@ export default function App() {
                   onBack={() => setSelectedDayIdx(null)}
                   gameState={gameState}
                   updateGameState={handleGameStateUpdate}
+                  onPray={handleNationPray}
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} />
           ) : tab === "teams" ? (
             <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} />
           ) : (
-            <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} />
+            <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} onPray={handleNationPray} />
           )}
         </div>
 
         <AchievementToast achievement={pendingToast} onDismiss={() => setPendingToast(null)} />
+        <NationIntegrityNudge
+          nation={showNationNudge ? pendingNationPray : null}
+          onConfirm={() => {
+            saveNationPrayer(pendingNationPray);
+            nationTapTimes.current = [];
+            setShowNationNudge(false);
+            setPendingNationPray(null);
+          }}
+          onCancel={() => {
+            setShowNationNudge(false);
+            setPendingNationPray(null);
+          }}
+        />
 
         {/* Settings Modal */}
         {showSettings && (
