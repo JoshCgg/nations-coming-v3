@@ -847,7 +847,7 @@ function NationIntegrityNudge({ nation, onConfirm, onCancel }) {
           lineHeight: 1.5,
           marginBottom: 22,
         }}>
-          Each tap is a prayer. Take a moment with {nation.n} before moving on.
+          Each tap represents a prayer. Take a moment with {nation.n} before moving on.
         </div>
         <button
           onClick={onConfirm}
@@ -3617,7 +3617,7 @@ export default function App() {
 
   function handleNationPray(nation) {
     const now = Date.now();
-    nationTapTimes.current = nationTapTimes.current.filter(t => now - t < 60000);
+    nationTapTimes.current = nationTapTimes.current.filter(t => now - t < 120000);
     nationTapTimes.current.push(now);
     if (nationTapTimes.current.length >= 5) {
       setPendingNationPray(nation);
