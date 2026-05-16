@@ -777,7 +777,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
         background: "white",
         overflow: "hidden",
         transform: isDismissing ? "translateY(110vh)" : `translateY(${dragOffsetY}px)`,
-        transition: (isDismissing || dragOffsetY === 0) ? "transform 0.3s ease" : "none",
+        transition: (isDismissing || dragOffsetY === 0) ? "transform 0.45s ease" : "none",
       }}>
         {/* Drag handle — above header, touch target for dismiss */}
         <div
@@ -801,7 +801,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
                 onClose();
                 setIsDismissing(false);
                 setDragOffsetY(0);
-              }, 300);
+              }, 450);
             } else {
               setDragOffsetY(0);
             }
@@ -843,7 +843,7 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
                 onClose();
                 setIsDismissing(false);
                 setDragOffsetY(0);
-              }, 300);
+              }, 450);
             } else {
               setDragOffsetY(0);
             }
@@ -857,12 +857,13 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: 12,
             touchAction: "none",
           }}
         >
-          <FlagImg iso={nation.iso} f={nation.f} size={52} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 22, color: "#fff", lineHeight: 1.2 }}>
+          <FlagImg iso={nation.iso} f={nation.f} size={52} style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0, marginLeft: 12 }}>
+            <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", lineHeight: 1.2 }}>
               {nation.n}
             </div>
             {(() => {
