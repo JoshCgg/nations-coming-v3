@@ -652,7 +652,147 @@ const RAW_SCHEDULE = [
   { d:"Jul 13", full:"Monday, July 13", img:"/images/day-20.png", feat:[], dev:`The World Cup final is this week. At the end, one team will lift the trophy above their head in victory and their homeland will erupt in celebration. In Ephesians 2:4-10, Paul says that one day God himself will also display a trophy...us. "It is by grace you have been saved...in order that in the coming ages he might show the incomparable riches of his grace, expressed in his kindness to us in Christ Jesus." One day, God will take the redeemed of all nations and present us as the trophy of his amazing and boundless love and grace. Let us embrace our identity as his people and play our role in leading others to experience his grace for themselves!`, pray:`This week, it's time to think about your role in reaching the nations. • Pray for God to show you what role he would have you play in the fulfillment of the Great Commission. • Pray for courage from the Holy Spirit to take the steps necessary to obey what God is leading you to do.`, matches:[] },
 ];
 
+const VERSE_LOOKUP = {
+  "Acts 17:26-27": "From one man he made all the nations, that they should inhabit the whole earth; and he marked out their appointed times in history and the boundaries of their lands. God did this so that they would seek him and perhaps reach out for him and find him, though he is not far from any one of us. (NIV)",
+  "2 Corinthians 5:18-20": "All this is from God, who reconciled us to himself through Christ and gave us the ministry of reconciliation: that God was reconciling the world to himself in Christ, not counting people's sins against them. And he has committed to us the message of reconciliation. We are therefore Christ's ambassadors, as though God were making his appeal through us. We implore you on Christ's behalf: Be reconciled to God. (NIV)",
+  "Romans 1:16-17": "For I am not ashamed of the gospel, because it is the power of God that brings salvation to everyone who believes: first to the Jew, then to the Gentile. For in the gospel the righteousness of God is revealed—a righteousness that is by faith from first to last, just as it is written: \"The righteous will live by faith.\" (NIV)",
+  "Romans 1:16": "For I am not ashamed of the gospel, because it is the power of God that brings salvation to everyone who believes: first to the Jew, then to the Gentile. For in the gospel the righteousness of God is revealed—a righteousness that is by faith from first to last, just as it is written: \"The righteous will live by faith.\" (NIV)",
+  "Matthew 13:31-32": "He told them another parable: \"The kingdom of heaven is like a mustard seed, which a man took and planted in his field. Though it is the smallest of all seeds, yet when it grows, it is the largest of garden plants and becomes a tree, so that the birds come and perch in its branches.\" (NIV)",
+  "1 Peter 2:9-10": "But you are a chosen people, a royal priesthood, a holy nation, God's special possession, that you may declare the praises of him who called you out of darkness into his wonderful light. Once you were not a people, but now you are the people of God; once you had not received mercy, but now you have received mercy. (NIV)",
+  "Acts 2:9-11": "Parthians, Medes and Elamites; residents of Mesopotamia, Judea and Cappadocia, Pontus and Asia, Phrygia and Pamphylia, Egypt and the parts of Libya near Cyrene; visitors from Rome (both Jews and converts to Judaism); Cretans and Arabs—we hear them declaring the wonders of God in our own tongues! (NIV)",
+  "Isaiah 43:19": "See, I am doing a new thing! Now it springs up; do you not perceive it? I am making a way in the wilderness and streams in the wasteland. (NIV)",
+  "Isaiah 55:10-11": "As the rain and the snow come down from heaven, and do not return to it without watering the earth and making it bud and flourish, so that it yields seed for the sower and bread for the eater, so is my word that goes out from my mouth: It will not return to me empty, but will accomplish what I desire and achieve the purpose for which I sent it. (NIV)",
+  "1 Corinthians 10:31": "So whether you eat or drink or whatever you do, do it all for the glory of God. (NIV)",
+  "1 John 3:18": "Dear children, let us not love with words or speech but with actions and in truth. (NIV)",
+  "Matthew 28:18-20": "Then Jesus came to them and said, \"All authority in heaven and on earth has been given to me. Therefore go and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit, and teaching them to obey everything I have commanded you. And surely I am with you always, to the very end of the age.\" (NIV)",
+  "Revelation 3:8": "I know your deeds. See, I have placed before you an open door that no one can shut. I know that you have little strength, yet you have kept my word and have not denied my name. (NIV)",
+  "Revelation 7:9-10": "After this I looked, and there before me was a great multitude that no one could count, from every nation, tribe, people and language, standing before the throne and before the Lamb. They were wearing white robes and were holding palm branches in their hands. And they cried out in a loud voice: \"Salvation belongs to our God, who sits on the throne, and to the Lamb!\" (NIV)",
+  "Ephesians 2:4-10": "But because of his great love for us, God, who is rich in mercy, made us alive with Christ even when we were dead in transgressions—it is by grace you have been saved. And God raised us up with Christ and seated us with him in the heavenly realms in Christ Jesus, in order that in the coming ages he might show the incomparable riches of his grace, expressed in his kindness to us in Christ Jesus. For it is by grace you have been saved, through faith—and this is not from yourselves, it is the gift of God—not by works, so that no one can boast. For we are God's handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do. (NIV)",
+};
+
 const REGIONS = ["All","Americas","Europe","Africa","Asia","Oceania"];
+
+/* ─── SCRIPTURE LINK ─── */
+function ScriptureLink({ reference }) {
+  const [open, setOpen] = useState(false);
+  const tooltipRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleOutside(e) {
+      if (tooltipRef.current && !tooltipRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
+  }, [open]);
+
+  const verseText = VERSE_LOOKUP[reference];
+
+  return (
+    <span style={{ position: "relative", display: "inline" }}>
+      <span
+        onClick={() => setOpen(o => !o)}
+        style={{
+          color: "#00BAF8",
+          borderBottom: "1.5px dashed #00BAF8",
+          cursor: "pointer",
+          textDecoration: "none",
+          display: "inline",
+        }}
+      >
+        {reference}
+      </span>
+      {open && (
+        <span
+          ref={tooltipRef}
+          style={{
+            position: "absolute",
+            zIndex: 9999,
+            maxWidth: 260,
+            background: "#00476B",
+            border: "1.5px solid #00BAF8",
+            borderRadius: 10,
+            padding: "12px 14px",
+            bottom: "100%",
+            left: 0,
+            display: "block",
+            boxSizing: "border-box",
+          }}
+        >
+          <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#00BAF8", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+              {reference}
+            </span>
+            <span
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+              style={{ color: "#00BAF8", cursor: "pointer", fontSize: 14, lineHeight: 1, marginLeft: 8, flexShrink: 0 }}
+            >
+              ✕
+            </span>
+          </span>
+          {verseText ? (
+            <span style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, fontStyle: "italic", color: "#ffffff", lineHeight: 1.6, display: "block" }}>
+              {verseText}
+            </span>
+          ) : (
+            <a
+              href={`https://www.biblegateway.com/passage/?search=${encodeURIComponent(reference)}&version=NIV`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              style={{ color: "#00BAF8", fontFamily: "Montserrat, sans-serif", fontSize: 13 }}
+            >
+              Read {reference} →
+            </a>
+          )}
+        </span>
+      )}
+    </span>
+  );
+}
+
+const SCRIPTURE_RE = /\b((?:1|2|3)\s)?([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s(\d+:\d+(?:[–-]\d+)?(?:,\s*\d+)*)\b/g;
+
+function renderDevotionalText(text) {
+  const elements = [];
+  let lastIndex = 0;
+  let match;
+  const re = new RegExp(SCRIPTURE_RE.source, "g");
+
+  while ((match = re.exec(text)) !== null) {
+    const fullMatch = match[0];
+    const start = match.index;
+
+    let prefix = "";
+    let ref = fullMatch;
+    if (ref.startsWith("Read ")) { prefix = "Read "; ref = ref.slice(5); }
+    else if (ref.startsWith("In ")) { prefix = "In "; ref = ref.slice(3); }
+
+    if (start > lastIndex) {
+      elements.push(<span key={lastIndex}>{text.slice(lastIndex, start)}</span>);
+    }
+    if (prefix) {
+      elements.push(<span key={`${start}-pre`}>{prefix}</span>);
+    }
+    if (VERSE_LOOKUP[ref]) {
+      elements.push(<ScriptureLink key={start} reference={ref} />);
+    } else {
+      elements.push(<span key={start}>{ref}</span>);
+    }
+    lastIndex = re.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    elements.push(<span key={lastIndex}>{text.slice(lastIndex)}</span>);
+  }
+  return elements;
+}
 
 /* ─── HOME SCREEN BANNER ─── */
 function HomeScreenBanner({ onDismiss }) {
@@ -745,7 +885,6 @@ function HomeScreenBanner({ onDismiss }) {
 }
 
 /* ─── NATION MODAL ─── */
-// TODO: hover cards for Bible verse links (Phase 3 UI polish)
 function NationModal({ nation, onClose, gameState, updateGameState }) {
   const [dragStartY, setDragStartY] = useState(null);
   const [dragOffsetY, setDragOffsetY] = useState(0);
@@ -1075,9 +1214,9 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack }) {
               }}
             />
           )}
-          <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 17, lineHeight: 1.75, color: C.text }}>
-            {day.dev}
-          </div>
+          <p style={{ fontFamily: "Libre Baskerville, serif", fontSize: 17, lineHeight: 1.75, color: C.text, position: "relative", margin: 0 }}>
+            {renderDevotionalText(day.dev)}
+          </p>
         </div>
 
         {/* Prayer */}
