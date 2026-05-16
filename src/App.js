@@ -772,8 +772,9 @@ function NationModal({ nation, onClose, gameState, updateGameState }) {
         borderRadius: "20px 20px 0 0",
         width: "100%",
         maxWidth: 520,
-        maxHeight: "90vh",
+        maxHeight: "85vh",
         overflowY: "auto",
+        WebkitOverflowScrolling: "touch",
         padding: "0 0 40px 0",
       }}>
         {/* Header — sticky so it stays visible while scrolling */}
