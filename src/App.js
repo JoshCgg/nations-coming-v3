@@ -1549,7 +1549,7 @@ function DigestHome({ gameState, onCardTap }) {
       )}
 
       {gameState.journeyMode && (
-        <button className="jny-mission-btn" onClick={() => onCardTap(todayIdx)}>
+        <button className="jny-mission-btn" data-tooltip-target="checkin" onClick={() => onCardTap(todayIdx)}>
           <span>⚡ Today's Mission — Day {todayIdx + 1}</span>
           <span style={{ fontSize: 16 }}>›</span>
         </button>
@@ -1607,7 +1607,7 @@ function DigestHome({ gameState, onCardTap }) {
               className={`devo-card ${cardClass}`}
               style={cardStyle}
               onClick={locked ? undefined : () => onCardTap(i)}
-              {...(isToday ? { 'data-tooltip-target': 'checkin' } : {})}
+              {...(isToday ? { 'data-tooltip-target': 'devotional' } : {})}
             >
               <div className="devo-card-inner" style={innerStyle}>
                 <div className="devo-flag-bg">{flag}</div>
@@ -3608,6 +3608,7 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
   const [tooltipStep, setTooltipStep] = useState(null);
+  const devotionalCardRef = useRef(null);
   const checkInBtnRef = useRef(null);
   const firstNationRef = useRef(null);
   const teamsCTARef = useRef(null);
@@ -3646,7 +3647,7 @@ export default function App() {
   function advanceTooltip() {
     setTooltipStep(s => {
       const next = s + 1;
-      if (next > 2) {
+      if (next > 3) {
         localStorage.setItem('pftc_tooltips_done', 'true');
         return null;
       }
@@ -3661,16 +3662,17 @@ export default function App() {
   }, [gameState.hasOnboarded]);
 
   useEffect(() => {
-    if (tooltipStep === 0) setTab("digest");
-    else if (tooltipStep === 1) setTab("nations");
-    else if (tooltipStep === 2) setTab("teams");
+    if (tooltipStep === 0 || tooltipStep === 1) setTab("digest");
+    else if (tooltipStep === 2) setTab("nations");
+    else if (tooltipStep === 3) setTab("teams");
     else { setPulsePos(null); return; }
 
     const timer = setTimeout(() => {
+      devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional"]');
       checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
       firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
       teamsCTARef.current = document.querySelector('[data-tooltip-target="teams-cta"]');
-      const el = [checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
+      const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
       if (el) {
         const rect = el.getBoundingClientRect();
         setPulsePos({ top: rect.top + rect.height / 2, left: rect.left + rect.width / 2 });
@@ -4070,22 +4072,24 @@ export default function App() {
             background: "#00476B", border: "1.5px solid #00BAF8", borderRadius: 14, padding: 16,
           }}>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#00BAF8", marginBottom: 8 }}>
-              {tooltipStep === 0 ? "Home" : tooltipStep === 1 ? "Nations" : "Teams"}
+              {tooltipStep <= 1 ? "Home" : tooltipStep === 2 ? "Nations" : "Teams"}
             </div>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 17, color: "#ffffff", lineHeight: 1.7, marginBottom: 12 }}>
               {tooltipStep === 0
-                ? "Check in each day to pray for today's nations and read the devotional."
+                ? "Today's devotional — tap to read, reflect, and pray."
                 : tooltipStep === 1
+                ? "Check in each day to log your prayer and keep your streak."
+                : tooltipStep === 2
                 ? "Tap any nation to pray. Track your progress across all 48 nations."
                 : "Create or join a team to pray together and cover all 48 nations collectively."}
             </div>
             <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 12 }}>
-              {[0, 1, 2].map(i => (
+              {[0, 1, 2, 3].map(i => (
                 <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === tooltipStep ? "#00BAF8" : "rgba(255,255,255,0.25)" }} />
               ))}
             </div>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#8ADBFF", fontStyle: "italic", textAlign: "center" }}>
-              {tooltipStep < 2 ? "Tap anywhere to continue →" : "Tap anywhere to finish ✓"}
+              {tooltipStep < 3 ? "Tap anywhere to continue →" : "Tap anywhere to finish ✓"}
             </div>
           </div>
         </>
