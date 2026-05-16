@@ -1219,7 +1219,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
             </>
           )}
         </div>
-        <div style={{ paddingLeft: 16, paddingRight: 16, paddingBottom: 24, paddingTop: 8, backgroundColor: "#fff" }}>
+        <div style={{ paddingLeft: 16, paddingRight: 16, paddingBottom: 40, paddingTop: 8, backgroundColor: "#fff" }}>
           <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{
             display: "block", width: "100%",
             background: C.brightGray, border: "none",
