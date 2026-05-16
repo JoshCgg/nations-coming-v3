@@ -738,7 +738,7 @@ function ScriptureLink({ reference }) {
             </span>
           </span>
           {verseText ? (
-            <span style={{ fontFamily: "Libre Baskerville, serif", fontSize: 14, fontStyle: "italic", color: "#ffffff", lineHeight: 1.6, display: "block" }}>
+            <span style={{ fontFamily: "Libre Baskerville, serif", fontSize: 17, fontStyle: "normal", color: "#ffffff", lineHeight: 1.7, display: "block" }}>
               {verseText}
             </span>
           ) : (
