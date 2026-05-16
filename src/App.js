@@ -3697,6 +3697,10 @@ export default function App() {
   }, [tooltipStep]);
 
   useEffect(() => {
+    document.body.style.overflow = tooltipStep !== null ? 'hidden' : '';
+  }, [tooltipStep]);
+
+  useEffect(() => {
     if (toastQueue.length > 0 && pendingToast === null) {
       setPendingToast(toastQueue[0]);
       setToastQueue(q => q.slice(1));
@@ -4060,6 +4064,8 @@ export default function App() {
           {/* Dimmed overlay — 4 strips leave a hole over the target once measured */}
           {pulsePos ? (
             <>
+              {/* Catch-all: transparent full-screen layer behind strips, catches taps through the hole */}
+              <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, zIndex: 99 }} />
               <div onClick={advanceTooltip} style={{ position: "fixed", top: 0, left: 0, right: 0, height: pulsePos.top, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
               <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top + pulsePos.height, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
               <div onClick={advanceTooltip} style={{ position: "fixed", top: pulsePos.top, left: 0, width: pulsePos.left, height: pulsePos.height, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
@@ -4090,10 +4096,18 @@ export default function App() {
             </div>
           )}
 
-          {/* Tooltip card */}
+          {/* Tooltip card — positioned relative to the target to avoid overlap */}
           <div onClick={advanceTooltip} style={{
-            position: "fixed", bottom: 120, left: 16, right: 16, zIndex: 101,
+            position: "fixed",
+            left: 16, right: 16, zIndex: 101,
             background: "#00476B", border: "1.5px solid #00BAF8", borderRadius: 14, padding: 16,
+            ...(pulsePos
+              ? (pulsePos.top + pulsePos.height < window.innerHeight / 2
+                  ? { top: pulsePos.top + pulsePos.height + 16 }           // target in upper half → card below
+                  : pulsePos.top + pulsePos.height > window.innerHeight - 200
+                  ? { bottom: window.innerHeight - pulsePos.top + 16 }     // target near bottom → card above
+                  : { bottom: 80 })                                        // target mid-screen → default bottom
+              : { bottom: 80 }),
           }}>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#00BAF8", marginBottom: 8 }}>
               {tooltipStep <= 1 ? "Home" : tooltipStep === 2 ? "Nations" : "Teams"}
