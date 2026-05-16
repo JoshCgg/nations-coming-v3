@@ -1680,7 +1680,7 @@ function AllNations({ gameState, updateGameState, onPray }) {
   const [region, setRegion] = useState("All");
   const [selectedNation, setSelectedNation] = useState(null);
 
-  const filtered = RAW_COUNTRIES.filter(c => {
+  const filtered = [...RAW_COUNTRIES].sort((a, b) => a.n.localeCompare(b.n)).filter(c => {
     const q = search.toLowerCase();
     const matchSearch = !q || c.n.toLowerCase().includes(q) || c.ug.some(g => g.toLowerCase().includes(q));
     const matchRegion = region === "All" || c.r === region;
