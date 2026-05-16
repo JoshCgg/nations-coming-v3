@@ -1584,7 +1584,7 @@ function DigestHome({ gameState, onCardTap }) {
           const isFuture = i > todayIdx;
           const locked    = isFuture && gameState.journeyMode;
           const isActive  = i === activeCard;
-          const cardClass = isActive ? "today" : (locked ? "future" : "past");
+          const cardClass = (isActive && !locked) ? "today" : (locked ? "future" : "past");
           const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.75, transform: 'scale(0.92)' };
           const featNations = (d.feat || [])
             .filter(name => name !== "All Nations")
@@ -1855,7 +1855,8 @@ const JOURNEY_CSS = `
   .devo-card.today { width: 220px; box-shadow: 0 8px 28px rgba(27,69,106,0.22); transform: translateY(-4px); }
   .devo-card.today:active { transform: translateY(-4px) scale(0.97); }
   .devo-card.past  { opacity: 0.85; box-shadow: 0 2px 8px rgba(27,69,106,0.08); }
-  .devo-card.future { cursor: not-allowed; box-shadow: none; }
+  .devo-card.future { cursor: not-allowed; box-shadow: none; -webkit-tap-highlight-color: transparent; user-select: none; pointer-events: none; }
+  .devo-card.future:active { transform: none; }
 
   .devo-card-inner {
     height: 260px; display: flex; flex-direction: column;
@@ -1863,7 +1864,7 @@ const JOURNEY_CSS = `
   }
   .devo-card.today  .devo-card-inner { background: linear-gradient(160deg, #1B456A 0%, #2a6ea6 60%, #1B456A 100%); }
   .devo-card.past   .devo-card-inner { background: linear-gradient(160deg, #2a5a8a 0%, #3E67AC 100%); }
-  .devo-card.future .devo-card-inner { background: linear-gradient(160deg, #5a7a9a 0%, #8899AA 100%); opacity: 0.45; filter: grayscale(1); }
+  .devo-card.future .devo-card-inner { background: linear-gradient(160deg, #5a7a9a 0%, #8899AA 100%); opacity: 0.45; filter: grayscale(1); pointer-events: none; }
 
   .devo-flag-bg { position: absolute; top: 12px; right: 14px; font-size: 64px; opacity: 0.25; line-height: 1; user-select: none; }
   .devo-card.today .devo-flag-bg { font-size: 72px; opacity: 0.3; }
