@@ -3134,12 +3134,13 @@ function Onboarding({ onComplete }) {
   }
 
   const handleGoogleSignIn = async () => {
+    console.log('Google sign-in button tapped');
     try {
       const auth = getAuth();
+      console.log('Auth instance:', auth);
       await signInWithRedirect(auth, googleProvider);
-      // Page will redirect to Google and come back
     } catch (e) {
-      console.log('Google sign-in error:', e.message);
+      console.log('Google sign-in error:', e.code, e.message);
     }
   };
 
