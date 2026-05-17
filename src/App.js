@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
@@ -3084,18 +3084,10 @@ function Onboarding({ onComplete }) {
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
 
-  const ua = navigator.userAgent || "";
-  const isIOS = /iPhone|iPad|iPod/i.test(ua);
-  const isAndroid = /Android/i.test(ua);
-
-  function finishOnboarding(opts = {}) {
-    onComplete({ journeyMode: journeyPath === true, ...opts });
-  }
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const auth = getAuth();
-      const result = await signInWithPopup(auth, googleProvider);
+  useEffect(() => {
+    const auth = getAuth();
+    getRedirectResult(auth).then(async (result) => {
+      if (!result) return;
       const user = result.user;
       const displayName = user.displayName?.split(' ')[0] || 'Friend';
       const email = user.email;
@@ -3128,9 +3120,26 @@ function Onboarding({ onComplete }) {
       } catch (e) {}
 
       setStep(4);
+    }).catch(e => {
+      console.log('Redirect result error:', e.message);
+    });
+  }, []);
 
+  const ua = navigator.userAgent || "";
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+
+  function finishOnboarding(opts = {}) {
+    onComplete({ journeyMode: journeyPath === true, ...opts });
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const auth = getAuth();
+      await signInWithRedirect(auth, googleProvider);
+      // Page will redirect to Google and come back
     } catch (e) {
-      console.log('Google sign-in cancelled or failed:', e.message);
+      console.log('Google sign-in error:', e.message);
     }
   };
 
