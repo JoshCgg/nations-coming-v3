@@ -3810,8 +3810,22 @@ export default function App() {
     else if (tooltipStep === 3) setTab("teams");
     else return;
 
-    // Stage 1 — find element and start scroll
-    const findTimer = setTimeout(() => {
+    function getAbsoluteRect(el) {
+      const rect = el.getBoundingClientRect();
+      return {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        cx: rect.left + rect.width / 2,
+        cy: rect.top + rect.height / 2
+      };
+    }
+
+    let cancelled = false;
+
+    // Stage 1 — find element and scroll (50ms for tab to render)
+    const findTimer = setTimeout(async () => {
       devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional-card"]');
       checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
       firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
@@ -3819,21 +3833,21 @@ export default function App() {
         document.querySelector('[data-tooltip-target="teams-cta"]') ||
         document.querySelector('[data-tooltip-target="team-card"]');
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
-      if (el && el.dataset.locked !== 'true') el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (!el || el.dataset.locked === 'true') return;
+
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // Stage 2 — wait for scroll + render to settle, then measure
+      await new Promise(resolve => setTimeout(resolve, 300));
+      if (cancelled) return;
+
+      const rect = getAbsoluteRect(el);
+      setPulsePos(rect);
     }, 50);
 
-    // Stage 2 — measure after scroll has settled
-    const measureTimer = setTimeout(() => {
-      const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
-      if (el && el.dataset.locked !== 'true') {
-        const rect = el.getBoundingClientRect();
-        setPulsePos({ top: rect.top, left: rect.left, width: rect.width, height: rect.height, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
-      }
-    }, 150);
-
     return () => {
+      cancelled = true;
       clearTimeout(findTimer);
-      clearTimeout(measureTimer);
     };
   }, [tooltipStep]);
 
