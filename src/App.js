@@ -3734,6 +3734,7 @@ export default function App() {
     }).catch(e => {
       console.log('Redirect result error:', e.code, e.message);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
