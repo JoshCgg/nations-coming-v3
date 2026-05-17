@@ -3131,7 +3131,7 @@ function Onboarding({ onComplete }) {
       } catch (e) { console.log('Brevo error:', e.message); }
 
       console.log('Sign-in success — entering app');
-      onComplete({ journeyMode: true });
+      setStep(4);
 
     } catch (e) {
       console.log('Sign-in error:', e.code, e.message);
