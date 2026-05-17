@@ -3087,7 +3087,12 @@ function Onboarding({ onComplete }) {
   useEffect(() => {
     const auth = getAuth();
     getRedirectResult(auth).then(async (result) => {
-      if (!result) return;
+      console.log('Redirect result:', result);
+      if (!result) {
+        console.log('No redirect result — normal page load');
+        return;
+      }
+      console.log('Google user returned:', result.user.email);
       const user = result.user;
       const displayName = user.displayName?.split(' ')[0] || 'Friend';
       const email = user.email;
@@ -3102,7 +3107,7 @@ function Onboarding({ onComplete }) {
           createdAt: new Date().toISOString(),
           gameState: existingGame || DEFAULT_GAME_STATE
         }, { merge: true });
-      } catch (e) {}
+      } catch (e) { console.log('Firestore error:', e.message); }
 
       localStorage.setItem('userProfile', JSON.stringify({
         displayName,
@@ -3117,11 +3122,12 @@ function Onboarding({ onComplete }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, firstName: displayName, listId: 64 })
         });
-      } catch (e) {}
+      } catch (e) { console.log('Brevo error:', e.message); }
 
+      console.log('Advancing to step 4');
       setStep(4);
     }).catch(e => {
-      console.log('Redirect result error:', e.message);
+      console.log('Redirect result error:', e.code, e.message);
     });
   }, []);
 
