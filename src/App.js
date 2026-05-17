@@ -3829,7 +3829,7 @@ export default function App() {
         const rect = el.getBoundingClientRect();
         setPulsePos({ top: rect.top, left: rect.left, width: rect.width, height: rect.height, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
       }
-    }, 600);
+    }, 150);
 
     return () => {
       clearTimeout(findTimer);
