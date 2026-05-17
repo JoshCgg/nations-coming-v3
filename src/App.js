@@ -4369,7 +4369,13 @@ export default function App() {
             </div>
             <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 12 }}>
               {[0, 1, 2, 3].map(i => (
-                <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === tooltipStep ? "#00BAF8" : "rgba(255,255,255,0.25)" }} />
+                <div key={i} style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: i === tooltipStep ? "#00BAF8" : "rgba(255,255,255,0.25)",
+                  opacity: i === tooltipStep ? 1 : 0.4,
+                  transition: 'all 0.3s ease',
+                  transitionDelay: i === tooltipStep ? '200ms' : '0ms',
+                }} />
               ))}
             </div>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#8ADBFF", fontStyle: "italic", textAlign: "center" }}>
