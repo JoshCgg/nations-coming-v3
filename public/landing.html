@@ -172,24 +172,26 @@
     .hero-features {
       width: 100%;
       max-width: 640px;
-      margin: 0 auto;
-      min-height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      margin: 0 auto 32px;
+      height: 100px;
+      position: relative;
       padding: 0 24px;
     }
 
     .feature-slide {
-      display: none;
+      position: absolute;
+      top: 0;
+      left: 24px;
+      right: 24px;
       opacity: 0;
       transition: opacity 0.4s ease;
-      width: 100%;
+      pointer-events: none;
     }
 
     .feature-slide.active {
-      display: flex;
+      display: block;
       opacity: 1;
+      pointer-events: auto;
     }
 
     .feature-item {
@@ -203,6 +205,7 @@
       padding: 18px 28px;
       width: 100%;
       text-align: left;
+      box-sizing: border-box;
     }
 
     .feature-icon {
@@ -218,7 +221,6 @@
       font-weight: 800;
       color: white;
       margin-bottom: 4px;
-      white-space: nowrap;
     }
 
     .feature-item p {
