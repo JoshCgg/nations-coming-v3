@@ -4340,18 +4340,17 @@ export default function App() {
             </div>
           )}
 
-          {/* Tooltip card — positioned relative to the target to avoid overlap */}
+          {/* Tooltip card — fixed bottom center, capped at 360px */}
           <div onClick={advanceTooltip} style={{
             position: "fixed",
-            left: 16, right: 16, zIndex: 101,
+            bottom: 80,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 'calc(100% - 32px)',
+            maxWidth: 360,
+            right: 'auto',
+            zIndex: 101,
             background: "#00476B", border: "1.5px solid #00BAF8", borderRadius: 14, padding: 16,
-            ...(pulsePos
-              ? (pulsePos.top + pulsePos.height < window.innerHeight / 2
-                  ? { top: pulsePos.top + pulsePos.height + 16 }           // target in upper half → card below
-                  : pulsePos.top + pulsePos.height > window.innerHeight - 200
-                  ? { bottom: window.innerHeight - pulsePos.top + 16 }     // target near bottom → card above
-                  : { bottom: 80 })                                        // target mid-screen → default bottom
-              : { bottom: 80 }),
           }}>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#00BAF8", marginBottom: 8 }}>
               {tooltipStep <= 1 ? "Home" : tooltipStep === 2 ? "Nations" : "Teams"}
