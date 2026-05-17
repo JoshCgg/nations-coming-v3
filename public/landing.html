@@ -99,15 +99,56 @@
       align-items: center;
       justify-content: center;
     }
-    .hero-img-desktop {
+    .hero-carousel {
+      position: relative;
       width: 100%;
-      max-width: 680px;
-      height: auto;
-      display: block;
+      padding-bottom: 60px;
     }
-    .hero-img-mobile {
+
+    .hero-slide {
       display: none;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      -webkit-box-reflect: below 6px linear-gradient(transparent 60%, rgba(0,0,0,0.15));
     }
+    .hero-slide.active { display: block; }
+
+    .hero-carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .hero-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .hero-dot.active {
+      width: 24px;
+      border-radius: 4px;
+      background: #E06520;
+    }
+
+    .hero-carousel-label {
+      text-align: center;
+      margin-top: 10px;
+      height: 18px;
+    }
+    .hero-label {
+      display: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #00BAF8;
+    }
+    .hero-label.active { display: block; }
     @media (max-width: 768px) {
       .hero-layout {
         flex-direction: column;
@@ -137,14 +178,6 @@
         width: 100%;
         margin-top: 0;
         padding-top: 0;
-      }
-      .hero-img-desktop { display: none; }
-      .hero-img-mobile {
-        display: block;
-        width: 95%;
-        max-width: 400px;
-        height: auto;
-        margin: 0 auto;
       }
     }
 
@@ -443,8 +476,21 @@
         </div>
 
         <div class="hero-image">
-          <img src="/images/hero-phones-desktop.png" alt="Pray for the Cup app on mobile" class="hero-img-desktop">
-          <img src="/images/hero-phones-mobile.png" alt="Pray for the Cup app on mobile" class="hero-img-mobile">
+          <div class="hero-carousel">
+            <img class="hero-slide active" src="images/hero-home-tab.png" alt="Daily Devotionals">
+            <img class="hero-slide" src="images/hero-nations-tab.png" alt="Pray the Nations">
+            <img class="hero-slide" src="images/hero-teams-tab.png" alt="Pray Together">
+            <div class="hero-carousel-dots">
+              <span class="hero-dot active"></span>
+              <span class="hero-dot"></span>
+              <span class="hero-dot"></span>
+            </div>
+            <div class="hero-carousel-label">
+              <span class="hero-label active">Daily Devotionals</span>
+              <span class="hero-label">Pray the Nations</span>
+              <span class="hero-label">Pray Together</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -535,6 +581,37 @@
       document.getElementById('signupWrap').innerHTML =
         '<p class="signup-thanks">✓ You\'re on the list! We\'ll be in touch.</p>';
     }
+  </script>
+
+  <script>
+    (function() {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots = document.querySelectorAll('.hero-dot');
+      const labels = document.querySelectorAll('.hero-label');
+      let current = 0;
+      let timer;
+
+      function goTo(n) {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        labels[current].classList.remove('active');
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+        labels[current].classList.add('active');
+      }
+
+      function next() { goTo(current + 1); }
+      timer = setInterval(next, 3500);
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          clearInterval(timer);
+          goTo(i);
+          timer = setInterval(next, 3500);
+        });
+      });
+    })();
   </script>
 
 </body>
