@@ -102,24 +102,61 @@
     .hero-carousel {
       position: relative;
       width: 100%;
-      padding-bottom: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .hero-slide {
-      display: none;
+    .hero-carousel-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       width: 100%;
-      max-width: 380px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      -webkit-box-reflect: below 6px linear-gradient(transparent 60%, rgba(0,0,0,0.15));
+      padding: 20px 0 40px;
     }
-    .hero-slide.active { display: block; }
+
+    .hero-slide-wrap {
+      transition: all 0.5s ease;
+      border-radius: 20px;
+      overflow: visible;
+      flex-shrink: 0;
+    }
+
+    .hero-slide-wrap img {
+      display: block;
+      border-radius: 20px;
+      width: 100%;
+    }
+
+    .hero-slide-wrap.active {
+      width: 220px;
+      opacity: 1;
+      transform: scale(1);
+      box-shadow:
+        0 0 0 1px rgba(0,186,248,0.3),
+        0 0 30px rgba(0,186,248,0.25),
+        0 20px 50px rgba(0,0,0,0.4);
+      -webkit-box-reflect: below 6px linear-gradient(transparent 65%, rgba(0,0,0,0.12));
+      z-index: 2;
+      position: relative;
+    }
+
+    .hero-slide-wrap.prev,
+    .hero-slide-wrap.next {
+      width: 140px;
+      opacity: 0.45;
+      transform: scale(0.92);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      z-index: 1;
+      position: relative;
+    }
 
     .hero-carousel-dots {
       display: flex;
       justify-content: center;
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 4px;
     }
     .hero-dot {
       width: 8px; height: 8px;
@@ -134,21 +171,15 @@
       background: #E06520;
     }
 
-    .hero-carousel-label {
-      text-align: center;
-      margin-top: 10px;
-      height: 18px;
-    }
-    .hero-label {
+    .feature-slide {
       display: none;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #00BAF8;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
-    .hero-label.active { display: block; }
+    .feature-slide.active {
+      display: block;
+      opacity: 1;
+    }
     @media (max-width: 768px) {
       .hero-layout {
         flex-direction: column;
@@ -179,6 +210,9 @@
         margin-top: 0;
         padding-top: 0;
       }
+      .hero-slide-wrap.active { width: 180px; }
+      .hero-slide-wrap.prev,
+      .hero-slide-wrap.next { width: 100px; }
     }
 
     /* ─── FEATURE ROWS ─── */
@@ -436,28 +470,22 @@
           </div>
 
           <div class="hero-features">
-            <!-- Feature rows -->
-            <div class="features">
-              <div class="feature-card">
+            <div class="feature-slide active" data-slide="0">
+              <div class="feature-item">
                 <div class="feature-icon">📖</div>
-                <div>
-                  <div class="feature-title">Daily Devotionals</div>
-                  <div class="feature-desc">20 days of Scripture-rooted prayer content tied to the tournament schedule</div>
-                </div>
+                <div><strong>Daily Devotionals</strong><p>20 days of Scripture-rooted prayer content tied to the tournament schedule</p></div>
               </div>
-              <div class="feature-card">
-                <div class="feature-icon">🔥</div>
-                <div>
-                  <div class="feature-title">Prayer Habit Tracker</div>
-                  <div class="feature-desc">Build a daily rhythm — streaks, milestones, and a team to pray with</div>
-                </div>
-              </div>
-              <div class="feature-card">
+            </div>
+            <div class="feature-slide" data-slide="1">
+              <div class="feature-item">
                 <div class="feature-icon">🌍</div>
-                <div>
-                  <div class="feature-title">48 Nation Profiles</div>
-                  <div class="feature-desc">People groups, diaspora communities, and mission insight for every World Cup nation</div>
-                </div>
+                <div><strong>48 Nation Profiles</strong><p>People groups, diaspora communities, and mission insight for every World Cup nation</p></div>
+              </div>
+            </div>
+            <div class="feature-slide" data-slide="2">
+              <div class="feature-item">
+                <div class="feature-icon">🏆</div>
+                <div><strong>Pray Together</strong><p>Build a team, track collective progress, and pray with others across all 48 nations</p></div>
               </div>
             </div>
 
@@ -477,18 +505,21 @@
 
         <div class="hero-image">
           <div class="hero-carousel">
-            <img class="hero-slide active" src="images/hero-home-tab.png" alt="Daily Devotionals">
-            <img class="hero-slide" src="images/hero-nations-tab.png" alt="Pray the Nations">
-            <img class="hero-slide" src="images/hero-teams-tab.png" alt="Pray Together">
+            <div class="hero-carousel-track">
+              <div class="hero-slide-wrap prev">
+                <img src="images/hero-teams-tab.png" alt="Pray Together">
+              </div>
+              <div class="hero-slide-wrap active">
+                <img src="images/hero-home-tab.png" alt="Daily Devotionals">
+              </div>
+              <div class="hero-slide-wrap next">
+                <img src="images/hero-nations-tab.png" alt="Pray the Nations">
+              </div>
+            </div>
             <div class="hero-carousel-dots">
               <span class="hero-dot active"></span>
               <span class="hero-dot"></span>
               <span class="hero-dot"></span>
-            </div>
-            <div class="hero-carousel-label">
-              <span class="hero-label active">Daily Devotionals</span>
-              <span class="hero-label">Pray the Nations</span>
-              <span class="hero-label">Pray Together</span>
             </div>
           </div>
         </div>
@@ -585,20 +616,37 @@
 
   <script>
     (function() {
-      const slides = document.querySelectorAll('.hero-slide');
+      const images = [
+        'images/hero-home-tab.png',
+        'images/hero-nations-tab.png',
+        'images/hero-teams-tab.png'
+      ];
+      const wraps = document.querySelectorAll('.hero-slide-wrap');
       const dots = document.querySelectorAll('.hero-dot');
-      const labels = document.querySelectorAll('.hero-label');
+      const features = document.querySelectorAll('.feature-slide');
       let current = 0;
       let timer;
 
       function goTo(n) {
-        slides[current].classList.remove('active');
-        dots[current].classList.remove('active');
-        labels[current].classList.remove('active');
-        current = (n + slides.length) % slides.length;
-        slides[current].classList.add('active');
-        dots[current].classList.add('active');
-        labels[current].classList.add('active');
+        current = (n + images.length) % images.length;
+        const prev = (current - 1 + images.length) % images.length;
+        const next = (current + 1) % images.length;
+
+        wraps[0].className = 'hero-slide-wrap prev';
+        wraps[0].querySelector('img').src = images[prev];
+        wraps[1].className = 'hero-slide-wrap active';
+        wraps[1].querySelector('img').src = images[current];
+        wraps[2].className = 'hero-slide-wrap next';
+        wraps[2].querySelector('img').src = images[next];
+
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+
+        features.forEach(f => { f.classList.remove('active'); f.style.opacity = 0; });
+        const activeFeature = document.querySelector(`.feature-slide[data-slide="${current}"]`);
+        if (activeFeature) {
+          activeFeature.style.display = 'block';
+          setTimeout(() => { activeFeature.classList.add('active'); activeFeature.style.opacity = 1; }, 20);
+        }
       }
 
       function next() { goTo(current + 1); }
@@ -611,6 +659,11 @@
           timer = setInterval(next, 3500);
         });
       });
+
+      wraps[0].style.cursor = 'pointer';
+      wraps[2].style.cursor = 'pointer';
+      wraps[0].addEventListener('click', () => { clearInterval(timer); goTo(current - 1); timer = setInterval(next, 3500); });
+      wraps[2].addEventListener('click', () => { clearInterval(timer); goTo(current + 1); timer = setInterval(next, 3500); });
     })();
   </script>
 
