@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
@@ -3095,56 +3095,46 @@ function Onboarding({ onComplete }) {
   const handleGoogleSignIn = async () => {
     console.log('Google sign-in tapped');
     const auth = getAuth();
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const displayName = user.displayName?.split(' ')[0] || 'Friend';
+      const email = user.email;
+      const uid = user.uid;
 
-    if (isMobile) {
+      const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+
       try {
-        await signInWithRedirect(auth, googleProvider);
-      } catch (e) {
-        console.log('Redirect error:', e.code, e.message);
-      }
-    } else {
+        await setDoc(doc(db, 'users', uid), {
+          name: displayName,
+          email: email,
+          createdAt: new Date().toISOString(),
+          gameState: existingGame || DEFAULT_GAME_STATE
+        }, { merge: true });
+      } catch (e) { console.log('Firestore error:', e.message); }
+
+      localStorage.setItem('userProfile', JSON.stringify({
+        displayName,
+        email,
+        uid,
+        autoPassword: null
+      }));
+
+      localStorage.setItem('hasOnboarded', 'true');
+
       try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        const displayName = user.displayName?.split(' ')[0] || 'Friend';
-        const email = user.email;
-        const uid = user.uid;
+        await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, firstName: displayName, listId: 64 })
+        });
+      } catch (e) { console.log('Brevo error:', e.message); }
 
-        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+      console.log('Sign-in success — entering app');
+      onComplete({ journeyMode: true });
 
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName,
-            email: email,
-            createdAt: new Date().toISOString(),
-            gameState: existingGame || DEFAULT_GAME_STATE
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-
-        localStorage.setItem('userProfile', JSON.stringify({
-          displayName,
-          email,
-          uid,
-          autoPassword: null
-        }));
-
-        localStorage.setItem('hasOnboarded', 'true');
-
-        try {
-          await fetch('/api/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, firstName: displayName, listId: 64 })
-          });
-        } catch (e) { console.log('Brevo error:', e.message); }
-
-        console.log('Popup success — entering app');
-        onComplete({ journeyMode: true });
-
-      } catch (e) {
-        console.log('Popup error:', e.code, e.message);
-      }
+    } catch (e) {
+      console.log('Sign-in error:', e.code, e.message);
     }
   };
 
