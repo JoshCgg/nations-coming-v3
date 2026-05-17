@@ -78,26 +78,24 @@
     /* ─── HERO LAYOUT ─── */
     .hero-layout {
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 40px 0;
-      gap: 0;
-      box-sizing: border-box;
-    }
-    .hero-left {
-      flex: 0 0 420px;
-      display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding-right: 40px;
-    }
-    .hero-image {
-      flex: 0 0 520px;
-      display: flex;
       align-items: center;
-      justify-content: center;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 24px 0;
+    }
+
+    .hero-left {
+      width: 100%;
+      max-width: 580px;
+      margin-bottom: 32px;
+    }
+
+    .hero-image {
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 32px;
     }
     .hero-carousel {
       position: relative;
@@ -130,7 +128,7 @@
     }
 
     .hero-slide-wrap.active {
-      width: 220px;
+      width: 260px;
       opacity: 1;
       transform: scale(1);
       box-shadow:
@@ -144,7 +142,7 @@
 
     .hero-slide-wrap.prev,
     .hero-slide-wrap.next {
-      width: 140px;
+      width: 160px;
       opacity: 0.45;
       transform: scale(0.92);
       box-shadow: 0 8px 20px rgba(0,0,0,0.25);
@@ -171,48 +169,68 @@
       background: #E06520;
     }
 
+    .hero-features {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .feature-slide {
       display: none;
       opacity: 0;
       transition: opacity 0.4s ease;
+      width: 100%;
     }
+
     .feature-slide.active {
-      display: block;
+      display: flex;
       opacity: 1;
     }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 20px 24px;
+      width: 100%;
+      text-align: left;
+    }
+
+    .feature-icon {
+      font-size: 36px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .feature-item strong {
+      display: block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .feature-item p {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin: 0;
+      line-height: 1.5;
+    }
     @media (max-width: 768px) {
-      .hero-layout {
-        flex-direction: column;
-        padding: 32px 24px;
-      }
-      .hero-left {
-        display: contents;
-      }
-      .hero-text {
-        order: 1;
-        width: 100%;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
-      .verse { margin-bottom: 0; }
-      .hero-image {
-        order: 2;
-        width: 100%;
-        margin: 8px 0 -90px 0;
-        padding: 0;
-        line-height: 0;
-        font-size: 0;
-        display: block;
-      }
-      .hero-features {
-        order: 3;
-        width: 100%;
-        margin-top: 0;
-        padding-top: 0;
-      }
-      .hero-slide-wrap.active { width: 180px; }
+      .hero-slide-wrap.active { width: 240px; }
       .hero-slide-wrap.prev,
-      .hero-slide-wrap.next { width: 100px; }
+      .hero-slide-wrap.next { width: 130px; }
+      .hero-features { min-height: 140px; padding: 0 16px; }
+      .hero-carousel-track { padding: 20px 0 30px; }
     }
 
     /* ─── FEATURE ROWS ─── */
@@ -664,6 +682,25 @@
       wraps[2].style.cursor = 'pointer';
       wraps[0].addEventListener('click', () => { clearInterval(timer); goTo(current - 1); timer = setInterval(next, 3500); });
       wraps[2].addEventListener('click', () => { clearInterval(timer); goTo(current + 1); timer = setInterval(next, 3500); });
+
+      // Swipe support
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const track = document.querySelector('.hero-carousel-track');
+
+      track.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      track.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 40) {
+          clearInterval(timer);
+          if (diff > 0) { goTo(current + 1); } else { goTo(current - 1); }
+          timer = setInterval(next, 3500);
+        }
+      }, { passive: true });
     })();
   </script>
 
