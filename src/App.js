@@ -125,6 +125,19 @@ function useGameState() {
   return [gameState, updateGameState];
 }
 
+async function syncMemberToTeam(teamCode, uid, memberData) {
+  try {
+    const teamRef = doc(db, "teams", teamCode);
+    const snap = await getDoc(teamRef);
+    const existing = snap.exists() ? (snap.data().members || {}) : {};
+    const merged = { ...existing, [uid]: memberData };
+    await setDoc(teamRef, {
+      members: merged,
+      memberCount: Object.keys(merged).length,
+    }, { merge: true });
+  } catch {}
+}
+
 function calcScore(gameState) {
   const nations = Math.min((gameState.prayedNations || []).length, 48);
   const days    = Math.min((gameState.checkedInDays || []).length, 17);
@@ -2408,6 +2421,23 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
     };
     const updatedTeams = [...teams, newTeam];
     try { updateGameState({ teams: updatedTeams }); } catch {}
+    if (userProfile && userProfile.uid) {
+      setDoc(doc(db, "teams", teamCode), {
+        name: teamNameInput.trim(),
+        kitNation: selectedKit,
+        createdAt: new Date().toISOString(),
+        ownerUid: userProfile.uid,
+      }, { merge: true }).catch(() => {});
+      syncMemberToTeam(teamCode, userProfile.uid, {
+        name: displayName,
+        nations: (gameState.prayedNations || []).length,
+        streak: gameState.streakCount || 0,
+        inactiveDays: 0,
+        initials: getInitials(displayName),
+        role: "owner",
+        lastUpdated: new Date().toISOString(),
+      });
+    }
     setView('myteam');
     setActiveTeamIndex(updatedTeams.length - 1);
     setTeamNameInput('');
@@ -3718,6 +3748,27 @@ export default function App() {
     if (newlyEarned.length > 0) {
       updateGameState({ goalsAchieved: [...(gameState.goalsAchieved || []), ...newlyEarned] });
       setToastQueue(q => [...q, ...newlyEarned]);
+    }
+    if (changes.prayedNations !== undefined || changes.streakCount !== undefined || changes.checkedInDays !== undefined) {
+      const userTeams = nextState.teams || [];
+      if (userTeams.length > 0) {
+        const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+        if (profile.uid) {
+          const name = profile.displayName || 'Anonymous';
+          const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
+          const memberData = {
+            name,
+            nations: (nextState.prayedNations || []).length,
+            streak: nextState.streakCount || 0,
+            inactiveDays: 0,
+            initials,
+            lastUpdated: new Date().toISOString(),
+          };
+          for (const team of userTeams) {
+            syncMemberToTeam(team.id, profile.uid, { ...memberData, role: team.role === 'Team Leader' ? 'owner' : 'member' });
+          }
+        }
+      }
     }
   }
 
