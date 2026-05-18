@@ -1518,7 +1518,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray })
 }
 
 /* ─── DIGEST HOME (carousel — Tab 1 primary view) ─── */
-function DigestHome({ gameState, onCardTap }) {
+function DigestHome({ gameState, onCardTap, onOpenSettings }) {
   const carouselRef = useRef(null);
 
   const today = new Date();
@@ -1600,7 +1600,7 @@ function DigestHome({ gameState, onCardTap }) {
           const locked    = isFuture && gameState.journeyMode;
           const isActive  = i === activeCard;
           const cardClass = (isActive && !locked) ? "today" : (locked ? "future" : "past");
-          const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.75, transform: 'scale(0.92)' };
+          const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.5, transform: 'scale(0.92)', filter: 'brightness(0.75)' };
           const featNations = (d.feat || [])
             .filter(name => name !== "All Nations")
             .map(name => RAW_COUNTRIES.find(c => c.n === name))
@@ -1666,6 +1666,32 @@ function DigestHome({ gameState, onCardTap }) {
           <div key={i} className={`carousel-dot ${i === activeCard ? "active" : ""}`} />
         ))}
       </div>
+
+      {!gameState.journeyMode && (
+        <div style={{
+          margin: '16px 16px 0', padding: '16px',
+          background: 'rgba(0,0,0,0.04)', borderRadius: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div style={{
+            fontFamily: 'Montserrat, sans-serif', fontSize: 13,
+            color: '#8899AA', lineHeight: 1.5, flex: 1,
+          }}>
+            Turn on Journey Mode in Settings to track your prayer streak and nations.
+          </div>
+          <button
+            onClick={onOpenSettings}
+            style={{
+              background: 'transparent', border: '1px solid #CDD5DE', borderRadius: 8,
+              padding: '6px 10px', fontFamily: 'Montserrat, sans-serif', fontSize: 12,
+              color: '#8899AA', cursor: 'pointer', flexShrink: 0,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}
+          >
+            ⚙ Settings
+          </button>
+        </div>
+      )}
 
       {gameState.journeyMode && (
         <>
@@ -1917,7 +1943,7 @@ const JOURNEY_CSS = `
   .devo-nation { color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; font-family: 'Montserrat', sans-serif; }
   .devo-theme  { color: white; font-size: 13px; font-weight: 700; line-height: 1.3; font-family: 'Libre Baskerville', serif; }
   .devo-card.today .devo-theme { font-size: 15px; }
-  .devo-date   { color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 500; margin-top: 6px; font-family: 'Montserrat', sans-serif; }
+  .devo-date   { color: #ffffff; text-shadow: 0 1px 4px rgba(0,0,0,0.8); font-size: 10px; font-weight: 500; margin-top: 6px; font-family: 'Montserrat', sans-serif; }
 
   .devo-card.today::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0;
@@ -4286,7 +4312,7 @@ export default function App() {
                   updateGameState={handleGameStateUpdate}
                   onPray={handleNationPray}
                 />
-              : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} />
+              : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} onOpenSettings={() => setShowSettings(true)} />
           ) : tab === "teams" ? (
             <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
           ) : (
