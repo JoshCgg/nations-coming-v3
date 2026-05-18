@@ -2532,8 +2532,9 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   function avatarColor(str) {
     const palette = ['#E06520', '#3E67AC', '#009C3B', '#CC0000', '#74ACDF', '#006847'];
+    const s = str || '';
     let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
     return palette[Math.abs(hash) % palette.length];
   }
 
