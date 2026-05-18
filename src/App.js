@@ -2313,7 +2313,7 @@ const KitBadge = ({ kitId, size = 32 }) => {
 };
 
 /* ─── TEAMS TAB ─── */
-const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
+const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAutoJoinConsumed }) => {
   const teams = gameState.teams || [];
   const [view, setView] = useState(teams.length > 0 ? 'myteam' : 'empty');
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -2325,6 +2325,9 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
   const [nudgeModal, setNudgeModal] = useState(null);
   const [nudgeMessageIndex, setNudgeMessageIndex] = useState(0);
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [joinError, setJoinError] = useState('');
+  const [joinSuccess, setJoinSuccess] = useState('');
 
   const NUDGE_MESSAGES = [
     {
@@ -2360,6 +2363,15 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
       setView('myteam');
     }
   }, [gameState.teams, view]);
+
+  useEffect(() => {
+    if (autoJoinCode) {
+      setView('join');
+      handleJoinTeam(autoJoinCode);
+      onAutoJoinConsumed();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoJoinCode]);
 
   function getInitials(name) {
     if (!name) return '?';
@@ -2444,24 +2456,71 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
     setSelectedKit('brazil');
   }
 
-  function handleJoinTeam() {
-    const mockTeam = {
-      id: joinCodeInput.toUpperCase(),
-      name: 'The Praying Squad',
-      kitNation: 'brazil',
-      role: 'Member',
-      createdAt: new Date().toISOString(),
-      memberCount: 3,
-      collectiveNations: 12,
-      collectiveDays: 5,
-      memberSummaries: [],
-      achievements: [],
-    };
-    const updatedTeams = [...teams, mockTeam];
-    try { updateGameState({ teams: updatedTeams }); } catch {}
-    setView('myteam');
-    setActiveTeamIndex(updatedTeams.length - 1);
-    setJoinCodeInput('');
+  async function handleJoinTeam(rawCode) {
+    const teamCode = (rawCode || joinCodeInput).trim().toUpperCase();
+    if (!teamCode) return;
+    setJoinError('');
+    setJoinSuccess('');
+
+    const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+    if (!profile.uid) {
+      setJoinError('no_account');
+      return;
+    }
+    if ((gameState.teams || []).length >= 3) {
+      setJoinError("You're already in 3 teams — that's the maximum");
+      return;
+    }
+    if ((gameState.teams || []).some(t => t.id === teamCode)) {
+      setJoinError("You're already in this team");
+      return;
+    }
+
+    setJoinLoading(true);
+    try {
+      const snap = await getDoc(doc(db, 'teams', teamCode));
+      if (!snap.exists()) {
+        setJoinError('Team not found — double-check the code and try again');
+        return;
+      }
+      const data = snap.data();
+      const newTeam = {
+        id: teamCode,
+        name: data.name,
+        kitNation: data.kitNation,
+        role: 'member',
+        createdAt: data.createdAt,
+        memberCount: Object.keys(data.members || {}).length,
+        collectiveNations: [],
+        collectiveDays: [],
+        memberSummaries: Object.values(data.members || {}),
+        achievements: [],
+      };
+      const updatedTeams = [...(gameState.teams || []), newTeam];
+      updateGameState({ teams: updatedTeams });
+      const name = profile.displayName || 'Anonymous';
+      const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
+      syncMemberToTeam(teamCode, profile.uid, {
+        name,
+        nations: (gameState.prayedNations || []).length,
+        streak: gameState.streakCount || 0,
+        inactiveDays: 0,
+        initials,
+        role: 'member',
+        lastUpdated: new Date().toISOString(),
+      });
+      setJoinSuccess(`You joined ${data.name}! 🙌`);
+      setJoinCodeInput('');
+      setTimeout(() => {
+        setJoinSuccess('');
+        setView('myteam');
+        setActiveTeamIndex(updatedTeams.length - 1);
+      }, 1500);
+    } catch {
+      setJoinError('Something went wrong — try again');
+    } finally {
+      setJoinLoading(false);
+    }
   }
 
   const safeIndex = Math.min(activeTeamIndex, Math.max(0, teams.length - 1));
@@ -3023,36 +3082,47 @@ const TeamsTab = ({ gameState, updateGameState, userProfile }) => {
             />
           </div>
 
-          {/* Mock team preview — real Firestore lookup in Phase 4 */}
-          {joinPreview && (
-            <div style={{
-              background: '#F5F7F8', borderRadius: 12, padding: '14px 16px',
-              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
-              border: '2px solid #00BAF8',
-            }}>
-              <KitBadge kitId="brazil" size={40} />
-              <div>
-                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: '#1B2B3A' }}>
-                  The Praying Squad
-                </div>
-                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#3E67AC', marginTop: 3 }}>
-                  3 members
-                </div>
-              </div>
+          {joinSuccess && (
+            <div style={{ background: '#e8f5e9', borderRadius: 12, padding: '14px 16px', marginBottom: 20, fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: '#2e7d32', textAlign: 'center' }}>
+              {joinSuccess}
             </div>
           )}
 
+          {joinError === 'no_account' ? (
+            <div style={{ background: '#FFF3E0', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14, color: '#E06520', marginBottom: 10 }}>
+                You need an account to join a team
+              </div>
+              <button
+                onClick={() => {
+                  try {
+                    const gs = JSON.parse(localStorage.getItem('pftc_game') || '{}');
+                    localStorage.setItem('pftc_game', JSON.stringify({ ...gs, hasOnboarded: false }));
+                  } catch {}
+                  window.location.reload();
+                }}
+                style={{ background: '#E06520', border: 'none', borderRadius: 8, padding: '10px 16px', fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: '#fff', cursor: 'pointer' }}
+              >
+                Sign up free →
+              </button>
+            </div>
+          ) : joinError ? (
+            <div style={{ background: '#FFEBEE', borderRadius: 12, padding: '14px 16px', marginBottom: 20, fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14, color: '#C62828' }}>
+              {joinError}
+            </div>
+          ) : null}
+
           <button
-            onClick={handleJoinTeam}
-            disabled={!joinPreview}
+            onClick={() => handleJoinTeam()}
+            disabled={!joinPreview || joinLoading}
             style={{
-              width: '100%', background: joinPreview ? '#E06520' : '#ccc',
+              width: '100%', background: (joinPreview && !joinLoading) ? '#E06520' : '#ccc',
               border: 'none', borderRadius: 12, padding: '15px 0',
               fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
-              color: '#FFFFFF', cursor: joinPreview ? 'pointer' : 'default', marginBottom: 10,
+              color: '#FFFFFF', cursor: (joinPreview && !joinLoading) ? 'pointer' : 'default', marginBottom: 10,
             }}
           >
-            Join this team
+            {joinLoading ? 'Joining…' : 'Join this team'}
           </button>
           <button
             onClick={() => setView(teams.length > 0 ? 'myteam' : 'empty')}
@@ -3736,6 +3806,7 @@ export default function App() {
   const firstNationRef = useRef(null);
   const teamsCTARef = useRef(null);
   const [pulsePos, setPulsePos] = useState(null);
+  const [pendingJoinCode, setPendingJoinCode] = useState(null);
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
     updateGameState({ hasOnboarded: true, journeyMode });
@@ -3806,6 +3877,12 @@ export default function App() {
   }, [gameState.hasOnboarded]);
 
   useEffect(() => {
+    if (pendingJoinCode && gameState.hasOnboarded) {
+      setTab('teams');
+    }
+  }, [pendingJoinCode, gameState.hasOnboarded, tab]);
+
+  useEffect(() => {
     const auth = getAuth();
     getRedirectResult(auth).then(async (result) => {
       console.log('Top-level redirect result:', result);
@@ -3851,6 +3928,12 @@ export default function App() {
     }).catch(e => {
       console.log('Redirect result error:', e.code, e.message);
     });
+
+    const joinCode = new URLSearchParams(window.location.search).get('join');
+    if (joinCode) {
+      setPendingJoinCode(joinCode.trim().toUpperCase());
+      window.history.replaceState({}, '', '/app');
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -4106,7 +4189,7 @@ export default function App() {
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} />
           ) : tab === "teams" ? (
-            <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} />
+            <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
           ) : (
             <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} onPray={handleNationPray} />
           )}
