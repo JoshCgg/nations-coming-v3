@@ -126,11 +126,13 @@ function useGameState() {
 }
 
 async function syncMemberToTeam(teamCode, uid, memberData) {
+  const resolvedUid = uid || auth.currentUser?.uid;
+  if (!resolvedUid) return;
   try {
     const teamRef = doc(db, "teams", teamCode);
     const snap = await getDoc(teamRef);
     const existing = snap.exists() ? (snap.data().members || {}) : {};
-    const merged = { ...existing, [uid]: memberData };
+    const merged = { ...existing, [resolvedUid]: memberData };
     await setDoc(teamRef, {
       members: merged,
       memberCount: Object.keys(merged).length,
@@ -2589,16 +2591,19 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     };
     const updatedTeams = [...teams, newTeam];
     try { updateGameState({ teams: updatedTeams }); } catch {}
-    if (userProfile && userProfile.uid) {
-      console.log('[createTeam] passed uid check, uid:', userProfile.uid);
+    const uid = userProfile?.uid || auth.currentUser?.uid;
+    if (!uid) {
+      console.log('[createTeam] skipping Firestore write — no uid available');
+    } else {
+      console.log('[createTeam] passed uid check, uid:', uid);
       console.log('[createTeam] calling setDoc now');
       setDoc(doc(db, "teams", teamCode), {
         name: teamNameInput.trim(),
         kitNation: selectedKit,
         createdAt: new Date().toISOString(),
-        ownerUid: userProfile.uid,
+        ownerUid: uid,
       }, { merge: true }).catch(e => console.error('[createTeam] setDoc error:', e));
-      syncMemberToTeam(teamCode, userProfile.uid, {
+      syncMemberToTeam(teamCode, uid, {
         name: displayName,
         nations: (gameState.prayedNations || []).length,
         streak: gameState.streakCount || 0,
