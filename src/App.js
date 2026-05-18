@@ -4130,15 +4130,19 @@ export default function App() {
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
       if (!el || el.dataset.locked === 'true') return;
 
-      // Step 0 targets the centered carousel card — scrollIntoView fights the
-      // carousel's own programmatic centering, so skip it for that step only.
-      if (tooltipStep !== 0) {
+      // Step 0: scroll the carousel container (page scroll) to the top of the viewport so
+      // there is room below it for the tooltip. Scrolling the container itself is safe —
+      // scrollIntoView on the container scrolls its ancestors, not its own scrollLeft.
+      // For other steps: scroll the target element to center.
+      if (tooltipStep === 0) {
+        const carouselContainer = document.querySelector('.carousel-scroll-wrap');
+        if (carouselContainer) carouselContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
       }
 
-      // Stage 2 — wait for scroll + render to settle, then measure.
-      // Step 0 only needs the carousel centering rAFs to finish (~32ms); others need scroll.
-      await new Promise(resolve => setTimeout(resolve, tooltipStep === 0 ? 100 : 300));
+      // Wait for page scroll to settle before measuring.
+      await new Promise(resolve => setTimeout(resolve, 300));
       if (cancelled) return;
 
       const rect = getAbsoluteRect(el);
