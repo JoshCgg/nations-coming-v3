@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -2328,6 +2328,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState('');
   const [joinSuccess, setJoinSuccess] = useState('');
+  const [liveTeamData, setLiveTeamData] = useState({});
+  const [joinPreviewData, setJoinPreviewData] = useState(null);
+  const [joinPreviewLoading, setJoinPreviewLoading] = useState(false);
+  const [joinPreviewError, setJoinPreviewError] = useState('');
 
   const NUDGE_MESSAGES = [
     {
@@ -2372,6 +2376,61 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoJoinCode]);
+
+  useEffect(() => {
+    const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+    if (!profile.uid || !(gameState.teams || []).length) return;
+    const unsubs = [];
+    try {
+      for (const team of gameState.teams) {
+        const unsub = onSnapshot(doc(db, 'teams', team.id), (snap) => {
+          if (!snap.exists()) return;
+          const snapData = snap.data();
+          setLiveTeamData(prev => ({
+            ...prev,
+            [team.id]: {
+              memberSummaries: Object.values(snapData.members || {}),
+              memberCount: Object.keys(snapData.members || {}).length,
+            },
+          }));
+        });
+        unsubs.push(unsub);
+      }
+    } catch {}
+    return () => unsubs.forEach(fn => fn());
+  }, [gameState.teams]);
+
+  useEffect(() => {
+    if (joinCodeInput.length < 6) {
+      setJoinPreviewData(null);
+      setJoinPreviewError('');
+      setJoinPreviewLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setJoinPreviewLoading(true);
+    setJoinPreviewData(null);
+    setJoinPreviewError('');
+    getDoc(doc(db, 'teams', joinCodeInput)).then(snap => {
+      if (cancelled) return;
+      if (!snap.exists()) {
+        setJoinPreviewError('Team not found — double-check the code and try again');
+      } else {
+        const d = snap.data();
+        setJoinPreviewData({
+          name: d.name,
+          kitNation: d.kitNation,
+          memberCount: Object.keys(d.members || {}).length,
+        });
+      }
+    }).catch(() => {
+      if (cancelled) return;
+      setJoinPreviewError('Could not load team — try again');
+    }).finally(() => {
+      if (!cancelled) setJoinPreviewLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [joinCodeInput]);
 
   function getInitials(name) {
     if (!name) return '?';
@@ -2656,7 +2715,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                   {activeTeam.name}
                 </div>
                 <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
-                  {activeTeam.memberCount} {activeTeam.memberCount === 1 ? 'member' : 'members'} · Code: {activeTeam.id}
+                  {(liveTeamData[activeTeam.id]?.memberCount ?? activeTeam.memberCount)} {(liveTeamData[activeTeam.id]?.memberCount ?? activeTeam.memberCount) === 1 ? 'member' : 'members'} · Code: {activeTeam.id}
                 </div>
               </div>
               <button
@@ -2693,12 +2752,12 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         )}
 
         {/* Members */}
-        {activeTeam && activeTeam.memberSummaries && activeTeam.memberSummaries.length > 0 && (
+        {activeTeam && (liveTeamData[activeTeam.id]?.memberSummaries || activeTeam.memberSummaries || []).length > 0 && (
           <div style={{ padding: '0 16px 16px' }}>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
               Members
             </div>
-            {activeTeam.memberSummaries.map(member => {
+            {(liveTeamData[activeTeam.id]?.memberSummaries || activeTeam.memberSummaries || []).map(member => {
               const isInactive = member.inactiveDays > 0;
               return (
                 <div key={member.id} style={{
@@ -3082,6 +3141,36 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
             />
           </div>
 
+          {joinPreviewLoading && (
+            <div style={{ textAlign: 'center', padding: '10px 0', marginBottom: 16, fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#3E67AC' }}>
+              Looking up team…
+            </div>
+          )}
+
+          {joinPreviewData && !joinPreviewLoading && (
+            <div style={{
+              background: '#F5F7F8', borderRadius: 12, padding: '14px 16px',
+              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
+              border: '2px solid #00BAF8',
+            }}>
+              <KitBadge kitId={joinPreviewData.kitNation || 'brazil'} size={40} />
+              <div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: '#1B2B3A' }}>
+                  {joinPreviewData.name}
+                </div>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#3E67AC', marginTop: 3 }}>
+                  {joinPreviewData.memberCount} {joinPreviewData.memberCount === 1 ? 'member' : 'members'}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {joinPreviewError && !joinPreviewLoading && (
+            <div style={{ background: '#FFEBEE', borderRadius: 12, padding: '14px 16px', marginBottom: 20, fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14, color: '#C62828' }}>
+              {joinPreviewError}
+            </div>
+          )}
+
           {joinSuccess && (
             <div style={{ background: '#e8f5e9', borderRadius: 12, padding: '14px 16px', marginBottom: 20, fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: '#2e7d32', textAlign: 'center' }}>
               {joinSuccess}
@@ -3114,12 +3203,12 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
           <button
             onClick={() => handleJoinTeam()}
-            disabled={!joinPreview || joinLoading}
+            disabled={!joinPreview || joinLoading || joinPreviewLoading || !!joinPreviewError}
             style={{
-              width: '100%', background: (joinPreview && !joinLoading) ? '#E06520' : '#ccc',
+              width: '100%', background: (joinPreview && !joinLoading && !joinPreviewLoading && !joinPreviewError) ? '#E06520' : '#ccc',
               border: 'none', borderRadius: 12, padding: '15px 0',
               fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
-              color: '#FFFFFF', cursor: (joinPreview && !joinLoading) ? 'pointer' : 'default', marginBottom: 10,
+              color: '#FFFFFF', cursor: (joinPreview && !joinLoading && !joinPreviewLoading && !joinPreviewError) ? 'pointer' : 'default', marginBottom: 10,
             }}
           >
             {joinLoading ? 'Joining…' : 'Join this team'}
