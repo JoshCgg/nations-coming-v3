@@ -2563,6 +2563,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   function handleCreateTeam() {
     console.log('[createTeam] fired, teamCode:', teamCode, 'userProfile:', JSON.parse(localStorage.getItem('userProfile')));
     if (!teamNameInput.trim()) return;
+    console.log('[createTeam] passed name check');
+    console.log('[createTeam] passed team limit check, teams.length:', teams.length);
     const displayName = (userProfile && userProfile.displayName) ? userProfile.displayName : 'Anonymous';
     const uid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
     const newTeam = {
@@ -2588,7 +2590,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     const updatedTeams = [...teams, newTeam];
     try { updateGameState({ teams: updatedTeams }); } catch {}
     if (userProfile && userProfile.uid) {
-      console.log('[createTeam] reached setDoc', teamCode);
+      console.log('[createTeam] passed uid check, uid:', userProfile.uid);
+      console.log('[createTeam] calling setDoc now');
       setDoc(doc(db, "teams", teamCode), {
         name: teamNameInput.trim(),
         kitNation: selectedKit,
