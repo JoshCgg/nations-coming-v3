@@ -4144,7 +4144,11 @@ export default function App() {
       const rect = getAbsoluteRect(el);
       if (tooltipStep === 0) {
         const carouselContainer = document.querySelector('.carousel-scroll-wrap');
-        if (carouselContainer) rect.carouselBottom = carouselContainer.getBoundingClientRect().bottom;
+        if (carouselContainer) {
+          const cr = carouselContainer.getBoundingClientRect();
+          rect.carouselBottom = cr.bottom;
+          rect.carouselTop = cr.top;
+        }
       }
       setPulsePos(rect);
     }, 50);
@@ -4661,9 +4665,17 @@ export default function App() {
           {/* Tooltip card — anchored below carousel on step 0, fixed bottom center otherwise */}
           <div onClick={advanceTooltip} style={{
             position: "fixed",
-            ...(tooltipStep === 0 && pulsePos?.carouselBottom
-              ? { top: pulsePos.carouselBottom + 12 }
-              : { bottom: 80 }),
+            ...((() => {
+              const TOOLTIP_H = 160;
+              if (tooltipStep === 0 && pulsePos?.carouselBottom != null) {
+                const below = pulsePos.carouselBottom + 12;
+                if (below + TOOLTIP_H <= window.innerHeight) return { top: below };
+                const above = pulsePos.carouselTop - TOOLTIP_H - 12;
+                if (above >= 0) return { top: above };
+                return { top: Math.round(window.innerHeight / 2 - TOOLTIP_H / 2) };
+              }
+              return { bottom: 80 };
+            })()),
             left: '50%',
             transform: 'translateX(-50%)',
             width: 'calc(100% - 32px)',
