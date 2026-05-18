@@ -1544,12 +1544,27 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
         const cards = Array.from(container.children);
         const card = cards[todayIdx];
         if (!card) { skipScrollRef.current = false; return; }
-        const containerRect = container.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        const cardFromScrollOrigin = cardRect.left - containerRect.left + container.scrollLeft;
-        const scrollLeft = cardFromScrollOrigin - (container.offsetWidth - card.offsetWidth) / 2;
-        container.scrollLeft = Math.max(0, scrollLeft);
-        requestAnimationFrame(() => { skipScrollRef.current = false; });
+
+        // Apply dynamic padding so first/last cards have enough scroll runway to center
+        const containerWidth = container.offsetWidth;
+        const firstCard = cards[0];
+        const lastCard = cards[cards.length - 1];
+        if (firstCard && lastCard) {
+          const leftPad = Math.max(16, Math.round((containerWidth - firstCard.offsetWidth) / 2));
+          const rightPad = Math.max(16, Math.round((containerWidth - lastCard.offsetWidth) / 2));
+          container.style.paddingLeft = leftPad + 'px';
+          container.style.paddingRight = rightPad + 'px';
+        }
+
+        // Re-measure after padding settles, then set scroll position
+        requestAnimationFrame(() => {
+          const containerRect = container.getBoundingClientRect();
+          const cardRect = card.getBoundingClientRect();
+          const cardFromScrollOrigin = cardRect.left - containerRect.left + container.scrollLeft;
+          const scrollLeft = cardFromScrollOrigin - (container.offsetWidth - card.offsetWidth) / 2;
+          container.scrollLeft = Math.max(0, scrollLeft);
+          requestAnimationFrame(() => { skipScrollRef.current = false; });
+        });
       });
     }
 
@@ -4127,6 +4142,10 @@ export default function App() {
       if (cancelled) return;
 
       const rect = getAbsoluteRect(el);
+      if (tooltipStep === 0) {
+        const carouselContainer = document.querySelector('.carousel-scroll-wrap');
+        if (carouselContainer) rect.carouselBottom = carouselContainer.getBoundingClientRect().bottom;
+      }
       setPulsePos(rect);
     }, 50);
 
@@ -4639,10 +4658,12 @@ export default function App() {
             </div>
           )}
 
-          {/* Tooltip card — fixed bottom center, capped at 360px */}
+          {/* Tooltip card — anchored below carousel on step 0, fixed bottom center otherwise */}
           <div onClick={advanceTooltip} style={{
             position: "fixed",
-            bottom: 80,
+            ...(tooltipStep === 0 && pulsePos?.carouselBottom
+              ? { top: pulsePos.carouselBottom + 12 }
+              : { bottom: 80 }),
             left: '50%',
             transform: 'translateX(-50%)',
             width: 'calc(100% - 32px)',
