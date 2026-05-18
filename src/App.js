@@ -1268,6 +1268,12 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray })
   const [selectedNation, setSelectedNation] = useState(null);
   const day = RAW_SCHEDULE[dayIdx];
   const matchesToShow = day.matches;
+  const isLastDay = dayIdx === RAW_SCHEDULE.length - 1;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const nextLocked = !isLastDay && gameState.journeyMode && scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr;
+  const unlockDate = !isLastDay
+    ? new Date(scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '';
 
   return (
     <div style={{ paddingBottom: 100 }}>
@@ -1294,11 +1300,26 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray })
           <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 17, color: "#fff" }}>{day.full}</div>
           <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>Day {dayIdx + 1} of 17</div>
         </div>
-        <button onClick={() => { if (dayIdx < RAW_SCHEDULE.length - 1) { setDayIdx(dayIdx + 1); } }} disabled={dayIdx === RAW_SCHEDULE.length - 1} style={{
-          background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
-          borderRadius: 10, padding: "10px 18px", fontSize: 18, cursor: "pointer",
-          opacity: dayIdx === RAW_SCHEDULE.length - 1 ? 0.3 : 1, fontFamily: "Montserrat, sans-serif", fontWeight: 700,
-        }}>Next →</button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80 }}>
+          {!isLastDay ? (
+            <>
+              <button onClick={() => setDayIdx(dayIdx + 1)} style={{
+                background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
+                borderRadius: 10, padding: "10px 18px", fontSize: 18, cursor: "pointer",
+                fontFamily: "Montserrat, sans-serif", fontWeight: 700,
+                opacity: nextLocked ? 0.4 : 1,
+                pointerEvents: nextLocked ? 'none' : 'auto',
+              }}>Next →</button>
+              {nextLocked && (
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 10, color: 'rgba(255,255,255,0.55)', marginTop: 4, whiteSpace: 'nowrap' }}>
+                  Unlocks {unlockDate}
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ width: 80 }} />
+          )}
+        </div>
       </div>
 
       <div style={{ padding: "16px 16px 0" }}>
