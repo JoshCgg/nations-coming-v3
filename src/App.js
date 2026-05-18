@@ -2561,6 +2561,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   };
 
   function handleCreateTeam() {
+    console.log('[createTeam] fired, teamCode:', teamCode, 'userProfile:', JSON.parse(localStorage.getItem('userProfile')));
     if (!teamNameInput.trim()) return;
     const displayName = (userProfile && userProfile.displayName) ? userProfile.displayName : 'Anonymous';
     const uid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
