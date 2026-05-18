@@ -1520,6 +1520,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray })
 /* ─── DIGEST HOME (carousel — Tab 1 primary view) ─── */
 function DigestHome({ gameState, onCardTap, onOpenSettings }) {
   const carouselRef = useRef(null);
+  const skipScrollRef = useRef(false);
 
   const today = new Date();
   const startOfTournament = new Date("2026-06-11");
@@ -1534,13 +1535,19 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
   const earned = gameState.goalsAchieved || [];
 
   useEffect(() => {
-    if (carouselRef.current && todayIdx >= 0) {
-      const cards = carouselRef.current.querySelectorAll('.devo-card');
-      if (cards[todayIdx]) {
-        cards[todayIdx].scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
-      }
-    }
-  }, [todayIdx]);
+    const container = carouselRef.current;
+    if (!container) return;
+    skipScrollRef.current = true;
+    requestAnimationFrame(() => {
+      const cards = Array.from(container.children);
+      const card = cards[activeCard];
+      if (!card) return;
+      const scrollLeft = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
+      container.scrollLeft = Math.max(0, scrollLeft);
+      requestAnimationFrame(() => { skipScrollRef.current = false; });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayIdx, gameState.journeyMode]);
 
   return (
     <div style={{ paddingBottom: 100 }}>
@@ -1583,6 +1590,7 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
         className="carousel-scroll-wrap"
         ref={carouselRef}
         onScroll={(e) => {
+          if (skipScrollRef.current) return;
           const el = e.currentTarget;
           const center = el.scrollLeft + el.offsetWidth / 2;
           let closest = 0, minDist = Infinity;
@@ -1600,7 +1608,7 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
           const locked    = isFuture && gameState.journeyMode;
           const isActive  = i === activeCard;
           const cardClass = (isActive && !locked) ? "today" : (locked ? "future" : "past");
-          const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.5, transform: 'scale(0.92)', filter: 'brightness(0.75)' };
+          const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.5, transform: 'scale(0.92)' };
           const featNations = (d.feat || [])
             .filter(name => name !== "All Nations")
             .map(name => RAW_COUNTRIES.find(c => c.n === name))
@@ -1629,7 +1637,7 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
               {...(locked ? { 'data-locked': 'true' } : {})}
             >
               {locked && <div className="devo-lock">🔒</div>}
-              <div className="devo-card-inner" style={innerStyle}>
+              <div className="devo-card-inner" style={{ ...innerStyle, ...(!isActive && !locked ? { filter: 'brightness(0.75)' } : {}) }}>
                 {d.img && (
                   <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
