@@ -2567,8 +2567,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     if (!teamNameInput.trim()) return;
     console.log('[createTeam] passed name check');
     console.log('[createTeam] passed team limit check, teams.length:', teams.length);
+    console.log('[createTeam] checkpoint A — resolving displayName');
     const displayName = (userProfile && userProfile.displayName) ? userProfile.displayName : 'Anonymous';
-    const uid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
+    console.log('[createTeam] checkpoint B — displayName:', displayName);
+    const memberUid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
+    console.log('[createTeam] checkpoint C — building newTeam object');
     const newTeam = {
       id: teamCode,
       name: teamNameInput.trim(),
@@ -2579,7 +2582,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       collectiveNations: (gameState.prayedNations || []).length,
       collectiveDays: (gameState.checkedInDays || []).length,
       memberSummaries: [{
-        id: uid,
+        id: memberUid,
         name: displayName,
         role: 'Team Leader',
         initials: getInitials(displayName),
@@ -2589,8 +2592,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       }],
       achievements: [],
     };
+    console.log('[createTeam] checkpoint D — calling updateGameState');
     const updatedTeams = [...teams, newTeam];
     try { updateGameState({ teams: updatedTeams }); } catch {}
+    console.log('[createTeam] checkpoint E — resolving uid for Firestore');
     const uid = userProfile?.uid || auth.currentUser?.uid;
     if (!uid) {
       console.log('[createTeam] skipping Firestore write — no uid available');
