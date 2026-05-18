@@ -1537,15 +1537,26 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
   useEffect(() => {
     const container = carouselRef.current;
     if (!container) return;
-    skipScrollRef.current = true;
-    requestAnimationFrame(() => {
-      const cards = Array.from(container.children);
-      const card = cards[activeCard];
-      if (!card) return;
-      const scrollLeft = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
-      container.scrollLeft = Math.max(0, scrollLeft);
-      requestAnimationFrame(() => { skipScrollRef.current = false; });
-    });
+
+    function centerToday() {
+      skipScrollRef.current = true;
+      requestAnimationFrame(() => {
+        const cards = Array.from(container.children);
+        const card = cards[todayIdx];
+        if (!card) { skipScrollRef.current = false; return; }
+        const containerRect = container.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        const cardFromScrollOrigin = cardRect.left - containerRect.left + container.scrollLeft;
+        const scrollLeft = cardFromScrollOrigin - (container.offsetWidth - card.offsetWidth) / 2;
+        container.scrollLeft = Math.max(0, scrollLeft);
+        requestAnimationFrame(() => { skipScrollRef.current = false; });
+      });
+    }
+
+    setActiveCard(todayIdx);
+    centerToday();
+    window.addEventListener('resize', centerToday);
+    return () => window.removeEventListener('resize', centerToday);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [todayIdx, gameState.journeyMode]);
 
@@ -1592,10 +1603,12 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
         onScroll={(e) => {
           if (skipScrollRef.current) return;
           const el = e.currentTarget;
-          const center = el.scrollLeft + el.offsetWidth / 2;
+          const containerRect = el.getBoundingClientRect();
+          const viewCenter = containerRect.left + el.offsetWidth / 2;
           let closest = 0, minDist = Infinity;
           Array.from(el.children).forEach((child, i) => {
-            const dist = Math.abs(child.offsetLeft + child.offsetWidth / 2 - center);
+            const childRect = child.getBoundingClientRect();
+            const dist = Math.abs(childRect.left + childRect.width / 2 - viewCenter);
             if (dist < minDist) { minDist = dist; closest = i; }
           });
           setActiveCard(closest);
@@ -4102,10 +4115,15 @@ export default function App() {
       const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
       if (!el || el.dataset.locked === 'true') return;
 
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Step 0 targets the centered carousel card — scrollIntoView fights the
+      // carousel's own programmatic centering, so skip it for that step only.
+      if (tooltipStep !== 0) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
 
-      // Stage 2 — wait for scroll + render to settle, then measure
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Stage 2 — wait for scroll + render to settle, then measure.
+      // Step 0 only needs the carousel centering rAFs to finish (~32ms); others need scroll.
+      await new Promise(resolve => setTimeout(resolve, tooltipStep === 0 ? 100 : 300));
       if (cancelled) return;
 
       const rect = getAbsoluteRect(el);
