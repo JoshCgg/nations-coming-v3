@@ -1616,6 +1616,7 @@ function DigestHome({ gameState, onCardTap }) {
             background: locked
               ? `linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.45) 100%), url('${d.img}') center / cover no-repeat`
               : `linear-gradient(to top, rgba(10,20,40,0.88) 0%, rgba(10,20,40,0.35) 65%, rgba(10,20,40,0.15) 100%), url('${d.img}') center / cover no-repeat`,
+            overflow: 'hidden',
           } : {};
 
           return (
@@ -1629,6 +1630,15 @@ function DigestHome({ gameState, onCardTap }) {
             >
               {locked && <div className="devo-lock">🔒</div>}
               <div className="devo-card-inner" style={innerStyle}>
+                {d.img && (
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    height: '55%',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 45%, transparent 100%)',
+                    pointerEvents: 'none',
+                    borderRadius: 'inherit',
+                  }} />
+                )}
                 <div className="devo-flag-bg">{flag}</div>
                 {!locked && (isPrayed ? (
                   <div className="devo-checked-badge">✓ Prayed</div>
