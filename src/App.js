@@ -2587,12 +2587,13 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     const updatedTeams = [...teams, newTeam];
     try { updateGameState({ teams: updatedTeams }); } catch {}
     if (userProfile && userProfile.uid) {
+      console.log('[createTeam] reached setDoc', teamCode);
       setDoc(doc(db, "teams", teamCode), {
         name: teamNameInput.trim(),
         kitNation: selectedKit,
         createdAt: new Date().toISOString(),
         ownerUid: userProfile.uid,
-      }, { merge: true }).catch(() => {});
+      }, { merge: true }).catch(e => console.error('[createTeam] setDoc error:', e));
       syncMemberToTeam(teamCode, userProfile.uid, {
         name: displayName,
         nations: (gameState.prayedNations || []).length,
