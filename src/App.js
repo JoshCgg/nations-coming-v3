@@ -2484,6 +2484,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
           setLiveTeamData(prev => ({
             ...prev,
             [team.id]: {
+              members: snapData.members || {},
               memberSummaries: Object.values(snapData.members || {}),
               memberCount: Object.keys(snapData.members || {}).length,
             },
@@ -2834,13 +2835,13 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 Nations prayed
               </div>
               <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, fontWeight: 700, color: '#FFFFFF' }}>
-                {activeTeam.collectiveNations} of 48
+                {(liveTeamData[activeTeam.id]?.memberSummaries || activeTeam.memberSummaries || []).reduce((sum, m) => sum + (m.nations || 0), 0)} of 48
               </div>
             </div>
             <div style={{ height: 6, background: 'rgba(255,255,255,0.15)', borderRadius: 3, overflow: 'hidden' }}>
               <div style={{
                 height: '100%',
-                width: `${Math.min((activeTeam.collectiveNations / 48) * 100, 100)}%`,
+                width: `${Math.min(((liveTeamData[activeTeam.id]?.memberSummaries || activeTeam.memberSummaries || []).reduce((sum, m) => sum + (m.nations || 0), 0) / 48) * 100, 100)}%`,
                 background: activeKit.primary,
                 borderRadius: 3,
               }} />
@@ -2849,21 +2850,25 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         )}
 
         {/* Members */}
-        {activeTeam && (liveTeamData[activeTeam.id]?.memberSummaries || activeTeam.memberSummaries || []).length > 0 && (
+        {activeTeam && (Object.keys(liveTeamData[activeTeam.id]?.members || {}).length > 0 || (activeTeam.memberSummaries || []).length > 0) && (
           <div style={{ padding: '0 16px 16px' }}>
+            {console.log('[Teams] liveTeamData for', activeTeam.id, liveTeamData[activeTeam.id])}
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
               Members
             </div>
-            {(liveTeamData[activeTeam.id]?.memberSummaries || activeTeam.memberSummaries || []).map(member => {
+            {(liveTeamData[activeTeam.id]?.members
+              ? Object.entries(liveTeamData[activeTeam.id].members)
+              : (activeTeam.memberSummaries || []).map(m => [m.id || m.name, m])
+            ).map(([uid, member]) => {
               const isInactive = member.inactiveDays > 0;
               return (
-                <div key={member.id} style={{
+                <div key={uid} style={{
                   background: '#FFFFFF', borderRadius: 12, padding: 14,
                   marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12,
                 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%',
-                    background: avatarColor(member.id),
+                    background: avatarColor(uid),
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 14,
                     color: '#FFFFFF', flexShrink: 0,
@@ -2876,7 +2881,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                         {member.name}
                       </span>
                       <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, color: '#3E67AC' }}>
-                        {member.role}
+                        {member.role === 'owner' ? 'captain' : member.role}
                       </span>
                       {isInactive && (
                         <span style={{
@@ -4006,24 +4011,21 @@ export default function App() {
       updateGameState({ goalsAchieved: [...(gameState.goalsAchieved || []), ...newlyEarned] });
       setToastQueue(q => [...q, ...newlyEarned]);
     }
-    if (changes.prayedNations !== undefined || changes.streakCount !== undefined || changes.checkedInDays !== undefined) {
-      const userTeams = nextState.teams || [];
-      if (userTeams.length > 0) {
-        const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-        if (profile.uid) {
-          const name = profile.displayName || 'Anonymous';
-          const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
-          const memberData = {
+    if (nextState.prayedNations !== gameState.prayedNations) {
+      const uid = userProfile?.uid || auth.currentUser?.uid;
+      if (uid) {
+        const name = userProfile?.displayName || 'Anonymous';
+        const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
+        for (const team of (nextState.teams || [])) {
+          syncMemberToTeam(team.id, uid, {
             name,
+            initials,
+            role: team.role,
             nations: (nextState.prayedNations || []).length,
             streak: nextState.streakCount || 0,
             inactiveDays: 0,
-            initials,
             lastUpdated: new Date().toISOString(),
-          };
-          for (const team of userTeams) {
-            syncMemberToTeam(team.id, profile.uid, { ...memberData, role: team.role === 'Team Leader' ? 'owner' : 'member' });
-          }
+          });
         }
       }
     }
