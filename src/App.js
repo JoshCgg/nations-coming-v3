@@ -2695,11 +2695,9 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       });
       setJoinSuccess(`You joined ${data.name}! 🙌`);
       setJoinCodeInput('');
-      setTimeout(() => {
-        setJoinSuccess('');
-        setView('myteam');
-        setActiveTeamIndex(updatedTeams.length - 1);
-      }, 600);
+      setView('myteam');
+      setActiveTeamIndex(updatedTeams.length - 1);
+      setTimeout(() => setJoinSuccess(''), 1500);
     } catch {
       setJoinError('Something went wrong — try again');
     } finally {
@@ -4404,7 +4402,7 @@ export default function App() {
       updateGameState({ goalsAchieved: [...(gameState.goalsAchieved || []), ...newlyEarned] });
       setToastQueue(q => [...q, ...newlyEarned]);
     }
-    if (nextState.prayedNations !== gameState.prayedNations) {
+    if ((nextState.prayedNations || []).length !== (gameState.prayedNations || []).length) {
       const uid = userProfile?.uid || auth.currentUser?.uid;
       if (uid) {
         const name = userProfile?.displayName || 'Anonymous';
