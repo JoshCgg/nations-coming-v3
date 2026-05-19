@@ -112,7 +112,8 @@ function useGameState() {
       try {
         const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
         if (profile.uid) {
-          updateDoc(doc(db, "users", profile.uid), { gameState: next }).catch(err =>
+          const sanitized = JSON.parse(JSON.stringify(next));
+          updateDoc(doc(db, "users", profile.uid), { gameState: sanitized }).catch(err =>
             console.error("Firestore sync error:", err)
           );
         }
@@ -2506,7 +2507,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
           }
           const snapData = snap.data();
           const currentUid = userProfile?.uid || auth.currentUser?.uid;
-          if (currentUid && snapData.members && !snapData.members[currentUid]) {
+          const teamEntry = (gameState.teams || []).find(t => t.id === team.id);
+          const joinedRecently = teamEntry?.joinedAt &&
+            (Date.now() - new Date(teamEntry.joinedAt).getTime()) < 15000;
+          if (!joinedRecently && currentUid && snapData.members && !snapData.members[currentUid]) {
             const updatedTeams = (gameState.teams || []).filter(t => t.id !== team.id);
             updateGameState({ teams: updatedTeams });
             return;
@@ -2685,6 +2689,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         kitNation: data.kitNation,
         role: 'member',
         createdAt: data.createdAt,
+        joinedAt: new Date().toISOString(),
         memberCount: Object.keys(data.members || {}).length,
         collectiveNations: [],
         collectiveDays: [],
