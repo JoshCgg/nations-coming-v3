@@ -2509,7 +2509,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
   const [showRemoveSubmenu, setShowRemoveSubmenu] = useState(false);
   const [snapVersion, setSnapVersion] = useState(0);
-  const [nudgeCooldowns, setNudgeCooldowns] = useState({});
   const [nudgedNow, setNudgedNow] = useState({});
 
   useEffect(() => {
@@ -2650,8 +2649,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   function handleNudge(targetUid, memberName) {
     const now = Date.now();
-    const lastNudge = nudgeCooldowns[targetUid];
-    if (lastNudge && now - lastNudge < 3600000) return;
+    const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
+    if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return;
 
     const senderName = userProfile?.displayName || 'A teammate';
     const teamName = activeTeam?.name || 'Your team';
@@ -2659,7 +2658,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
     }).catch(() => {});
 
-    setNudgeCooldowns(prev => ({ ...prev, [targetUid]: now }));
+    cooldowns[targetUid] = now;
+    localStorage.setItem('nudgeCooldowns', JSON.stringify(cooldowns));
     setNudgedNow(prev => ({ ...prev, [targetUid]: true }));
     setTimeout(() => setNudgedNow(prev => ({ ...prev, [targetUid]: false })), 3000);
   }
@@ -3161,7 +3161,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                     </div>
                   </div>
                   {(() => {
-                    const cooldownActive = nudgeCooldowns[uid] && Date.now() - nudgeCooldowns[uid] < 3600000;
+                    const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
+                    const cooldownActive = cooldowns[uid] && Date.now() - cooldowns[uid] < 3600000;
                     const justNudged = nudgedNow[uid];
                     const isDisabled = cooldownActive || justNudged;
                     return (
@@ -4566,7 +4567,25 @@ export default function App() {
       updateDoc(doc(db, 'users', uid), { pendingNudge: deleteField() }).catch(() => {});
     }).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userProfile?.uid]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        const uid = userProfile?.uid || auth.currentUser?.uid;
+        if (!uid) return;
+        getDoc(doc(db, 'users', uid)).then(snap => {
+          if (snap.exists() && snap.data().pendingNudge) {
+            const { from, teamName } = snap.data().pendingNudge;
+            setPendingToast({ type: 'nudge', from, teamName });
+            updateDoc(doc(db, 'users', uid), { pendingNudge: deleteField() }).catch(() => {});
+          }
+        }).catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [userProfile?.uid]);
 
   useEffect(() => {
     setPulsePos(null); // clear immediately so full-dim shows while transitioning
