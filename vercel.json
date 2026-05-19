@@ -11,6 +11,7 @@
     { "src": "(.*)\\.webp", "dest": "$1.webp" },
     { "src": "(.*)\\.svg", "dest": "$1.svg" },
     { "src": "(.*)\\.json", "dest": "$1.json" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "(.*)", "dest": "/index.html" }
   ]
 }
