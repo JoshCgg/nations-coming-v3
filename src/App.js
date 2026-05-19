@@ -2513,7 +2513,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       }
     } catch {}
     return () => unsubs.forEach(fn => fn());
-  }, [gameState.teams, updateGameState]);
+  }, [gameState.teams, updateGameState, userProfile?.uid]);
 
   useEffect(() => {
     if (joinCodeInput.length < 6) {
