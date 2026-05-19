@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -2433,6 +2433,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [editName, setEditName] = useState('');
   const [editKit, setEditKit] = useState('');
   const [teamUpdateBanner, setTeamUpdateBanner] = useState(false);
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
 
   const NUDGE_MESSAGES = [
     {
@@ -2491,6 +2492,12 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
             return;
           }
           const snapData = snap.data();
+          const currentUid = userProfile?.uid || auth.currentUser?.uid;
+          if (currentUid && snapData.members && !snapData.members[currentUid]) {
+            const updatedTeams = (gameState.teams || []).filter(t => t.id !== team.id);
+            updateGameState({ teams: updatedTeams });
+            return;
+          }
           setLiveTeamData(prev => ({
             ...prev,
             [team.id]: {
@@ -2727,6 +2734,14 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   const safeIndex = Math.min(activeTeamIndex, Math.max(0, teams.length - 1));
   const activeTeam = teams.length > 0 ? (teams[safeIndex] || null) : null;
+  function handleRemoveMember(uid) {
+    updateDoc(doc(db, 'teams', activeTeam.id), {
+      [`members.${uid}`]: deleteField(),
+      memberCount: Math.max(0, (liveTeamData[activeTeam.id]?.memberCount || 1) - 1),
+    }).catch(() => {});
+    setConfirmRemoveMember(null);
+  }
+
   const liveTeam = activeTeam ? liveTeamData[activeTeam.id] : null;
   const displayName = liveTeam?.name || activeTeam?.name;
   const displayKit = liveTeam?.kitNation || activeTeam?.kitNation;
@@ -2965,7 +2980,21 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 <div key={uid} style={{
                   background: '#FFFFFF', borderRadius: 12, padding: 14,
                   marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12,
+                  position: 'relative',
                 }}>
+                  {(activeTeam.role === 'owner' || activeTeam.role === 'Team Leader') && uid !== (userProfile?.uid || auth.currentUser?.uid) && (
+                    <button
+                      onClick={() => setConfirmRemoveMember({ uid, name: member.name })}
+                      style={{
+                        position: 'absolute', top: 8, right: 8,
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        color: '#ff6b6b', fontSize: 16, lineHeight: 1, padding: 4,
+                      }}
+                      title={`Remove ${member.name}`}
+                    >
+                      ✕
+                    </button>
+                  )}
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%',
                     background: avatarColor(uid),
@@ -3285,6 +3314,58 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                   }}
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Remove member confirm modal */}
+        {confirmRemoveMember && (
+          <div
+            onClick={() => setConfirmRemoveMember(null)}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+              zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 24,
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#FFFFFF', borderRadius: 20, padding: '28px 24px',
+                maxWidth: 320, width: '100%',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', marginBottom: 12 }}>
+                Remove member?
+              </div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#555', marginBottom: 24, lineHeight: 1.6 }}>
+                Remove <strong>{confirmRemoveMember.name}</strong> from this team? They'll lose access immediately.
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setConfirmRemoveMember(null)}
+                  style={{
+                    flex: 1, background: 'transparent', border: '2px solid #ECF1EE',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#1B2B3A',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleRemoveMember(confirmRemoveMember.uid)}
+                  style={{
+                    flex: 1, background: '#E53935', border: 'none',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Remove
                 </button>
               </div>
             </div>
