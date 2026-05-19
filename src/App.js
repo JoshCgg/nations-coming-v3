@@ -2434,6 +2434,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [editKit, setEditKit] = useState('');
   const [teamUpdateBanner, setTeamUpdateBanner] = useState(false);
   const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
+  const [showRemoveSubmenu, setShowRemoveSubmenu] = useState(false);
 
   const NUDGE_MESSAGES = [
     {
@@ -2897,6 +2898,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                     onClick={() => {
                       setEditName(displayName);
                       setEditKit(displayKit);
+                      setShowRemoveSubmenu(false);
                       setShowTeamMenu(v => !v);
                     }}
                     style={{
@@ -2912,32 +2914,86 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                     <div style={{
                       position: 'absolute', top: '100%', right: 0, marginTop: 4,
                       background: '#003A56', border: '1.5px solid #00BAF8',
-                      borderRadius: 10, zIndex: 50, minWidth: 140,
+                      borderRadius: 10, zIndex: 50, minWidth: 180,
                       boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
-                      overflow: 'hidden',
                     }}>
-                      <button
-                        onClick={() => { setShowTeamMenu(false); setShowEditSheet(true); }}
-                        style={{
-                          width: '100%', background: 'transparent', border: 'none',
-                          padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
-                          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
-                          color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 8,
-                        }}
-                      >
-                        ✏️ Edit team
-                      </button>
-                      <button
-                        onClick={() => { setShowTeamMenu(false); setShowDeleteConfirm(true); }}
-                        style={{
-                          width: '100%', background: 'transparent', border: 'none',
-                          padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
-                          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
-                          color: '#FF6B6B', display: 'flex', alignItems: 'center', gap: 8,
-                        }}
-                      >
-                        🗑️ Delete team
-                      </button>
+                      {!showRemoveSubmenu ? (
+                        <>
+                          <button
+                            onClick={() => { setShowTeamMenu(false); setShowEditSheet(true); }}
+                            style={{
+                              width: '100%', background: 'transparent', border: 'none',
+                              padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
+                              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                              color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 8,
+                            }}
+                          >
+                            ✏️ Edit team
+                          </button>
+                          <button
+                            onClick={() => setShowRemoveSubmenu(true)}
+                            style={{
+                              width: '100%', background: 'transparent', border: 'none',
+                              padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
+                              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                              color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 8,
+                            }}
+                          >
+                            👤 Remove a member
+                          </button>
+                          <button
+                            onClick={() => { setShowTeamMenu(false); setShowDeleteConfirm(true); }}
+                            style={{
+                              width: '100%', background: 'transparent', border: 'none',
+                              padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
+                              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                              color: '#FF6B6B', display: 'flex', alignItems: 'center', gap: 8,
+                            }}
+                          >
+                            🗑️ Delete team
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setShowRemoveSubmenu(false)}
+                            style={{
+                              width: '100%', background: 'transparent', border: 'none',
+                              borderBottom: '1px solid rgba(255,255,255,0.1)',
+                              padding: '10px 16px', textAlign: 'left', cursor: 'pointer',
+                              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 13,
+                              color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 6,
+                            }}
+                          >
+                            ← Back
+                          </button>
+                          {(() => {
+                            const currentUid = userProfile?.uid || auth.currentUser?.uid;
+                            const removable = Object.entries(liveTeamData[activeTeam.id]?.members || {})
+                              .filter(([uid]) => uid !== currentUid);
+                            if (removable.length === 0) {
+                              return (
+                                <div style={{ padding: '12px 16px', fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                                  No other members
+                                </div>
+                              );
+                            }
+                            return removable.map(([uid, member]) => (
+                              <div key={uid} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px' }}>
+                                <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: '#FFFFFF', flex: 1, marginRight: 8 }}>
+                                  {member.name}
+                                </span>
+                                <button
+                                  onClick={() => { setShowTeamMenu(false); setShowRemoveSubmenu(false); setConfirmRemoveMember({ uid, name: member.name }); }}
+                                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ff6b6b', fontSize: 15, padding: '2px 4px', lineHeight: 1 }}
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ));
+                          })()}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2980,21 +3036,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 <div key={uid} style={{
                   background: '#FFFFFF', borderRadius: 12, padding: 14,
                   marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12,
-                  position: 'relative',
                 }}>
-                  {(activeTeam.role === 'owner' || activeTeam.role === 'Team Leader') && uid !== (userProfile?.uid || auth.currentUser?.uid) && (
-                    <button
-                      onClick={() => setConfirmRemoveMember({ uid, name: member.name })}
-                      style={{
-                        position: 'absolute', top: 8, right: 8,
-                        background: 'transparent', border: 'none', cursor: 'pointer',
-                        color: '#ff6b6b', fontSize: 16, lineHeight: 1, padding: 4,
-                      }}
-                      title={`Remove ${member.name}`}
-                    >
-                      ✕
-                    </button>
-                  )}
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%',
                     background: avatarColor(uid),
@@ -3155,7 +3197,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         {/* Menu close backdrop */}
         {showTeamMenu && (
           <div
-            onClick={() => setShowTeamMenu(false)}
+            onClick={() => { setShowTeamMenu(false); setShowRemoveSubmenu(false); }}
             style={{ position: 'fixed', inset: 0, zIndex: 49 }}
           />
         )}
