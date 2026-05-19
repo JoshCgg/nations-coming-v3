@@ -2490,6 +2490,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
           setLiveTeamData(prev => ({
             ...prev,
             [team.id]: {
+              name: snapData.name,
+              kitNation: snapData.kitNation,
               members: snapData.members || {},
               memberSummaries: Object.values(snapData.members || {}),
               memberCount: Object.keys(snapData.members || {}).length,
@@ -2715,7 +2717,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   const safeIndex = Math.min(activeTeamIndex, Math.max(0, teams.length - 1));
   const activeTeam = teams.length > 0 ? (teams[safeIndex] || null) : null;
-  const activeKit = activeTeam ? (TEAM_KITS.find(k => k.id === activeTeam.kitNation) || TEAM_KITS[0]) : TEAM_KITS[0];
+  const liveTeam = activeTeam ? liveTeamData[activeTeam.id] : null;
+  const displayName = liveTeam?.name || activeTeam?.name;
+  const displayKit = liveTeam?.kitNation || activeTeam?.kitNation;
+  const activeKit = activeTeam ? (TEAM_KITS.find(k => k.id === displayKit) || TEAM_KITS[0]) : TEAM_KITS[0];
 
   /* ── EMPTY STATE ── */
   if (view === 'empty') {
@@ -2811,8 +2816,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 color: '#FFFFFF', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
-              <KitBadge kitId={team.kitNation} size={20} />
-              {team.name}
+              <KitBadge kitId={liveTeamData[team.id]?.kitNation || team.kitNation} size={20} />
+              {liveTeamData[team.id]?.name || team.name}
             </button>
           ))}
           {teams.length < 3 && (
@@ -2840,10 +2845,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
             margin: 16, borderRadius: 14, padding: 16,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <KitBadge kitId={activeTeam.kitNation} size={28} />
+              <KitBadge kitId={displayKit} size={28} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: '#FFFFFF' }}>
-                  {activeTeam.name}
+                  {displayName}
                 </div>
                 <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>
                   {(liveTeamData[activeTeam.id]?.memberCount ?? activeTeam.memberCount)} {(liveTeamData[activeTeam.id]?.memberCount ?? activeTeam.memberCount) === 1 ? 'member' : 'members'} · Code: {activeTeam.id}
@@ -2864,8 +2869,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button
                     onClick={() => {
-                      setEditName(activeTeam.name);
-                      setEditKit(activeTeam.kitNation);
+                      setEditName(displayName);
+                      setEditKit(displayKit);
                       setShowTeamMenu(v => !v);
                     }}
                     style={{
