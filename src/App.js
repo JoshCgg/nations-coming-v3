@@ -2436,6 +2436,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [teamUpdateBanner, setTeamUpdateBanner] = useState(false);
   const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
   const [showRemoveSubmenu, setShowRemoveSubmenu] = useState(false);
+  const [snapVersion, setSnapVersion] = useState(0);
 
   const NUDGE_MESSAGES = [
     {
@@ -2482,6 +2483,12 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   }, [autoJoinCode]);
 
   useEffect(() => {
+    if (view === 'myteam') {
+      setSnapVersion(v => v + 1);
+    }
+  }, [view, gameState.teams]);
+
+  useEffect(() => {
     const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
     if (!profile.uid || !(gameState.teams || []).length) return;
     const unsubs = [];
@@ -2515,7 +2522,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       }
     } catch {}
     return () => unsubs.forEach(fn => fn());
-  }, [gameState.teams, updateGameState, userProfile?.uid]);
+  }, [gameState.teams, updateGameState, userProfile?.uid, snapVersion]);
 
   useEffect(() => {
     if (joinCodeInput.length < 6) {
