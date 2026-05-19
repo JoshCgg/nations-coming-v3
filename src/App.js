@@ -2654,10 +2654,9 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
     const senderName = userProfile?.displayName || 'A teammate';
     const teamName = activeTeam?.name || 'Your team';
-    console.log('[Nudge] writing to uid:', targetUid, 'from:', senderName, 'team:', teamName);
     updateDoc(doc(db, 'users', targetUid), {
       pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
-    }).then(() => console.log('[Nudge] write success')).catch(e => console.log('[Nudge] write error:', e));
+    }).catch(() => {});
 
     cooldowns[targetUid] = now;
     localStorage.setItem('nudgeCooldowns', JSON.stringify(cooldowns));
@@ -4574,17 +4573,14 @@ export default function App() {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         const uid = userProfile?.uid || auth.currentUser?.uid;
-        console.log('[Nudge] visibility fired, uid:', uid);
         if (!uid) return;
         getDoc(doc(db, 'users', uid)).then(snap => {
-          console.log('[Nudge] doc exists:', snap.exists(), 'data:', snap.data());
           if (snap.exists() && snap.data().pendingNudge) {
             const { from, teamName } = snap.data().pendingNudge;
-            console.log('[Nudge] firing toast for:', from, teamName);
             setPendingToast({ type: 'nudge', from, teamName });
             updateDoc(doc(db, 'users', uid), { pendingNudge: deleteField() }).catch(() => {});
           }
-        }).catch((e) => console.log('[Nudge] getDoc error:', e));
+        }).catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
