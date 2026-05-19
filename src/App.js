@@ -2506,7 +2506,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       }
     } catch {}
     return () => unsubs.forEach(fn => fn());
-  }, [gameState.teams]);
+  }, [gameState.teams, updateGameState]);
 
   useEffect(() => {
     if (joinCodeInput.length < 6) {
