@@ -2439,8 +2439,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [showRemoveSubmenu, setShowRemoveSubmenu] = useState(false);
   const [snapVersion, setSnapVersion] = useState(0);
 
-  console.log('[TeamsTab] view:', view, 'gameState.teams.length:', (gameState.teams||[]).length, 'liveTeamData keys:', Object.keys(liveTeamData));
-
   const NUDGE_MESSAGES = [
     {
       emoji: '🟨',
@@ -2492,8 +2490,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   }, [view, gameState.teams]);
 
   useEffect(() => {
-    console.log('[Snapshot] effect running, gameState.teams:', JSON.stringify(gameState.teams));
-    console.log('[Snapshot] snapVersion:', snapVersion);
     const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
     if (!profile.uid || !(gameState.teams || []).length) return;
     const unsubs = [];
@@ -2698,8 +2694,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       };
       const updatedTeams = [...(gameState.teams || []), newTeam];
       updateGameState({ teams: updatedTeams });
-      console.log('[Join] updatedTeams:', JSON.stringify(updatedTeams));
-      console.log('[Join] gameState.teams before update:', JSON.stringify(gameState.teams));
       const name = profile.displayName || 'Anonymous';
       const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
       syncMemberToTeam(teamCode, profile.uid, {
