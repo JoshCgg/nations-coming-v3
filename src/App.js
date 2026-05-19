@@ -2649,16 +2649,14 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   function handleNudge(targetUid, memberName) {
     const now = Date.now();
-    localStorage.removeItem('nudgeCooldowns'); // DEBUG: clear all cooldowns for testing
     const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
-    // if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return; // DEBUG: cooldown disabled
+    if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return;
 
     const senderName = userProfile?.displayName || 'A teammate';
     const teamName = activeTeam?.name || 'Your team';
-    console.log('[Nudge] writing pendingNudge to users/', targetUid);
     updateDoc(doc(db, 'users', targetUid), {
       pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
-    }).then(() => console.log('[Nudge] write success')).catch(e => console.log('[Nudge] write FAILED:', e.code, e.message));
+    }).catch(() => {});
 
     cooldowns[targetUid] = now;
     localStorage.setItem('nudgeCooldowns', JSON.stringify(cooldowns));
@@ -3163,6 +3161,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                     </div>
                   </div>
                   {(() => {
+                    const currentUid = userProfile?.uid || auth.currentUser?.uid;
+                    if (uid === currentUid) return null;
                     const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
                     const cooldownActive = cooldowns[uid] && Date.now() - cooldowns[uid] < 3600000;
                     const justNudged = nudgedNow[uid];
