@@ -2519,25 +2519,28 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     setJoinPreviewLoading(true);
     setJoinPreviewData(null);
     setJoinPreviewError('');
-    getDoc(doc(db, 'teams', joinCodeInput)).then(snap => {
-      if (cancelled) return;
-      if (!snap.exists()) {
-        setJoinPreviewError('Team not found — double-check the code and try again');
-      } else {
-        const d = snap.data();
-        setJoinPreviewData({
-          name: d.name,
-          kitNation: d.kitNation,
-          memberCount: Object.keys(d.members || {}).length,
-        });
-      }
-    }).catch(() => {
-      if (cancelled) return;
-      setJoinPreviewError('Could not load team — try again');
-    }).finally(() => {
-      if (!cancelled) setJoinPreviewLoading(false);
-    });
-    return () => { cancelled = true; };
+    const timer = setTimeout(() => {
+      getDoc(doc(db, 'teams', joinCodeInput)).then(snap => {
+        if (cancelled) return;
+        if (!snap.exists()) {
+          setJoinPreviewError('Team not found — double-check the code and try again');
+        } else {
+          const d = snap.data();
+          setJoinPreviewData({
+            name: d.name,
+            kitNation: d.kitNation,
+            memberCount: Object.keys(d.members || {}).length,
+            members: d.members || {},
+          });
+        }
+      }).catch(() => {
+        if (cancelled) return;
+        setJoinPreviewError('Could not load team — try again');
+      }).finally(() => {
+        if (!cancelled) setJoinPreviewLoading(false);
+      });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [joinCodeInput]);
 
   function getInitials(name) {
