@@ -2658,7 +2658,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     console.log('[Nudge] writing pendingNudge to users/', targetUid);
     updateDoc(doc(db, 'users', targetUid), {
       pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
-    }).catch(() => {});
+    }).then(() => console.log('[Nudge] write success')).catch(e => console.log('[Nudge] write FAILED:', e.code, e.message));
 
     cooldowns[targetUid] = now;
     localStorage.setItem('nudgeCooldowns', JSON.stringify(cooldowns));
