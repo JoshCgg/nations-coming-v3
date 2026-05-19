@@ -2492,8 +2492,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [teamCode, setTeamCode] = useState('');
   const [teamSheetMode, setTeamSheetMode] = useState(null);
-  const [nudgeModal, setNudgeModal] = useState(null);
-  const [nudgeMessageIndex, setNudgeMessageIndex] = useState(0);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState('');
@@ -2513,29 +2511,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [snapVersion, setSnapVersion] = useState(0);
   const [nudgeCooldowns, setNudgeCooldowns] = useState({});
   const [nudgedNow, setNudgedNow] = useState({});
-
-  const NUDGE_MESSAGES = [
-    {
-      emoji: '🟨',
-      headline: (name) => `Yellow card for ${name}!`,
-      sub: `Just kidding — but Hebrews 10:24 says to "spur one another on." Consider them spurred.`
-    },
-    {
-      emoji: '⚽',
-      headline: (name) => `${name} is getting some coaching from their Captain!`,
-      sub: `You just did what good teammates do — "carry each other's burdens." — Gal 6:2`
-    },
-    {
-      emoji: '🚩',
-      headline: (name) => `${name} was caught offside — from their prayer habit!`,
-      sub: `You called them back. "As iron sharpens iron, so one person sharpens another." — Prov 27:17`
-    },
-    {
-      emoji: '🥤',
-      headline: (name) => `Water break — ${name} needed this.`,
-      sub: `You showed up for them. "Let us not give up meeting together." — Heb 10:25`
-    },
-  ];
 
   useEffect(() => {
     if (view === 'create') {
@@ -3253,51 +3228,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
             >
               ← Back
             </button>
-          </div>
-        )}
-
-        {/* Nudge modal */}
-        {nudgeModal && (
-          <div onClick={() => setNudgeModal(null)} style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
-            zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '24px'
-          }}>
-            <div onClick={e => e.stopPropagation()} style={{
-              background: 'white', borderRadius: '20px', padding: '32px 24px 28px',
-              maxWidth: '340px', width: '100%', textAlign: 'center',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.18)'
-            }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: '50%',
-                background: '#ECF1EE', margin: '0 auto 16px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 36
-              }}>
-                {NUDGE_MESSAGES[nudgeMessageIndex].emoji}
-              </div>
-              <p style={{
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 800,
-                fontSize: 17, color: '#00476B', margin: '0 0 10px', lineHeight: 1.3
-              }}>
-                {NUDGE_MESSAGES[nudgeMessageIndex].headline(nudgeModal.name)}
-              </p>
-              <p style={{
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 500,
-                fontSize: 13, color: '#1B456A', margin: '0 0 24px', lineHeight: 1.6
-              }}>
-                {NUDGE_MESSAGES[nudgeMessageIndex].sub}
-              </p>
-              <img src='/images/nudge-ref.webp' width={110} height={110} alt='referee' style={{ display: 'block', margin: '0 auto 4px' }} />
-              <button onClick={() => setNudgeModal(null)} style={{
-                background: '#E06520', color: 'white', border: 'none',
-                borderRadius: '12px', padding: '12px 32px',
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 800,
-                fontSize: 15, cursor: 'pointer', width: '100%'
-              }}>
-                Got it 👊
-              </button>
-            </div>
           </div>
         )}
 
