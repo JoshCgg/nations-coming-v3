@@ -2485,7 +2485,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     try {
       for (const team of gameState.teams) {
         const unsub = onSnapshot(doc(db, 'teams', team.id), (snap) => {
-          if (!snap.exists()) return;
+          if (!snap.exists()) {
+            const updatedTeams = (gameState.teams || []).filter(t => t.id !== team.id);
+            updateGameState({ teams: updatedTeams });
+            return;
+          }
           const snapData = snap.data();
           setLiveTeamData(prev => ({
             ...prev,
@@ -2798,6 +2802,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   /* ── MY TEAM STATE ── */
   if (view === 'myteam') {
+    if (!activeTeam) return null;
     return (
       <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
 
