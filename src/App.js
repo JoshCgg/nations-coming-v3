@@ -2650,10 +2650,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   function handleNudge(targetUid, memberName) {
     const now = Date.now();
     const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
-    if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return;
+    // if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return; // DEBUG: cooldown disabled
 
     const senderName = userProfile?.displayName || 'A teammate';
     const teamName = activeTeam?.name || 'Your team';
+    console.log('[Nudge] writing pendingNudge to users/', targetUid);
     updateDoc(doc(db, 'users', targetUid), {
       pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
     }).catch(() => {});
