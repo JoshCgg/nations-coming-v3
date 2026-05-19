@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -2427,6 +2427,12 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [joinPreviewData, setJoinPreviewData] = useState(null);
   const [joinPreviewLoading, setJoinPreviewLoading] = useState(false);
   const [joinPreviewError, setJoinPreviewError] = useState('');
+  const [showTeamMenu, setShowTeamMenu] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editKit, setEditKit] = useState('');
+  const [teamUpdateBanner, setTeamUpdateBanner] = useState(false);
 
   const NUDGE_MESSAGES = [
     {
@@ -2680,6 +2686,33 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     }
   }
 
+  function handleEditTeam() {
+    const name = editName.trim();
+    if (!name || name.length < 2 || name.length > 30) return;
+    const updatedTeams = (gameState.teams || []).map(t =>
+      t.id === activeTeam.id ? { ...t, name, kitNation: editKit } : t
+    );
+    updateGameState({ teams: updatedTeams });
+    updateDoc(doc(db, 'teams', activeTeam.id), { name, kitNation: editKit }).catch(() => {});
+    setShowEditSheet(false);
+    setShowTeamMenu(false);
+    setTeamUpdateBanner(true);
+    setTimeout(() => setTeamUpdateBanner(false), 2500);
+  }
+
+  function handleDeleteTeam() {
+    const updatedTeams = (gameState.teams || []).filter(t => t.id !== activeTeam.id);
+    updateGameState({ teams: updatedTeams });
+    deleteDoc(doc(db, 'teams', activeTeam.id)).catch(() => {});
+    setShowDeleteConfirm(false);
+    setShowTeamMenu(false);
+    if (updatedTeams.length === 0) {
+      setView('empty');
+    } else {
+      setActiveTeamIndex(prev => Math.min(prev, updatedTeams.length - 1));
+    }
+  }
+
   const safeIndex = Math.min(activeTeamIndex, Math.max(0, teams.length - 1));
   const activeTeam = teams.length > 0 ? (teams[safeIndex] || null) : null;
   const activeKit = activeTeam ? (TEAM_KITS.find(k => k.id === activeTeam.kitNation) || TEAM_KITS[0]) : TEAM_KITS[0];
@@ -2827,6 +2860,57 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
               >
                 {inviteCopied ? 'Link copied! 📋' : '🔗 Invite'}
               </button>
+              {(activeTeam.role === 'owner' || activeTeam.role === 'Team Leader') && (
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <button
+                    onClick={() => {
+                      setEditName(activeTeam.name);
+                      setEditKit(activeTeam.kitNation);
+                      setShowTeamMenu(v => !v);
+                    }}
+                    style={{
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      color: 'rgba(255,255,255,0.8)', fontSize: 22, padding: '4px 6px',
+                      lineHeight: 1, letterSpacing: 1,
+                    }}
+                    title="Team settings"
+                  >
+                    ⋯
+                  </button>
+                  {showTeamMenu && (
+                    <div style={{
+                      position: 'absolute', top: '100%', right: 0, marginTop: 4,
+                      background: '#003A56', border: '1.5px solid #00BAF8',
+                      borderRadius: 10, zIndex: 50, minWidth: 140,
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+                      overflow: 'hidden',
+                    }}>
+                      <button
+                        onClick={() => { setShowTeamMenu(false); setShowEditSheet(true); }}
+                        style={{
+                          width: '100%', background: 'transparent', border: 'none',
+                          padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
+                          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                          color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 8,
+                        }}
+                      >
+                        ✏️ Edit team
+                      </button>
+                      <button
+                        onClick={() => { setShowTeamMenu(false); setShowDeleteConfirm(true); }}
+                        style={{
+                          width: '100%', background: 'transparent', border: 'none',
+                          padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
+                          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                          color: '#FF6B6B', display: 'flex', alignItems: 'center', gap: 8,
+                        }}
+                      >
+                        🗑️ Delete team
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Nations progress bar */}
@@ -3019,6 +3103,174 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
               }}>
                 Got it 👊
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Menu close backdrop */}
+        {showTeamMenu && (
+          <div
+            onClick={() => setShowTeamMenu(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 49 }}
+          />
+        )}
+
+        {/* Team updated banner */}
+        {teamUpdateBanner && (
+          <div style={{
+            position: 'fixed', top: 64, left: '50%', transform: 'translateX(-50%)',
+            background: '#2e7d32', color: '#FFFFFF',
+            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+            borderRadius: 10, padding: '10px 20px', zIndex: 300,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap',
+          }}>
+            Team updated ✓
+          </div>
+        )}
+
+        {/* Edit team sheet */}
+        {showEditSheet && (
+          <div
+            onClick={() => setShowEditSheet(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 200 }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0,
+                background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+                padding: '24px 20px 36px', maxHeight: '88vh', overflowY: 'auto',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 20, color: '#1B2B3A', marginBottom: 20 }}>
+                Edit team
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  Team name
+                </div>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  maxLength={30}
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    border: '2px solid #ECF1EE', borderRadius: 10, padding: '12px 14px',
+                    fontFamily: 'Montserrat, sans-serif', fontSize: 15, color: '#1B2B3A', outline: 'none',
+                  }}
+                />
+                {editName.trim().length > 0 && editName.trim().length < 2 && (
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#C62828', marginTop: 4 }}>
+                    Name must be at least 2 characters
+                  </div>
+                )}
+              </div>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  Choose a kit
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                  {TEAM_KITS.map(kit => (
+                    <div
+                      key={kit.id}
+                      onClick={() => setEditKit(kit.id)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                        cursor: 'pointer', borderRadius: 10, padding: '8px 4px',
+                        background: editKit === kit.id ? 'rgba(0,71,107,0.08)' : 'transparent',
+                        boxShadow: editKit === kit.id ? '0 0 0 3px #00476B' : 'none',
+                      }}
+                    >
+                      <KitBadge kitId={kit.id} size={40} />
+                      <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 10, fontWeight: 600, color: '#1B2B3A', textAlign: 'center', lineHeight: 1.2 }}>
+                        {kit.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+                  <KitBadge kitId={editKit || 'brazil'} size={24} />
+                  <span style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, fontWeight: 600, color: '#1B2B3A' }}>
+                    {(TEAM_KITS.find(k => k.id === editKit) || TEAM_KITS[0]).label}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleEditTeam}
+                disabled={editName.trim().length < 2}
+                style={{
+                  width: '100%', background: editName.trim().length >= 2 ? '#E06520' : '#ccc',
+                  border: 'none', borderRadius: 12, padding: '15px 0',
+                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                  color: '#FFFFFF', cursor: editName.trim().length >= 2 ? 'pointer' : 'default',
+                  marginBottom: 10,
+                }}
+              >
+                Save changes
+              </button>
+              <button
+                onClick={() => setShowEditSheet(false)}
+                style={{
+                  width: '100%', background: 'transparent', border: 'none',
+                  fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                  color: '#3E67AC', cursor: 'pointer', padding: '8px 0',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Delete confirm modal */}
+        {showDeleteConfirm && (
+          <div
+            onClick={() => setShowDeleteConfirm(false)}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+              zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 24,
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#FFFFFF', borderRadius: 20, padding: '28px 24px',
+                maxWidth: 320, width: '100%',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', marginBottom: 12 }}>
+                Delete team?
+              </div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#555', marginBottom: 24, lineHeight: 1.6 }}>
+                This will permanently delete <strong>{activeTeam?.name}</strong> for all members.
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  style={{
+                    flex: 1, background: 'transparent', border: '2px solid #ECF1EE',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#1B2B3A',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteTeam}
+                  style={{
+                    flex: 1, background: '#E53935', border: 'none',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         )}
