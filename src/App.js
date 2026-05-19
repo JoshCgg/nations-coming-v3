@@ -2649,6 +2649,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   function handleNudge(targetUid, memberName) {
     const now = Date.now();
+    localStorage.removeItem('nudgeCooldowns'); // DEBUG: clear all cooldowns for testing
     const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
     // if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return; // DEBUG: cooldown disabled
 
