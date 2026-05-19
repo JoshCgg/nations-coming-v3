@@ -2212,15 +2212,88 @@ const BIG_ACHIEVEMENTS = new Set([
 ]);
 
 function AchievementToast({ achievement, onDismiss }) {
+  const isNudge = achievement && typeof achievement === 'object' && achievement.type === 'nudge';
+
   useEffect(() => {
     if (!achievement) return;
+    if (isNudge) {
+      const timer = setTimeout(onDismiss, 4000);
+      return () => clearTimeout(timer);
+    }
     const duration = BIG_ACHIEVEMENTS.has(achievement) ? 0 : 3500;
     if (duration === 0) return;
     const timer = setTimeout(onDismiss, duration);
     return () => clearTimeout(timer);
-  }, [achievement, onDismiss]);
+  }, [achievement, onDismiss, isNudge]);
 
   if (!achievement) return null;
+
+  if (isNudge) {
+    return (
+      <div
+        onClick={onDismiss}
+        style={{
+          position: "fixed",
+          bottom: 80,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 3000,
+          width: "calc(100% - 48px)",
+          maxWidth: 400,
+          background: "#00476B",
+          border: "1.5px solid #00BAF8",
+          borderRadius: 20,
+          padding: "10px 14px 10px 10px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          cursor: "pointer",
+        }}
+      >
+        <div style={{
+          width: 40, height: 40,
+          background: "#E06520",
+          borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 20,
+          flexShrink: 0,
+        }}>
+          👋
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 800, fontSize: 13,
+            color: "#fff",
+          }}>
+            {achievement.from} is cheering you on!
+          </div>
+          <div style={{
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 700, fontSize: 11,
+            color: "#8ADBFF",
+            marginTop: 1,
+          }}>
+            Your {achievement.teamName} teammate wants you to pray today
+          </div>
+        </div>
+        <button
+          onClick={onDismiss}
+          style={{
+            background: "none", border: "none",
+            color: "rgba(255,255,255,0.5)",
+            fontSize: 16, cursor: "pointer",
+            padding: "0 0 0 4px",
+            fontFamily: "Montserrat, sans-serif",
+            fontWeight: 700,
+          }}
+        >
+          ✕
+        </button>
+      </div>
+    );
+  }
+
   const info = ACHIEVEMENT_LABELS[achievement];
   if (!info) return null;
 
@@ -2438,6 +2511,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
   const [showRemoveSubmenu, setShowRemoveSubmenu] = useState(false);
   const [snapVersion, setSnapVersion] = useState(0);
+  const [nudgeCooldowns, setNudgeCooldowns] = useState({});
+  const [nudgedNow, setNudgedNow] = useState({});
 
   const NUDGE_MESSAGES = [
     {
@@ -2597,6 +2672,22 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       setTimeout(() => setInviteCopied(false), 2500);
     }
   };
+
+  function handleNudge(targetUid, memberName) {
+    const now = Date.now();
+    const lastNudge = nudgeCooldowns[targetUid];
+    if (lastNudge && now - lastNudge < 3600000) return;
+
+    const senderName = userProfile?.displayName || 'A teammate';
+    const teamName = activeTeam?.name || 'Your team';
+    updateDoc(doc(db, 'users', targetUid), {
+      pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
+    }).catch(() => {});
+
+    setNudgeCooldowns(prev => ({ ...prev, [targetUid]: now }));
+    setNudgedNow(prev => ({ ...prev, [targetUid]: true }));
+    setTimeout(() => setNudgedNow(prev => ({ ...prev, [targetUid]: false })), 3000);
+  }
 
   function handleCreateTeam() {
     if (!teamNameInput.trim()) return;
@@ -3094,25 +3185,30 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                       </div>
                     </div>
                   </div>
-                  {true /* TEMP TEST - remove before launch */ && (
-                    <button
-                      onClick={() => {
-                        setNudgeMessageIndex(Math.floor(Math.random() * NUDGE_MESSAGES.length));
-                        setNudgeModal({ name: member.name });
-                      }}
-                      style={{
-                        background: 'transparent', border: '1.5px solid #E06520',
-                        borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
-                        flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4,
-                        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12,
-                        color: '#E06520',
-                      }}
-                      title={`Nudge ${member.name}`}
-                    >
-                      <img src="/images/whistle.svg" width={14} height={14} alt="" style={{ verticalAlign: 'middle' }} />
-                      Nudge
-                    </button>
-                  )}
+                  {(() => {
+                    const cooldownActive = nudgeCooldowns[uid] && Date.now() - nudgeCooldowns[uid] < 3600000;
+                    const justNudged = nudgedNow[uid];
+                    const isDisabled = cooldownActive || justNudged;
+                    return (
+                      <button
+                        onClick={() => handleNudge(uid, member.name)}
+                        disabled={isDisabled}
+                        style={{
+                          background: 'transparent',
+                          border: `1.5px solid ${isDisabled ? '#ccc' : '#E06520'}`,
+                          borderRadius: 8, padding: '6px 10px',
+                          cursor: isDisabled ? 'default' : 'pointer',
+                          flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4,
+                          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12,
+                          color: isDisabled ? '#ccc' : '#E06520',
+                        }}
+                        title={`Nudge ${member.name}`}
+                      >
+                        <img src="/images/whistle.svg" width={14} height={14} alt="" style={{ verticalAlign: 'middle', opacity: isDisabled ? 0.4 : 1 }} />
+                        {justNudged ? 'Nudged! 👋' : (cooldownActive ? 'Nudged' : 'Nudge')}
+                      </button>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -4525,6 +4621,20 @@ export default function App() {
       setPendingJoinCode(joinCode.trim().toUpperCase());
       window.history.replaceState({}, '', '/app');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const uid = userProfile?.uid;
+    if (!uid) return;
+    getDoc(doc(db, 'users', uid)).then(snap => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      if (!data.pendingNudge) return;
+      const { from, teamName } = data.pendingNudge;
+      setPendingToast({ type: 'nudge', from, teamName });
+      updateDoc(doc(db, 'users', uid), { pendingNudge: deleteField() }).catch(() => {});
+    }).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
