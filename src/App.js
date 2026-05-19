@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, createPortal } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -4950,12 +4950,12 @@ export default function App() {
         )}
 
         {/* Sign out confirm modal */}
-        {showSignOutConfirm && (
+        {showSignOutConfirm && createPortal(
           <div
             onClick={() => setShowSignOutConfirm(false)}
             style={{
               position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-              zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: 24,
             }}
           >
@@ -5002,7 +5002,8 @@ export default function App() {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* About & Credits Modal */}
