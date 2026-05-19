@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
@@ -4373,6 +4373,7 @@ export default function App() {
   const [showBanner, setShowBanner] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
@@ -4903,8 +4904,24 @@ export default function App() {
                 </a>
               </div>
 
+              {/* Sign out */}
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <button
+                  onClick={() => setShowSignOutConfirm(true)}
+                  style={{
+                    width: '100%', background: 'transparent',
+                    border: '1px solid #ff6b6b', borderRadius: 10,
+                    padding: '11px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#ff6b6b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  🚪 Sign out
+                </button>
+              </div>
+
               {/* About & Credits link */}
-              <div style={{ textAlign: "center", marginTop: 10 }}>
+              <div style={{ textAlign: "center", marginTop: 16 }}>
                 <span
                   onClick={() => { setShowSettings(false); setShowAbout(true); }}
                   style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "underline", cursor: "pointer" }}
@@ -4926,6 +4943,62 @@ export default function App() {
                   onMouseLeave={e => e.target.style.textDecoration = "none"}
                 >
                   Replay tutorial
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sign out confirm modal */}
+        {showSignOutConfirm && (
+          <div
+            onClick={() => setShowSignOutConfirm(false)}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+              zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 24,
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#FFFFFF', borderRadius: 20, padding: '28px 24px',
+                maxWidth: 320, width: '100%',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', marginBottom: 12 }}>
+                Sign out?
+              </div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#555', marginBottom: 24, lineHeight: 1.6 }}>
+                This will sign you out and clear your local data. Your prayer progress is saved to your account and will be restored when you sign back in.
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setShowSignOutConfirm(false)}
+                  style={{
+                    flex: 1, background: 'transparent', border: '2px solid #ECF1EE',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#1B2B3A',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    await signOut(auth).catch(() => {});
+                    localStorage.clear();
+                    window.location.reload();
+                  }}
+                  style={{
+                    flex: 1, background: '#ff6b6b', border: 'none',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Sign out
                 </button>
               </div>
             </div>
