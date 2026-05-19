@@ -187,6 +187,18 @@ function checkAchievements(gameState) {
 }
 
 /* ─── TEAM KITS ─── */
+const BLOCKED_TEAM_NAMES = [
+  'fuck', 'shit', 'ass', 'bitch', 'cunt', 'dick', 'cock', 'pussy',
+  'nigger', 'nigga', 'faggot', 'fag', 'retard', 'whore', 'slut',
+  'bastard', 'damn', 'hell', 'piss', 'crap', 'porn', 'sex', 'nazi',
+  'hitler', 'rape', 'kill', 'terror', 'jihad', 'satan', 'hate'
+];
+
+function containsBlockedWord(name) {
+  const lower = name.toLowerCase();
+  return BLOCKED_TEAM_NAMES.some(word => lower.includes(word));
+}
+
 const TEAM_KITS = [
   { id:'brazil',      label:'Brazil',       primary:'#009C3B', accent:'#FFDF00', bgCircle:'white' },
   { id:'argentina',   label:'Argentina',    primary:'#74ACDF', accent:'#FFFFFF', bgCircle:'navy' },
@@ -2492,6 +2504,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [joinCodeInput, setJoinCodeInput] = useState('');
   const [teamCode, setTeamCode] = useState('');
   const [teamSheetMode, setTeamSheetMode] = useState(null);
+  const [createError, setCreateError] = useState('');
+  const [editError, setEditError] = useState('');
   const [inviteCopied, setInviteCopied] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState('');
@@ -2666,6 +2680,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   function handleCreateTeam() {
     if (!teamNameInput.trim()) return;
+    if (containsBlockedWord(teamNameInput)) {
+      setCreateError('Please choose a different team name');
+      return;
+    }
+    setCreateError('');
     const displayName = (userProfile && userProfile.displayName) ? userProfile.displayName : 'Anonymous';
     const memberUid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
     const newTeam = {
@@ -2786,6 +2805,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   function handleEditTeam() {
     const name = editName.trim();
     if (!name || name.length < 2 || name.length > 30) return;
+    if (containsBlockedWord(name)) {
+      setEditError('Please choose a different team name');
+      return;
+    }
+    setEditError('');
     const updatedTeams = (gameState.teams || []).map(t =>
       t.id === activeTeam.id ? { ...t, name, kitNation: editKit } : t
     );
@@ -3279,7 +3303,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 <input
                   type="text"
                   value={editName}
-                  onChange={e => setEditName(e.target.value)}
+                  onChange={e => { setEditName(e.target.value); setEditError(''); }}
                   maxLength={30}
                   style={{
                     width: '100%', boxSizing: 'border-box',
@@ -3290,6 +3314,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 {editName.trim().length > 0 && editName.trim().length < 2 && (
                   <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#C62828', marginTop: 4 }}>
                     Name must be at least 2 characters
+                  </div>
+                )}
+                {editError && (
+                  <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#C62828', marginTop: 4 }}>
+                    {editError}
                   </div>
                 )}
               </div>
@@ -3528,7 +3557,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                 type="text"
                 placeholder="e.g. The Praying Eagles"
                 value={teamNameInput}
-                onChange={e => setTeamNameInput(e.target.value)}
+                onChange={e => { setTeamNameInput(e.target.value); setCreateError(''); }}
                 maxLength={40}
                 style={{
                   width: '100%', boxSizing: 'border-box',
@@ -3536,6 +3565,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                   fontFamily: 'Montserrat, sans-serif', fontSize: 15, color: '#1B2B3A', outline: 'none',
                 }}
               />
+              {createError && (
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: '#C62828', marginTop: 4 }}>
+                  {createError}
+                </div>
+              )}
             </div>
 
             {/* Kit picker */}
