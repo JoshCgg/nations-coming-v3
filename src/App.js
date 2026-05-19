@@ -2647,12 +2647,15 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
     setJoinLoading(true);
     try {
-      const snap = await getDoc(doc(db, 'teams', teamCode));
-      if (!snap.exists()) {
-        setJoinError('Team not found — double-check the code and try again');
-        return;
+      let data = joinPreviewData;
+      if (!data) {
+        const snap = await getDoc(doc(db, 'teams', teamCode));
+        if (!snap.exists()) {
+          setJoinError('Team not found — double-check the code and try again');
+          return;
+        }
+        data = snap.data();
       }
-      const data = snap.data();
       const newTeam = {
         id: teamCode,
         name: data.name,
@@ -2684,7 +2687,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         setJoinSuccess('');
         setView('myteam');
         setActiveTeamIndex(updatedTeams.length - 1);
-      }, 1500);
+      }, 600);
     } catch {
       setJoinError('Something went wrong — try again');
     } finally {
