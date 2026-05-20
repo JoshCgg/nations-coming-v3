@@ -1467,22 +1467,26 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray })
           </div>
           <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
             <div style={{ display: "flex", gap: 8, padding: "0 16px", width: "max-content" }}>
-              {RAW_SCHEDULE.map((s, i) => (
-                <button key={i} onClick={() => { setDayIdx(i); window.scrollTo(0,0); }} style={{
-                  background: i === dayIdx ? C.indigo : C.brightGray,
-                  color: i === dayIdx ? "#fff" : C.indigo,
-                  border: "none",
-                  borderRadius: 10,
-                  padding: "10px 14px",
-                  fontFamily: "Montserrat, sans-serif",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                  minWidth: 64,
-                }}>{s.d}</button>
-              ))}
+              {RAW_SCHEDULE.map((s, i) => {
+                const dayLocked = gameState.journeyMode && scheduleToISO(s.d) > todayStr;
+                return (
+                  <button key={i} onClick={() => { if (!dayLocked) { setDayIdx(i); window.scrollTo(0,0); } }} disabled={dayLocked} style={{
+                    background: i === dayIdx ? C.indigo : C.brightGray,
+                    color: i === dayIdx ? "#fff" : dayLocked ? "#bbb" : C.indigo,
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "10px 14px",
+                    fontFamily: "Montserrat, sans-serif",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: dayLocked ? "not-allowed" : "pointer",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    minWidth: 64,
+                    opacity: dayLocked ? 0.4 : 1,
+                  }}>{s.d}</button>
+                );
+              })}
             </div>
           </div>
         </div>
