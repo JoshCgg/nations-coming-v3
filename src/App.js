@@ -4441,10 +4441,13 @@ function Onboarding({ onComplete }) {
 /* ─── MAIN APP ─── */
 export default function App() {
   const LAUNCH_DATE = new Date('2026-06-11');
-  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
+  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true'
+    || localStorage.getItem('pftc_preview') === 'true';
   const isLaunched = new Date() >= LAUNCH_DATE;
-  const showApp = isLaunched || isPreview;
+  const [previewUnlocked, setPreviewUnlocked] = useState(false);
+  const showApp = isLaunched || isPreview || previewUnlocked;
   const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
+  const logoTapTimes = useRef([]);
 
   const [tab, setTab] = useState("digest");
   const [selectedDayIdx, setSelectedDayIdx] = useState(null);
@@ -4727,7 +4730,20 @@ export default function App() {
         fontFamily: "Montserrat, sans-serif", padding: "40px 24px", boxSizing: "border-box",
       }}>
         <style>{FONTS}</style>
-        <img src="/images/pray-cup-logo.png" alt="Pray for the Cup" style={{ width: 200, marginBottom: 32 }} />
+        <img
+          src="/images/pray-cup-logo.png"
+          alt="Pray for the Cup"
+          style={{ width: 200, marginBottom: 32, WebkitTapHighlightColor: 'transparent', cursor: 'default' }}
+          onClick={() => {
+            const now = Date.now();
+            logoTapTimes.current = [...logoTapTimes.current, now].filter(t => now - t <= 3000);
+            if (logoTapTimes.current.length >= 5) {
+              logoTapTimes.current = [];
+              localStorage.setItem('pftc_preview', 'true');
+              setPreviewUnlocked(true);
+            }
+          }}
+        />
         <div style={{ fontSize: 28, fontWeight: 900, color: "#ffffff", textAlign: "center", marginBottom: 12 }}>
           Coming June 11, 2026
         </div>
