@@ -4,6 +4,91 @@ import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
+const triggerHaptic = async (style = 'medium') => {
+  try {
+    const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+    const styleMap = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
+    await Haptics.impact({ style: styleMap[style] || ImpactStyle.Medium });
+  } catch (e) {}
+};
+
+const scheduleMatchDayNotifications = async () => {
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications');
+    const { display } = await LocalNotifications.requestPermissions();
+    if (display !== 'granted') return;
+
+    await LocalNotifications.cancel({ notifications: Array.from({length: 40}, (_, i) => ({ id: i + 1 })) });
+
+    const schedule = [
+      { id: 1,  date: '2026-06-11', nations: 'Mexico & South Africa' },
+      { id: 2,  date: '2026-06-12', nations: 'Haiti & Scotland' },
+      { id: 3,  date: '2026-06-13', nations: 'Brazil & Morocco' },
+      { id: 4,  date: '2026-06-14', nations: 'Spain & Uruguay' },
+      { id: 5,  date: '2026-06-15', nations: 'Iran & Iraq' },
+      { id: 6,  date: '2026-06-16', nations: 'Senegal & Tunisia' },
+      { id: 7,  date: '2026-06-17', nations: 'Portugal & DR Congo' },
+      { id: 8,  date: '2026-06-18', nations: 'Jordan & Qatar' },
+      { id: 9,  date: '2026-06-19', nations: 'Türkiye & Australia' },
+      { id: 10, date: '2026-06-20', nations: 'Egypt & Saudi Arabia' },
+      { id: 11, date: '2026-06-21', nations: 'France & Algeria' },
+      { id: 12, date: '2026-06-22', nations: 'Argentina & Colombia' },
+      { id: 13, date: '2026-06-23', nations: 'Germany & Japan' },
+      { id: 14, date: '2026-06-24', nations: 'South Africa & South Korea' },
+      { id: 15, date: '2026-06-25', nations: 'Norway & New Zealand' },
+      { id: 16, date: '2026-06-26', nations: 'Netherlands & Sweden' },
+      { id: 17, date: '2026-06-27', nations: 'all 48 nations 🌍' },
+      { id: 18, date: '2026-06-28', nations: null },
+      { id: 19, date: '2026-06-29', nations: null },
+      { id: 20, date: '2026-06-30', nations: null },
+      { id: 21, date: '2026-07-01', nations: null },
+      { id: 22, date: '2026-07-02', nations: null },
+      { id: 23, date: '2026-07-03', nations: null },
+      { id: 24, date: '2026-07-04', nations: null },
+      { id: 25, date: '2026-07-05', nations: null },
+      { id: 26, date: '2026-07-06', nations: null },
+      { id: 27, date: '2026-07-07', nations: null },
+      { id: 28, date: '2026-07-08', nations: null },
+      { id: 29, date: '2026-07-09', nations: null },
+      { id: 30, date: '2026-07-10', nations: null },
+      { id: 31, date: '2026-07-11', nations: null },
+      { id: 32, date: '2026-07-12', nations: null },
+      { id: 33, date: '2026-07-13', nations: null },
+      { id: 34, date: '2026-07-14', nations: null },
+      { id: 35, date: '2026-07-15', nations: null },
+      { id: 36, date: '2026-07-16', nations: null },
+      { id: 37, date: '2026-07-17', nations: null },
+      { id: 38, date: '2026-07-18', nations: null },
+      { id: 39, date: '2026-07-19', nations: null },
+    ];
+
+    const savedTime = localStorage.getItem('notificationTime') || '08:00';
+    const [hh, mm] = savedTime.split(':');
+    const today = new Date();
+    const cutoff = new Date('2026-07-20');
+
+    const notifications = schedule
+      .filter(s => {
+        const d = new Date(s.date);
+        return d >= today && d < cutoff;
+      })
+      .map(s => ({
+        id: s.id,
+        title: 'Time to Pray for the Cup ⚽',
+        body: s.nations
+          ? `Today: pray for ${s.nations} 🙏`
+          : 'Pray for the nations still in the tournament 🏆',
+        schedule: { at: new Date(`${s.date}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`) },
+        sound: null,
+        smallIcon: 'ic_stat_icon_config_sample',
+        iconColor: '#E06520',
+      }));
+
+    if (notifications.length > 0) {
+      await LocalNotifications.schedule({ notifications });
+    }
+  } catch (e) {}
+};
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -1241,7 +1326,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
                 </div>
               ) : (
                 <button
-                  onClick={() => onPray ? onPray(nation) : updateGameState({ prayedNations: [...(gameState?.prayedNations || []), nation.n] })}
+                  onClick={() => { triggerHaptic('medium'); onPray ? onPray(nation) : updateGameState({ prayedNations: [...(gameState?.prayedNations || []), nation.n] }); }}
                   style={{
                     display: "block", width: "100%", marginTop: 12,
                     background: C.orange, color: C.white, border: "none",
@@ -1530,7 +1615,8 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
           return (
             <div style={{ marginBottom: 14 }}>
               <button
-                onClick={() => {
+                onClick={async () => {
+                  triggerHaptic('light');
                   const yesterday = new Date();
                   yesterday.setDate(yesterday.getDate() - 1);
                   const yesterdayISO = yesterday.toISOString().split('T')[0];
@@ -4134,6 +4220,7 @@ function Onboarding({ onComplete }) {
   };
 
   function handleNotifAllow() {
+    scheduleMatchDayNotifications();
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission().then(() => finishOnboarding());
     } else {
@@ -4769,6 +4856,8 @@ export default function App() {
   const [settingsDisplayName, setSettingsDisplayName] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}").displayName || ''; } catch { return ''; }
   });
+  const [notifTime, setNotifTime] = useState(() => localStorage.getItem('notificationTime') || '08:00');
+  const [notifTimeConfirm, setNotifTimeConfirm] = useState(false);
   const [tooltipStep, setTooltipStep] = useState(null);
   const devotionalCardRef = useRef(null);
   const checkInBtnRef = useRef(null);
@@ -4843,6 +4932,13 @@ export default function App() {
     if (gameState.hasOnboarded && !localStorage.getItem('pftc_tooltips_done')) {
       setTooltipStep(0);
     }
+  }, [gameState.hasOnboarded]);
+
+  useEffect(() => {
+    if (!gameState.hasOnboarded) return;
+    if (new Date() >= new Date('2026-07-20')) return;
+    scheduleMatchDayNotifications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.hasOnboarded]);
 
   useEffect(() => {
@@ -5029,6 +5125,8 @@ export default function App() {
 
   useEffect(() => {
     if (toastQueue.length > 0 && pendingToast === null) {
+      triggerHaptic('heavy');
+      setTimeout(() => triggerHaptic('heavy'), 150);
       setPendingToast(toastQueue[0]);
       setToastQueue(q => q.slice(1));
     }
@@ -5418,6 +5516,50 @@ export default function App() {
                   </button>
                 )}
               </div>
+
+              {/* Daily reminder time — only shown after onboarding */}
+              {gameState.hasOnboarded && (
+                <>
+                  <div style={{ height: 1, background: C.brightGray, margin: "0 0 20px" }} />
+                  <div style={{ marginBottom: 20 }}>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Notifications</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ flex: 1, marginRight: 16 }}>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Daily reminder</div>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>
+                          {(() => {
+                            const [h, m] = notifTime.split(':').map(Number);
+                            const ampm = h >= 12 ? 'PM' : 'AM';
+                            const h12 = h % 12 || 12;
+                            return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+                          })()}
+                        </div>
+                        {notifTimeConfirm && (
+                          <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#2e7d32", marginTop: 4 }}>Reminders updated ✓</div>
+                        )}
+                      </div>
+                      <input
+                        type="time"
+                        value={notifTime}
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (!val) return;
+                          setNotifTime(val);
+                          localStorage.setItem('notificationTime', val);
+                          scheduleMatchDayNotifications();
+                          setNotifTimeConfirm(true);
+                          setTimeout(() => setNotifTimeConfirm(false), 3000);
+                        }}
+                        style={{
+                          fontFamily: "Montserrat, sans-serif", fontSize: 14, color: C.indigo,
+                          border: `1px solid ${C.blue}`, borderRadius: 8, padding: "8px 10px",
+                          background: "#fff", cursor: "pointer", outline: "none",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Version line */}
               <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: C.blue, textAlign: "center", marginTop: 20 }}>
