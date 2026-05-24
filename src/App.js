@@ -1272,7 +1272,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
 }
 
 /* ─── DAILY DIGEST TAB ─── */
-function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray }) {
+function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, userProfile }) {
   const today = new Date();
   const startOfTournament = new Date("2026-06-11");
   let defaultDay = 0;
@@ -1345,6 +1345,25 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray })
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <span style={{ fontSize: 22 }}>📖</span>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 16, color: C.indigo }}>Today's Devotional</div>
+            {userProfile?.uid && (
+              <button
+                onClick={async () => {
+                  const text = 'I just prayed for the nations today using Pray for the Cup 🌍⚽ Join me at prayforthecup.com';
+                  try {
+                    if (navigator.share) { await navigator.share({ text }); }
+                    else { await navigator.clipboard.writeText(text); }
+                  } catch {}
+                }}
+                style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: C.indigo, display: 'flex', alignItems: 'center' }}
+                title="Share"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                  <polyline points="16 6 12 2 8 6"/>
+                  <line x1="12" y1="2" x2="12" y2="15"/>
+                </svg>
+              </button>
+            )}
           </div>
           {day.img && (
             <img
@@ -2498,6 +2517,126 @@ const KitBadge = ({ kitId, size = 32 }) => {
   return <SoccerBallKit kitId={kitId} size={size * 0.85} />;
 };
 
+/* ─── SHARE CARD CANVAS ─── */
+const KIT_SVG_SLUG = {
+  brazil:'brazil', argentina:'argentina', france:'france', germany:'germany',
+  spain:'spain', usa:'usa', mexico:'mexico', canada:'canada', portugal:'portugal',
+  nigeria:'nigeria', morocco:'morocco', senegal:'senegal', japan:'japan',
+  saudi:'saudi-arabia', netherlands:'netherlands', jordan:'jordan',
+  australia:'australia', southkorea:'south-korea', england:'england', scotland:'scotland',
+};
+const KIT_FLAG_EMOJI_MAP = {
+  brazil:'🇧🇷', argentina:'🇦🇷', france:'🇫🇷', germany:'🇩🇪', spain:'🇪🇸',
+  usa:'🇺🇸', mexico:'🇲🇽', canada:'🇨🇦', portugal:'🇵🇹', nigeria:'🇳🇬',
+  morocco:'🇲🇦', senegal:'🇸🇳', japan:'🇯🇵', saudi:'🇸🇦', netherlands:'🇳🇱',
+  jordan:'🇯🇴', australia:'🇦🇺', southkorea:'🇰🇷', england:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', scotland:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+};
+function loadCanvasImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+async function generateShareCard(type, data) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1920;
+  const ctx = canvas.getContext('2d');
+  try { await document.fonts.ready; } catch {}
+
+  ctx.fillStyle = '#00476B';
+  ctx.fillRect(0, 0, 1080, 1920);
+  ctx.fillStyle = '#E06520';
+  ctx.fillRect(0, 0, 12, 1920);
+
+  try {
+    const logo = await loadCanvasImage('/images/pray-cup-logo-white.png');
+    const lW = 400, lH = Math.round(lW * logo.height / logo.width);
+    ctx.drawImage(logo, (1080 - lW) / 2, 120, lW, lH);
+  } catch {}
+
+  ctx.textAlign = 'center';
+
+  if (type === 'final_whistle') {
+    ctx.font = '220px serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('🏆', 540, 680);
+
+    ctx.font = 'bold 72px Montserrat, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('I prayed for all 48 nations', 540, 940);
+
+    ctx.font = '48px Montserrat, sans-serif';
+    ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('2026 FIFA World Cup', 540, 1030);
+
+    ctx.strokeStyle = '#E06520';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(390, 1100); ctx.lineTo(690, 1100); ctx.stroke();
+
+    ctx.font = '42px Montserrat, sans-serif';
+    ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('prayforthecup.com', 540, 1160);
+
+    try {
+      const wm = await loadCanvasImage('/images/gg-wordmark.png');
+      const wmW = 180, wmH = Math.round(wmW * wm.height / wm.width);
+      ctx.drawImage(wm, (1080 - wmW) / 2, 1260, wmW, wmH);
+    } catch {}
+
+  } else if (type === 'team') {
+    const { teamName = '', kitNation = '', teamCode = '' } = data;
+    const slug = KIT_SVG_SLUG[kitNation] || kitNation;
+    let kitDrawn = false;
+    try {
+      const svgText = await fetch(`/images/kits/${slug}.svg`).then(r => r.text());
+      const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      try {
+        const kitImg = await loadCanvasImage(svgUrl);
+        const kW = 480, kH = Math.round(kW * kitImg.height / kitImg.width);
+        ctx.drawImage(kitImg, (1080 - kW) / 2, 460, kW, kH);
+        kitDrawn = true;
+      } finally { URL.revokeObjectURL(svgUrl); }
+    } catch {}
+    if (!kitDrawn) {
+      ctx.font = '200px serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(KIT_FLAG_EMOJI_MAP[kitNation] || '⚽', 540, 700);
+    }
+
+    const namePx = (teamName.length > 20) ? 60 : 80;
+    ctx.font = `bold ${namePx}px Montserrat, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(teamName, 540, 1020);
+
+    ctx.font = '48px Montserrat, sans-serif';
+    ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('is praying for the nations ⚽', 540, 1110);
+
+    ctx.strokeStyle = '#E06520';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(390, 1190); ctx.lineTo(690, 1190); ctx.stroke();
+
+    ctx.font = '42px Montserrat, sans-serif';
+    ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('Join us:', 540, 1260);
+
+    ctx.font = 'bold 44px Montserrat, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`prayforthecup.com/app?join=${teamCode}`, 540, 1330);
+
+    ctx.font = '38px Montserrat, sans-serif';
+    ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('prayforthecup.com', 540, 1480);
+  }
+
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
 /* ─── TEAMS TAB ─── */
 const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAutoJoinConsumed }) => {
   const teams = gameState.teams || [];
@@ -2514,6 +2653,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState('');
   const [joinSuccess, setJoinSuccess] = useState('');
+  const [teamShareBanner, setTeamShareBanner] = useState(null);
   const [liveTeamData, setLiveTeamData] = useState({});
   const [joinPreviewData, setJoinPreviewData] = useState(null);
   const [joinPreviewLoading, setJoinPreviewLoading] = useState(false);
@@ -2737,8 +2877,17 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     }
     setView('myteam');
     setActiveTeamIndex(updatedTeams.length - 1);
+    const createdName = teamNameInput.trim();
+    const createdKit = selectedKit;
+    const createdCode = teamCode;
     setTeamNameInput('');
     setSelectedKit('brazil');
+    generateShareCard('team', { teamName: createdName, kitNation: createdKit, teamCode: createdCode })
+      .then(blob => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        setTeamShareBanner({ teamName: createdName, teamCode: createdCode, previewUrl: url, blob });
+      }).catch(() => {});
   }
 
   async function handleJoinTeam(rawCode) {
@@ -2936,6 +3085,37 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     if (!activeTeam) return null;
     return (
       <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
+        {teamShareBanner && (
+          <div style={{ background: '#00476B', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '2px solid #E06520' }}>
+            {teamShareBanner.previewUrl && (
+              <img src={teamShareBanner.previewUrl} alt="" style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{teamShareBanner.teamName}</div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Team created!</div>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  const file = new File([teamShareBanner.blob], 'team.png', { type: 'image/png' });
+                  const text = `Join my prayer team on Pray for the Cup! Code: ${teamShareBanner.teamCode} — prayforthecup.com/app?join=${teamShareBanner.teamCode}`;
+                  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], text });
+                  } else if (navigator.share) {
+                    await navigator.share({ text });
+                  } else {
+                    await navigator.clipboard.writeText(`prayforthecup.com/app?join=${teamShareBanner.teamCode}`);
+                  }
+                } catch {}
+              }}
+              style={{ background: '#E06520', border: 'none', borderRadius: 8, padding: '8px 14px', fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: '#fff', cursor: 'pointer', flexShrink: 0 }}
+            >Share Your Team</button>
+            <button
+              onClick={() => { URL.revokeObjectURL(teamShareBanner.previewUrl); setTeamShareBanner(null); }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 18, cursor: 'pointer', padding: 4, flexShrink: 0 }}
+            >✕</button>
+          </div>
+        )}
 
         {/* Pill switcher */}
         <div style={{ background: '#00476B', padding: '12px 16px', display: 'flex', gap: 8, overflowX: 'auto' }}>
@@ -4462,6 +4642,71 @@ function Onboarding({ onComplete }) {
   );
 }
 
+/* ─── FINAL WHISTLE SHARE MODAL ─── */
+function FinalWhistleShareModal({ onClose }) {
+  const [cardDataUrl, setCardDataUrl] = useState(null);
+  const [sharing, setSharing] = useState(false);
+
+  useEffect(() => {
+    let objectUrl;
+    generateShareCard('final_whistle', {}).then(blob => {
+      if (!blob) return;
+      objectUrl = URL.createObjectURL(blob);
+      setCardDataUrl(objectUrl);
+    }).catch(() => {});
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, []);
+
+  async function handleShare() {
+    if (sharing) return;
+    setSharing(true);
+    try {
+      const blob = await generateShareCard('final_whistle', {});
+      const file = new File([blob], 'pray-for-the-cup.png', { type: 'image/png' });
+      const text = 'I just prayed for all 48 nations at the 2026 FIFA World Cup! 🏆🌍 prayforthecup.com #PrayForTheCup';
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text });
+      } else if (navigator.share) {
+        await navigator.share({ text });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'pray-for-the-cup.png'; a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch {}
+    setSharing(false);
+  }
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,20,40,0.95)', zIndex:4000, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24 }}>
+      <div style={{ fontFamily:'Montserrat, sans-serif', fontWeight:900, fontSize:28, color:'#fff', textAlign:'center', marginBottom:8 }}>The Final Whistle 🏆</div>
+      <div style={{ fontFamily:'Montserrat, sans-serif', fontSize:14, color:'#8ADBFF', textAlign:'center', marginBottom:24, lineHeight:1.5 }}>
+        You prayed for all 48 nations at the 2026 World Cup!
+      </div>
+      {cardDataUrl
+        ? <img src={cardDataUrl} alt="Share card preview" style={{ width:280, borderRadius:12, boxShadow:'0 8px 32px rgba(0,0,0,0.5)', marginBottom:24 }} />
+        : <div style={{ width:280, height:498, borderRadius:12, background:'#00476B', marginBottom:24, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ color:'#8ADBFF', fontFamily:'Montserrat, sans-serif', fontSize:14 }}>Generating…</div>
+          </div>
+      }
+      <button
+        onClick={handleShare}
+        disabled={sharing}
+        style={{ background:'#E06520', color:'#fff', border:'none', borderRadius:14, fontFamily:'Montserrat, sans-serif', fontWeight:800, fontSize:16, padding:'16px 0', width:'100%', maxWidth:320, cursor:'pointer', opacity:sharing ? 0.7 : 1 }}
+      >
+        Share This Moment
+      </button>
+      <button
+        onClick={onClose}
+        style={{ background:'none', border:'none', color:'rgba(255,255,255,0.6)', fontFamily:'Montserrat, sans-serif', fontSize:14, marginTop:16, cursor:'pointer' }}
+      >
+        Close
+      </button>
+    </div>
+  );
+}
+
 /* ─── MAIN APP ─── */
 export default function App() {
   const LAUNCH_DATE = new Date('2026-06-11');
@@ -4479,6 +4724,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [showFinalWhistleShare, setShowFinalWhistleShare] = useState(false);
   const [gameState, updateGameState] = useGameState();
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
@@ -4487,6 +4733,12 @@ export default function App() {
   const nationTapTimes = useRef([]);
   const [userProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
+  });
+  const [showNameEdit, setShowNameEdit] = useState(false);
+  const [nameEditValue, setNameEditValue] = useState('');
+  const [nameEditError, setNameEditError] = useState('');
+  const [settingsDisplayName, setSettingsDisplayName] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("userProfile") || "{}").displayName || ''; } catch { return ''; }
   });
   const [tooltipStep, setTooltipStep] = useState(null);
   const devotionalCardRef = useRef(null);
@@ -4509,6 +4761,7 @@ export default function App() {
       if (userProfile?.uid && nextState.journeyMode) {
         setToastQueue(q => [...q, ...newlyEarned]);
       }
+      if (newlyEarned.includes('final_whistle')) setShowFinalWhistleShare(true);
     }
     if ((nextState.prayedNations || []).length !== (gameState.prayedNations || []).length) {
       const uid = userProfile?.uid || auth.currentUser?.uid;
@@ -4955,6 +5208,7 @@ export default function App() {
                   gameState={gameState}
                   updateGameState={handleGameStateUpdate}
                   onPray={handleNationPray}
+                  userProfile={userProfile}
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} onOpenSettings={() => setShowSettings(true)} />
           ) : tab === "teams" ? (
@@ -5043,50 +5297,97 @@ export default function App() {
               {/* Account row */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Account</div>
-                {(() => {
-                  let profile = null;
-                  try { profile = JSON.parse(localStorage.getItem("userProfile") || "null"); } catch {}
-                  if (profile && profile.displayName && profile.email) {
-                    return (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{profile.displayName}</div>
-                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Display name</div>
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <span style={{ fontSize: 20, marginRight: 12 }}>✉️</span>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{profile.email}</div>
-                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Account email</div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return (
-                    <button
-                      onClick={() => {
-                        setShowSettings(false);
-                        try {
-                          const gs = JSON.parse(localStorage.getItem('pftc_game') || '{}');
-                          localStorage.setItem('pftc_game', JSON.stringify({ ...gs, hasOnboarded: false }));
-                        } catch {}
-                        window.location.reload();
-                      }}
-                      style={{ display: "flex", alignItems: "center", cursor: "pointer", background: "none", border: "none", padding: 0, width: "100%", textAlign: "left" }}
-                    >
+                {userProfile?.uid && userProfile?.email ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
                       <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Sign In / Register</div>
-                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Save your progress and track your prayer journey</div>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{settingsDisplayName}</div>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Display name</div>
                       </div>
-                      <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
-                    </button>
-                  );
-                })()}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <span style={{ fontSize: 20, marginRight: 12 }}>✉️</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>{userProfile.email}</div>
+                        <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Account email</div>
+                      </div>
+                    </div>
+                    {/* Change Display Name row */}
+                    <div>
+                      {!showNameEdit ? (
+                        <button
+                          onClick={() => { setNameEditValue(settingsDisplayName); setNameEditError(''); setShowNameEdit(true); }}
+                          style={{ display: "flex", alignItems: "center", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}
+                        >
+                          <span style={{ fontSize: 20, marginRight: 12 }}>✏️</span>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Change Display Name</div>
+                          </div>
+                          <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
+                        </button>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          <input
+                            value={nameEditValue}
+                            onChange={e => setNameEditValue(e.target.value)}
+                            maxLength={40}
+                            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, padding: "10px 12px", borderRadius: 8, border: `1px solid ${C.blue}`, color: C.indigo, outline: "none", width: "100%", boxSizing: "border-box" }}
+                            autoFocus
+                          />
+                          {nameEditError && <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#e03030" }}>{nameEditError}</div>}
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                              onClick={async () => {
+                                const trimmed = nameEditValue.trim();
+                                if (!trimmed) return;
+                                if (containsBlockedWord(trimmed)) {
+                                  setNameEditError("That name isn't allowed — please choose another");
+                                  return;
+                                }
+                                try {
+                                  const stored = JSON.parse(localStorage.getItem("userProfile") || "{}");
+                                  stored.displayName = trimmed;
+                                  localStorage.setItem("userProfile", JSON.stringify(stored));
+                                  setSettingsDisplayName(trimmed);
+                                  if (userProfile?.uid) {
+                                    try { await updateDoc(doc(db, "users", userProfile.uid), { displayName: trimmed }); } catch {}
+                                  }
+                                  setShowNameEdit(false);
+                                  setNameEditError('');
+                                } catch {}
+                              }}
+                              style={{ flex: 1, background: "#E06520", border: "none", borderRadius: 8, padding: "10px 0", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", cursor: "pointer" }}
+                            >Save</button>
+                            <button
+                              onClick={() => { setShowNameEdit(false); setNameEditError(''); }}
+                              style={{ flex: 1, background: "rgba(0,0,0,0.08)", border: "none", borderRadius: 8, padding: "10px 0", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: C.indigo, cursor: "pointer" }}
+                            >Cancel</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      try {
+                        const gs = JSON.parse(localStorage.getItem('pftc_game') || '{}');
+                        localStorage.setItem('pftc_game', JSON.stringify({ ...gs, hasOnboarded: false }));
+                      } catch {}
+                      window.location.reload();
+                    }}
+                    style={{ display: "flex", alignItems: "center", cursor: "pointer", background: "none", border: "none", padding: 0, width: "100%", textAlign: "left" }}
+                  >
+                    <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Sign In / Register</div>
+                      <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Save your progress and track your prayer journey</div>
+                    </div>
+                    <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
+                  </button>
+                )}
               </div>
 
               {/* Version line */}
@@ -5209,6 +5510,8 @@ export default function App() {
           </div>,
           document.body
         )}
+
+        {showFinalWhistleShare && <FinalWhistleShareModal onClose={() => setShowFinalWhistleShare(false)} />}
 
         {/* About & Credits Modal */}
         {showAbout && (
