@@ -397,7 +397,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Willemstad", lang: "Papiamentu, Dutch, English",
     ug: ["East Indian", "Jewish, Dutch", "Deaf"],
     m: "Curaçao makes a rare World Cup appearance for this small Caribbean island — a Dutch territory with a warm, syncretic Christian heritage. The island has seen a wave of Venezuelan and Haitian migrants in recent years, many in precarious conditions. Curaçao's diaspora in the Netherlands represents a bridge community with gospel potential in both directions.",
-    ujp: 16, ujp_unreached: 3,
+    ujp: 16, ujp_unreached: 3, jp: "UC",
   },
   {
     n: "Côte d'Ivoire", f: "🇨🇮", iso: "ci",
@@ -437,7 +437,7 @@ const RAW_COUNTRIES = [
     rel: "Secular", cap: "Stockholm", lang: "Swedish",
     ug: ["Arab, Iraqi", "Hazara", "Somali"],
     m: "Sweden sent missionaries across the globe for two centuries — now the mission field has come home. Stockholm and Gothenburg are home to hundreds of thousands of Muslim refugees from Somalia, Iraq, and Afghanistan. Swedish churches that once sent workers abroad are now discovering their unreached neighbors next door.",
-    ujp: 74, ujp_unreached: 24,
+    ujp: 74, ujp_unreached: 24, jp: "SW",
   },
   {
     n: "Tunisia", f: "🇹🇳", iso: "tn",
@@ -496,7 +496,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Praia", lang: "Portuguese, Cape Verdean Creole",
     ug: ["Fulani, Adamawa", "Deaf"],
     m: "Cabo Verde makes its first-ever World Cup appearance — a tiny island nation of 560,000 with a diaspora larger than its home population scattered across Portugal, the Netherlands, and New England. The diaspora carries gospel potential: Cape Verdean believers in Boston and Lisbon are uniquely positioned to reach their own communities and beyond.",
-    ujp: 5, ujp_unreached: 2,
+    ujp: 5, ujp_unreached: 2, jp: "CV",
   },
   {
     n: "Saudi Arabia", f: "🇸🇦", iso: "sa",
@@ -638,7 +638,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Accra", lang: "English, Akan, Hausa",
     ug: ["Mamprusi", "Gonja", "Hausa"],
     m: "Ghana's evangelical church in the south is one of Africa's most vibrant — sending missionaries and planting churches across the continent. Yet Ghana's Muslim-majority north remains largely unreached, home to the Dagomba, Konkomba, and Fulani peoples. Ghana is simultaneously a sending nation and a nation with its own frontier.",
-    ujp: 108, ujp_unreached: 16,
+    ujp: 108, ujp_unreached: 16, jp: "GH",
   },
   {
     n: "Panama", f: "🇵🇦", iso: "pa",
