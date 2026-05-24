@@ -264,7 +264,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Mexico City", lang: "Spanish",
     ug: ["Huichol", "Jewish, Spanish-speaking", "Japanese"],
     m: "Mexico is one of Latin America's top missionary-sending nations and has a vibrant evangelical movement — yet dozens of indigenous peoples in Oaxaca, Chiapas, and the Sierra Madre remain unreached. In North America, millions of Mexican immigrants fill cities from Los Angeles to New York, carrying both gospel need and gospel potential.",
-    ujp: 333, ujp_unreached: 4,
+    ujp: 333, ujp_unreached: 4, jp: "MX",
   },
   {
     n: "South Africa", f: "🇿🇦", iso: "za",
@@ -272,7 +272,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Pretoria", lang: "Zulu, Xhosa, Afrikaans, English",
     ug: ["Cape Malay Muslims", "Zulu traditionalists", "Indian South Africans"],
     m: "South Africa has one of Africa's largest and most resourced churches — yet significant Muslim and traditional communities remain unreached. The Cape Malay Muslim community in Cape Town, descended from Southeast Asian slaves, has seen almost no gospel engagement for centuries. South Africa is both a sending nation and a mission field.",
-    ujp: 63, ujp_unreached: 9,
+    ujp: 63, ujp_unreached: 9, jp: "SF",
   },
   {
     n: "South Korea", f: "🇰🇷", iso: "kr",
@@ -280,7 +280,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Seoul", lang: "Korean",
     ug: ["Korean non-religious", "Joseonjok (ethnic Koreans in China)", "North Koreans"],
     m: "South Korea has sent over 20,000 missionaries worldwide — second only to the United States. Yet at home, the church faces declining attendance among younger generations, and the 2.5 million Koreans in North America include many who are culturally Christian but spiritually distant. And yet the nation most on the hearts of South Korean believers — North Korea — remains one of the world's most closed and unreachable.",
-    ujp: 30, ujp_unreached: 13,
+    ujp: 30, ujp_unreached: 13, jp: "KS",
   },
   {
     n: "Czechia", f: "🇨🇿", iso: "cz",
@@ -298,7 +298,7 @@ const RAW_COUNTRIES = [
     m: "Canada is home to one of the world's largest Sikh diaspora communities, concentrated in Vancouver and Toronto, as well as hundreds of thousands of Muslims from South Asia, the Middle East, and East Africa. Canada's multicultural cities are extraordinary mission fields — and Canadian churches are only beginning to recognize the unreached peoples living next door. Global Gates Canada is engaging unreached diaspora peoples in cities across Canada.",
     diasporaLink: { text: "gatewaycities.ca", url: "https://gatewaycities.ca" },
     diaspora: "",
-    ujp: 244, ujp_unreached: 53,
+    ujp: 244, ujp_unreached: 53, jp: "CA",
   },
   {
     n: "Bosnia & Herzegovina", f: "🇧🇦", iso: "ba",
@@ -307,7 +307,7 @@ const RAW_COUNTRIES = [
     ug: ["Bosniak", "Roma Bosnians", "Albanian Muslims"],
     m: "Sarajevo is one of Europe's most Muslim cities — the legacy of Ottoman rule still shapes daily life. A small but growing evangelical church is quietly taking root in the Balkans, one of the last Protestant frontiers on the continent. The scars of the 1990s war run deep across Bosnian society — making the gospel of reconciliation uniquely compelling in this context.",
     diaspora: "An estimated 350,000 Bosniaks live in the US and Canada, many of them refugees still processing war, displacement, and identity. Learn more: https://upgnorthamerica.com/project/bosniaks-in-north-america/",
-    ujp: 8, ujp_unreached: 3,
+    ujp: 8, ujp_unreached: 3, jp: "BK",
   },
   {
     n: "Qatar", f: "🇶🇦", iso: "qa",
@@ -315,7 +315,7 @@ const RAW_COUNTRIES = [
     rel: "Islam", cap: "Doha", lang: "Arabic",
     ug: ["Arab, Arabic Gulf Spoken", "Arab, Palestinian", "Persian"],
     m: "Qatar's population is over 85% migrant workers — Nepalis, Filipinos, Indians, and Pakistanis who built the World Cup stadiums and now fill the city of Doha. Many come from Hindu, Buddhist, and Muslim backgrounds with little gospel access at home. Qatar is a temporary gathering of nations: workers who carry what they encounter back to their home countries.",
-    ujp: 25, ujp_unreached: 14,
+    ujp: 25, ujp_unreached: 14, jp: "QA",
   },
   {
     n: "Brazil", f: "🇧🇷", iso: "br",
@@ -323,7 +323,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Brasília", lang: "Portuguese",
     ug: ["Jewish, Portuguese", "Satere-Mawe", "Turk"],
     m: "Brazil now sends more missionaries than any other country in the Global South — a remarkable shift in the center of gravity of world mission. Yet Brazil's own Amazon basin contains dozens of indigenous peoples who have never heard the gospel, and Brazilian cities have growing Muslim and Jewish communities largely untouched by the church.",
-    ujp: 321, ujp_unreached: 52,
+    ujp: 321, ujp_unreached: 52, jp: "BR",
   },
   {
     n: "Morocco", f: "🇲🇦", iso: "ma",
@@ -332,7 +332,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Moroccan", "Berber, Southern Shilha", "Berber, Tamazight"],
     m: "Morocco is 99.9% Muslim, yet a quiet movement of Moroccans coming to faith in Jesus has been growing for decades — primarily through media, dreams, and personal witness. The Amazigh people of the Atlas Mountains have seen some of the most remarkable gospel movements in North Africa. In North America, Moroccan communities in Montreal, New York, and beyond represent an extraordinary access point.",
     diaspora: "Over 320,000 Moroccan Arabs and Berbers live across North America — concentrated in New York, Montreal, and Los Angeles. Meet them at UPG North America: https://upgnorthamerica.com/project/moroccan-arabs-in-north-america/",
-    ujp: 29, ujp_unreached: 27,
+    ujp: 29, ujp_unreached: 27, jp: "MO",
   },
   {
     n: "Haiti", f: "🇭🇹", iso: "ht",
@@ -340,7 +340,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Port-au-Prince", lang: "Haitian Creole, French",
     ug: ["Haitian Vodou practitioners", "Rural Haitian poor", "Haitian diaspora (secular)"],
     m: "Haiti is one of the most spiritually complex nations in the Western Hemisphere — a majority Christian country where Vodou is deeply woven into cultural and spiritual life. Despite extraordinary suffering, the Haitian church is remarkably resilient. The Haitian diaspora in Miami, New York, and Montreal carries both deep faith and deep need for wholeness.",
-    ujp: 5, ujp_unreached: 1,
+    ujp: 5, ujp_unreached: 1, jp: "HA",
   },
   {
     n: "Scotland", f: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", iso: "gb-sct",
@@ -356,7 +356,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Washington D.C.", lang: "English",
     ug: ["Arab Americans", "Jewish Americans", "Somali Americans"],
     m: "The United States is simultaneously the world's largest missionary-sending nation and home to millions of unreached peoples. Over 400 people groups live in American cities with little or no gospel witness in their own language and culture. Arab, Somali, Afghan, and South Asian Muslim communities in New York, Minneapolis, Houston, and Dearborn represent some of the greatest mission opportunities on earth.",
-    ujp: 498, ujp_unreached: 92,
+    ujp: 498, ujp_unreached: 92, jp: "US",
   },
   {
     n: "Paraguay", f: "🇵🇾", iso: "py",
@@ -364,7 +364,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Asunción", lang: "Spanish, Guaraní",
     ug: ["Guaraní indigenous", "Guaraní, Eastern Bolivian", "Chamacoco Tomaraho"],
     m: "Paraguay is one of only two countries in the Americas where an indigenous language — Guaraní — is spoken by the majority of the population. The Guaraní people carry a deep spiritual hunger, and the Paraguayan evangelical church is growing. Smaller indigenous groups in the Chaco region remain largely unreached and face significant pressure from land development.",
-    ujp: 36, ujp_unreached: 6,
+    ujp: 36, ujp_unreached: 6, jp: "PA",
   },
   {
     n: "Australia", f: "🇦🇺", iso: "au",
@@ -372,7 +372,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Canberra", lang: "English",
     ug: ["Aboriginal Australians", "Afghan Australians", "Chinese Australians"],
     m: "Australia is home to Aboriginal and Torres Strait Islander peoples whose spiritual landscape is complex and whose historical relationship with Christianity is painful. At the same time, Sydney and Melbourne host some of the world's largest diaspora communities — Chinese, Lebanese, Afghan, and Vietnamese — many of whom are Muslim or Buddhist and have little church contact.",
-    ujp: 208, ujp_unreached: 41,
+    ujp: 208, ujp_unreached: 41, jp: "AS",
   },
   {
     n: "Türkiye", f: "🇹🇷", iso: "tr",
@@ -381,7 +381,7 @@ const RAW_COUNTRIES = [
     ug: ["Turk", "Kurd, Kurmanji", "Turk, Alevi"],
     m: "Türkiye is home to 15 million Kurds — one of the world's largest unreached people groups — and hosts over 3 million Syrian refugees. The tiny Turkish church faces significant legal and social pressure, yet continues to grow. Türkiye is both a mission field and a strategic bridge between Europe, Central Asia, and the Arab world.",
     diaspora: "Around 425,000 Turks and tens of thousands of Kurds live across North America, in cities from New York to Chicago to Toronto. Explore their communities: https://upgnorthamerica.com/project/turks-in-north-america/",
-    ujp: 85, ujp_unreached: 61,
+    ujp: 85, ujp_unreached: 61, jp: "TU",
   },
   {
     n: "Germany", f: "🇩🇪", iso: "de",
@@ -405,7 +405,7 @@ const RAW_COUNTRIES = [
     rel: "Islam", cap: "Yamoussoukro", lang: "French",
     ug: ["Jula (Dioula)", "Hausa", "Fulani, Maasina"],
     m: "Côte d'Ivoire is evenly divided between Muslim north and Christian south — a spiritual and cultural fault line that has fueled decades of political tension. The Dioula Muslim people are one of the largest unreached groups in West Africa, spread across the Sahel. Yet the Ivorian church is vibrant, growing, and increasingly mission-minded toward its own unreached north.",
-    ujp: 105, ujp_unreached: 32,
+    ujp: 105, ujp_unreached: 32, jp: "IV",
   },
   {
     n: "Ecuador", f: "🇪🇨", iso: "ec",
@@ -413,7 +413,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Quito", lang: "Spanish, Kichwa",
     ug: ["Kichwa indigenous", "Shuar", "Afro-Ecuadorian"],
     m: "Ecuador's Amazon and Andes regions are home to numerous indigenous peoples, including the Kichwa and Shuar, where significant gospel movements have taken root in recent decades. Ecuador also has a growing evangelical church that is increasingly engaged in missions. Ecuadorian migrants in New York and New Jersey form one of the largest South American diaspora communities in the US.",
-    ujp: 33, ujp_unreached: 1,
+    ujp: 33, ujp_unreached: 1, jp: "EC",
   },
   {
     n: "Netherlands", f: "🇳🇱", iso: "nl",
@@ -421,7 +421,7 @@ const RAW_COUNTRIES = [
     rel: "Non-religious", cap: "Amsterdam", lang: "Dutch",
     ug: ["Arab, Moroccan", "Turk", "Berber, Rif"],
     m: "The Netherlands is home to over a million Muslims, predominantly Moroccan and Turkish, many of whom have been in the country for two or three generations with minimal gospel engagement. Amsterdam is post-Christian and philosophically secular — yet Dutch Reformed missionary movements shaped global Christianity for centuries. The Netherlands is both a legacy sending nation and a new mission field.",
-    ujp: 71, ujp_unreached: 20,
+    ujp: 71, ujp_unreached: 20, jp: "NL",
   },
   {
     n: "Japan", f: "🇯🇵", iso: "jp",
@@ -429,7 +429,7 @@ const RAW_COUNTRIES = [
     rel: "Buddhism", cap: "Tokyo", lang: "Japanese",
     ug: ["Japanese", "Okinawan, Ryukyuan", "Burakumin"],
     m: "Japan is one of the most gospel-resistant nations on earth — less than 1% Christian after centuries of missionary work. The spiritual stronghold of ancestor veneration and the social pressure against standing out make conversion costly. Yet Japanese diaspora communities in Brazil, the US, and Canada — often more open than those at home — represent a unique access point for the Japanese church.",
-    ujp: 43, ujp_unreached: 28,
+    ujp: 43, ujp_unreached: 28, jp: "JA",
   },
   {
     n: "Sweden", f: "🇸🇪", iso: "se",
@@ -446,7 +446,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Tunisian", "Arab, Libyan", "Algerian, Arabic-speaking"],
     m: "Tunisia is 99% Muslim, yet since the Arab Spring of 2011 there has been a measurable increase in Tunisians exploring Christianity — particularly through online media and satellite TV. The Tunisian church is tiny but growing, and a number of Tunisians have come to faith through dreams and visions. Tunisian diaspora communities in France and Italy are also seeing quiet gospel movement.",
     diaspora: "Around 80,000 Tunisian Arabs have settled across North America, carrying both Islamic identity and growing spiritual openness. Explore their story: https://upgnorthamerica.com/project/tunisian-arabs-in-north-america/",
-    ujp: 19, ujp_unreached: 17,
+    ujp: 19, ujp_unreached: 17, jp: "TS",
   },
   {
     n: "Belgium", f: "🇧🇪", iso: "be",
@@ -454,7 +454,7 @@ const RAW_COUNTRIES = [
     rel: "Non-religious", cap: "Brussels", lang: "Dutch, French, German",
     ug: ["Arab, Moroccan", "Turk", "Berber, Kabyle"],
     m: "Brussels is the administrative capital of the EU and home to one of Europe's most diverse Muslim populations — Moroccan, Turkish, and Congolese communities concentrated in neighborhoods like Molenbeek. Belgium's Catholic heritage has largely evaporated, leaving a post-Christian population alongside a growing Muslim community with little evangelical engagement. Belgian churches are small but missionally motivated.",
-    ujp: 56, ujp_unreached: 27,
+    ujp: 56, ujp_unreached: 27, jp: "BE",
   },
   {
     n: "Egypt", f: "🇪🇬", iso: "eg",
@@ -463,7 +463,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Egyptian Muslim", "Arab, Saidi - Muslim", "Arab, Sudanese"],
     m: "Egypt is home to the Coptic Church — one of the oldest Christian communities on earth, dating to the Apostle Mark. Yet 90% of Egypt's 105 million people are Muslim, and Coptic believers face significant discrimination. In recent years, an extraordinary number of Egyptian Muslims have come to faith through satellite television and online media, making Egypt one of the most dynamic gospel movements in the Arab world.",
     diaspora: "Egyptian Arab communities have established themselves across North American cities — a people with ancient Christian roots and a growing diaspora hunger. Discover more: https://upgnorthamerica.com/project/egyptian-arabs-in-north-america/",
-    ujp: 46, ujp_unreached: 33,
+    ujp: 46, ujp_unreached: 33, jp: "EG",
   },
   {
     n: "Iran", f: "🇮🇷", iso: "ir",
@@ -472,7 +472,7 @@ const RAW_COUNTRIES = [
     ug: ["Persian", "Azerbaijani, Azeri Turk", "Kurd, Southern"],
     m: "Iran is experiencing one of the fastest-growing church movements in the world — estimates suggest hundreds of thousands of Iranians have come to faith in the past two decades, primarily through underground house churches and satellite media. The Islamic Republic's restrictions have paradoxically fueled spiritual hunger. Iranian diaspora communities in Los Angeles, Toronto, and London are also seeing significant gospel movement.",
     diaspora: "Over 580,000 Persians live in the US and Canada — in Los Angeles, Toronto, and beyond — many more spiritually open in diaspora than at home. Explore their story: https://upgnorthamerica.com/project/persians-in-north-america/",
-    ujp: 91, ujp_unreached: 85,
+    ujp: 91, ujp_unreached: 85, jp: "IR",
   },
   {
     n: "New Zealand", f: "🇳🇿", iso: "nz",
@@ -480,7 +480,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Wellington", lang: "English, Māori",
     ug: ["Māori people", "Pacific Islander migrants", "Indian New Zealanders"],
     m: "New Zealand's indigenous Māori people have a complex relationship with Christianity — the gospel arrived alongside colonization, and reclaiming a distinctly Māori expression of faith is an ongoing journey. Auckland is one of the world's most Polynesian cities and home to growing South Asian and Chinese communities. New Zealand churches are small but engaged in cross-cultural mission both locally and across the Pacific.",
-    ujp: 60, ujp_unreached: 19,
+    ujp: 60, ujp_unreached: 19, jp: "NZ",
   },
   {
     n: "Spain", f: "🇪🇸", iso: "es",
@@ -488,7 +488,7 @@ const RAW_COUNTRIES = [
     rel: "Non-religious", cap: "Madrid", lang: "Spanish",
     ug: ["Arab, Moroccan", "Romani (Gitano)", "Wolof"],
     m: "Spain's Catholic heritage is deep but its church attendance has collapsed — Spain is now one of Europe's most secular nations. At the same time, Spain has Europe's fastest-growing Muslim population, with Moroccan, Senegalese, and Pakistani communities concentrated in Madrid, Barcelona, and Catalonia. The Romani (Gitano) people of Spain have seen one of Europe's most remarkable gospel movements through the Filadelfia Church.",
-    ujp: 77, ujp_unreached: 11,
+    ujp: 77, ujp_unreached: 11, jp: "SP",
   },
   {
     n: "Cabo Verde", f: "🇨🇻", iso: "cv",
@@ -505,7 +505,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Saudi - Najdi", "Arab, Saudi - Hijazi", "Arab, Bedouin"],
     m: "Saudi Arabia is the birthplace of Islam and one of the most restricted nations for gospel witness — yet something remarkable is happening. Reports of Saudis coming to faith through dreams, visions, and online media have multiplied in recent years. The young population, shaken by rapid modernization and the contradictions of Saudi Arabia's Vision 2030 modernization agenda, is spiritually searching in ways previous generations were not.",
     diaspora: "Saudi Arab communities are present across North America, often students and professionals with rare access to the gospel in their home country. Learn more: https://upgnorthamerica.com/project/saudi-arab-muslims-in-north-america/",
-    ujp: 57, ujp_unreached: 43,
+    ujp: 57, ujp_unreached: 43, jp: "SA",
   },
   {
     n: "Uruguay", f: "🇺🇾", iso: "uy",
@@ -513,7 +513,7 @@ const RAW_COUNTRIES = [
     rel: "Non-religious", cap: "Montevideo", lang: "Spanish",
     ug: ["Secular Uruguayans", "Jewish, Spanish-speaking", "Afro-Uruguayans"],
     m: "Uruguay is the most secular nation in Latin America — over 40% of Uruguayans identify as non-religious, a legacy of early state secularization. The evangelical church is small but growing, and youth movements are creating new openings. Uruguay's Jewish community — one of the largest per capita in South America — has historically been resistant to the gospel but is increasingly open to conversation.",
-    ujp: 24, ujp_unreached: 2,
+    ujp: 24, ujp_unreached: 2, jp: "UY",
   },
   {
     n: "France", f: "🇫🇷", iso: "fr",
@@ -521,7 +521,7 @@ const RAW_COUNTRIES = [
     rel: "Non-religious", cap: "Paris", lang: "French",
     ug: ["Berber, Kabyle", "Algerian, Arabic-speaking", "Arab, Moroccan"],
     m: "France has the largest Muslim population in Western Europe — 5 to 6 million, predominantly North African — concentrated in the banlieues of Paris, Lyon, and Marseille. France is also deeply post-Christian, with the Catholic Church in significant decline. Yet a growing evangelical movement is finding traction in immigrant communities, and French-speaking North Africans are among the most responsive to the gospel in the diaspora.",
-    ujp: 118, ujp_unreached: 41,
+    ujp: 118, ujp_unreached: 41, jp: "FR",
   },
   {
     n: "Senegal", f: "🇸🇳", iso: "sn",
@@ -530,7 +530,7 @@ const RAW_COUNTRIES = [
     ug: ["Wolof", "Fulani, Fulakunda", "Maninka, Western"],
     m: "Senegal is 96% Muslim, dominated by powerful Sufi brotherhoods — the Mourides and Tijaniyya — whose influence shapes every aspect of social and spiritual life. The Wolof people, Senegal's largest ethnic group, are considered one of the least-reached in West Africa. Yet Senegalese diaspora communities in New York, Paris, and Italy are often more spiritually open than those at home.",
     diaspora: "Around 60,000 Wolof and other Senegalese live in North America, with New York City holding the largest concentration. Explore their communities: https://upgnorthamerica.com/project/wolof-in-north-america/",
-    ujp: 54, ujp_unreached: 28,
+    ujp: 54, ujp_unreached: 28, jp: "SG",
   },
   {
     n: "Iraq", f: "🇮🇶", iso: "iq",
@@ -547,7 +547,7 @@ const RAW_COUNTRIES = [
     rel: "Secular", cap: "Oslo", lang: "Norwegian",
     ug: ["Somali", "Tigre, Eritrean", "Persian"],
     m: "Norway sent extraordinary missionaries across the globe — including to China, Madagascar, and Ethiopia. Today, Oslo is home to one of Europe's largest Pakistani Muslim communities, as well as significant Somali and Iraqi populations. Norwegian churches that once supported foreign missions are now finding the mission field on their doorstep, in apartment blocks around the corner from historic Lutheran churches.",
-    ujp: 53, ujp_unreached: 17,
+    ujp: 53, ujp_unreached: 17, jp: "NO",
   },
   {
     n: "Argentina", f: "🇦🇷", iso: "ar",
@@ -555,7 +555,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Buenos Aires", lang: "Spanish",
     ug: ["Jewish, Spanish-speaking", "Wichi indigenous", "Mapuche"],
     m: "Argentina has one of the largest Jewish populations outside Israel and the United States — concentrated in Buenos Aires — as well as dozens of indigenous peoples in Patagonia and the Gran Chaco who remain unreached. Argentina's evangelical church has grown dramatically in recent decades and now sends missionaries across Latin America and beyond. The country is both a mission field and a sending force.",
-    ujp: 79, ujp_unreached: 3,
+    ujp: 79, ujp_unreached: 3, jp: "AR",
   },
   {
     n: "Algeria", f: "🇩🇿", iso: "dz",
@@ -564,7 +564,7 @@ const RAW_COUNTRIES = [
     ug: ["Algerian, Arabic-speaking", "Berber, Kabyle", "Berber, Shawiya"],
     m: "Algeria has seen one of the most dramatic church growth stories in North Africa — the Kabyle Berber people in the mountainous Kabylie region have experienced a remarkable movement to Christ over the past 30 years, with tens of thousands coming to faith. The Algerian government has responded with increased restrictions, making fellowship costly. Algerian diaspora communities in France carry extraordinary gospel potential.",
     diaspora: "An estimated 120,000+ Algerians live in North America, including a significant Kabyle Berber diaspora in Montreal and Toronto. Learn more: https://upgnorthamerica.com/project/algerian-arabs-in-north-america/",
-    ujp: 37, ujp_unreached: 34,
+    ujp: 37, ujp_unreached: 34, jp: "AG",
   },
   {
     n: "Austria", f: "🇦🇹", iso: "at",
@@ -572,7 +572,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Vienna", lang: "German",
     ug: ["Turk", "Bosniak", "Chechen"],
     m: "Vienna is one of Europe's great gateway cities — home to significant Chechen, Afghan, and Turkish Muslim communities, many of whom are refugees with complex trauma histories. Austria's Catholic heritage is largely nominal, and evangelical churches are small but growing. Vienna's position at the crossroads of Central Europe makes it a strategic hub for diaspora ministry.",
-    ujp: 46, ujp_unreached: 13,
+    ujp: 46, ujp_unreached: 13, jp: "AU",
   },
   {
     n: "Jordan", f: "🇯🇴", iso: "jo",
@@ -581,7 +581,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Jordanian", "Arab, Palestinian", "Arab, Bedouin"],
     m: "Jordan hosts more refugees per capita than almost any nation on earth — Palestinians, Syrians, and Iraqis — creating an extraordinary and complex mission context. Amman has become a refuge for Arab Christians displaced by regional conflict, and also a place where displaced Muslims are asking deep questions about faith and identity. Jordan's tiny evangelical church quietly serves across these communities.",
     diaspora: "Around 55,000 Jordanian Arabs live in North America, with communities in Chicago, Detroit, New York, and Los Angeles. Explore their communities: https://upgnorthamerica.com/project/jordanian-arabs-in-north-america/",
-    ujp: 26, ujp_unreached: 20,
+    ujp: 26, ujp_unreached: 20, jp: "JO",
   },
   {
     n: "Portugal", f: "🇵🇹", iso: "pt",
@@ -606,7 +606,7 @@ const RAW_COUNTRIES = [
     ug: ["Uzbek, Northern", "Tajik", "Kazakh"],
     m: "Uzbekistan is a Central Asian nation of 36 million with one of the smallest and most persecuted Christian communities in the world — evangelical believers face imprisonment and severe social pressure. The Uzbek people are one of the largest unreached people groups on earth. Despite this, a quiet house church movement persists, and Uzbek diaspora communities in Russia and the West are more accessible than those at home.",
     diaspora: "Around 68,000 Uzbeks live in North America — one of the most accessible pockets of a people group that faces severe persecution at home. Meet them at UPG North America: https://upgnorthamerica.com/project/uzbeks-in-north-america/",
-    ujp: 44, ujp_unreached: 26,
+    ujp: 44, ujp_unreached: 26, jp: "UZ",
   },
   {
     n: "Colombia", f: "🇨🇴", iso: "co",
@@ -614,7 +614,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Bogotá", lang: "Spanish",
     ug: ["Wayuu indigenous", "Kogi", "Wiwa"],
     m: "Colombia's church grew through decades of conflict — narco violence, guerrilla war, and displacement forged a resilient evangelical movement that now reaches across social classes. Colombia is increasingly a missionary-sending nation, with churches planting across Latin America. Colombian migrants in the US and Spain carry deep faith and significant gospel potential in their diaspora communities.",
-    ujp: 120, ujp_unreached: 15,
+    ujp: 120, ujp_unreached: 15, jp: "CO",
   },
   {
     n: "England", f: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", iso: "gb-eng",
@@ -630,7 +630,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Zagreb", lang: "Croatian",
     ug: ["Bosniak", "Roma Croats", "Jewish, Croatian-speaking"],
     m: "Croatia is deeply Catholic — over 85% identify as Catholic — yet genuine evangelical presence is tiny. The Roma people spread across the Balkans are one of Europe's most significant unreached groups, facing profound marginalization. Croatia also shares a border with Bosnia, and Croatian churches have a unique opportunity to engage both their own post-Catholic population and Muslim neighbors across the region.",
-    ujp: 17, ujp_unreached: 3,
+    ujp: 17, ujp_unreached: 3, jp: "HR",
   },
   {
     n: "Ghana", f: "🇬🇭", iso: "gh",
@@ -646,7 +646,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Panama City", lang: "Spanish",
     ug: ["Guna (Kuna) indigenous", "Emberá", "Jewish, Spanish-speaking"],
     m: "Panama is a crossroads nation — geographically and spiritually. The Panama Canal connects oceans; Panama's growing evangelical church is beginning to see its role connecting gospel movements across the Americas. Indigenous peoples including the Guna and Emberá have seen significant gospel movement. Panama City's Chinese community, one of the oldest in Latin America, remains largely unreached by local churches.",
-    ujp: 26, ujp_unreached: 2,
+    ujp: 26, ujp_unreached: 2, jp: "PM",
   },
   {
     n: "Switzerland", f: "🇨🇭", iso: "ch",
@@ -654,7 +654,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Bern", lang: "German, French, Italian",
     ug: ["Turk", "Bosniak", "Arab, Syrian"],
     m: "Switzerland's Reformed heritage shaped global Protestantism — Calvin's Geneva was a city of refuge and theological renewal. Today Switzerland is thoroughly post-Christian, yet Zurich, Geneva, and Basel host significant Turkish, Kosovar, and North African Muslim communities with minimal gospel engagement. Switzerland is both a historic center of world mission and a new mission field at home.",
-    ujp: 58, ujp_unreached: 17,
+    ujp: 58, ujp_unreached: 17, jp: "SZ",
   }
 ];
 
@@ -5068,7 +5068,14 @@ export default function App() {
                   }
                   return (
                     <button
-                      onClick={() => { setShowSettings(false); updateGameState({ hasOnboarded: false }); }}
+                      onClick={() => {
+                        setShowSettings(false);
+                        try {
+                          const gs = JSON.parse(localStorage.getItem('pftc_game') || '{}');
+                          localStorage.setItem('pftc_game', JSON.stringify({ ...gs, hasOnboarded: false }));
+                        } catch {}
+                        window.location.reload();
+                      }}
                       style={{ display: "flex", alignItems: "center", cursor: "pointer", background: "none", border: "none", padding: 0, width: "100%", textAlign: "left" }}
                     >
                       <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
