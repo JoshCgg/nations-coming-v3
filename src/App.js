@@ -2552,15 +2552,18 @@ async function generateShareCard(type, data) {
   ctx.fillStyle = '#E06520';
   ctx.fillRect(0, 0, 12, 1920);
 
-  try {
-    const logo = await loadCanvasImage('/images/pray-cup-logo-white.png');
-    const lW = 400, lH = Math.round(lW * logo.height / logo.width);
-    ctx.drawImage(logo, (1080 - lW) / 2, 120, lW, lH);
-  } catch {}
+  // Load logo once; used differently per type
+  let logoImg = null;
+  try { logoImg = await loadCanvasImage('/images/pray-cup-logo-white.png'); } catch {}
 
   ctx.textAlign = 'center';
 
   if (type === 'final_whistle') {
+    if (logoImg) {
+      const lW = 400, lH = Math.round(lW * logoImg.height / logoImg.width);
+      ctx.drawImage(logoImg, (1080 - lW) / 2, 120, lW, lH);
+    }
+
     ctx.font = '220px serif';
     ctx.fillStyle = '#ffffff';
     ctx.fillText('🏆', 540, 680);
@@ -2589,49 +2592,75 @@ async function generateShareCard(type, data) {
 
   } else if (type === 'team') {
     const { teamName = '', kitNation = '', teamCode = '' } = data;
+
+    // Logo dimensions at 280px wide
+    const lW = 280;
+    const lH = logoImg ? Math.round(lW * logoImg.height / logoImg.width) : 0;
+
+    // Load kit SVG
     const slug = KIT_SVG_SLUG[kitNation] || kitNation;
-    let kitDrawn = false;
+    let kitImg = null;
     try {
       const svgText = await fetch(`/images/kits/${slug}.svg`).then(r => r.text());
       const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
       const svgUrl = URL.createObjectURL(svgBlob);
-      try {
-        const kitImg = await loadCanvasImage(svgUrl);
-        const kW = 480, kH = Math.round(kW * kitImg.height / kitImg.width);
-        ctx.drawImage(kitImg, (1080 - kW) / 2, 460, kW, kH);
-        kitDrawn = true;
-      } finally { URL.revokeObjectURL(svgUrl); }
+      try { kitImg = await loadCanvasImage(svgUrl); } finally { URL.revokeObjectURL(svgUrl); }
     } catch {}
-    if (!kitDrawn) {
-      ctx.font = '200px serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(KIT_FLAG_EMOJI_MAP[kitNation] || '⚽', 540, 700);
+
+    const kW = 480;
+    const kH = kitImg ? Math.round(kW * kitImg.height / kitImg.width) : 480;
+    const namePx = teamName.length > 20 ? 60 : 80;
+
+    // Total block height = sum of all y-advances in draw order below:
+    // (lH + 80) + kH + (60 + namePx) + (20 + 48) + 60 + (60 + 42) + (40 + 44) + (50 + 38)
+    const logoBlock = lH > 0 ? lH + 80 : 0;
+    const contentH = logoBlock + kH + 60 + namePx + 20 + 48 + 60 + 60 + 42 + 40 + 44 + 50 + 38;
+    let y = Math.max(60, Math.round((1920 - contentH) / 2));
+
+    // Logo
+    if (logoImg && lH > 0) {
+      ctx.drawImage(logoImg, (1080 - lW) / 2, y, lW, lH);
+      y += lH + 80;
     }
 
-    const namePx = (teamName.length > 20) ? 60 : 80;
-    ctx.font = `bold ${namePx}px Montserrat, sans-serif`;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(teamName, 540, 1020);
+    // Kit SVG or emoji fallback
+    if (kitImg) {
+      ctx.drawImage(kitImg, (1080 - kW) / 2, y, kW, kH);
+    } else {
+      ctx.font = '200px serif'; ctx.fillStyle = '#ffffff';
+      ctx.fillText(KIT_FLAG_EMOJI_MAP[kitNation] || '⚽', 540, y + Math.round(kH * 0.55));
+    }
+    y += kH;
 
-    ctx.font = '48px Montserrat, sans-serif';
-    ctx.fillStyle = '#8ADBFF';
-    ctx.fillText('is praying for the nations ⚽', 540, 1110);
+    // Team name
+    y += 60 + namePx;
+    ctx.font = `bold ${namePx}px Montserrat, sans-serif`; ctx.fillStyle = '#ffffff';
+    ctx.fillText(teamName, 540, y);
 
-    ctx.strokeStyle = '#E06520';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(390, 1190); ctx.lineTo(690, 1190); ctx.stroke();
+    // Subtext
+    y += 20 + 48;
+    ctx.font = '48px Montserrat, sans-serif'; ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('is praying for the nations ⚽', 540, y);
 
-    ctx.font = '42px Montserrat, sans-serif';
-    ctx.fillStyle = '#8ADBFF';
-    ctx.fillText('Join us:', 540, 1260);
+    // Divider
+    y += 60;
+    ctx.strokeStyle = '#E06520'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(390, y); ctx.lineTo(690, y); ctx.stroke();
 
-    ctx.font = 'bold 44px Montserrat, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(`prayforthecup.com/app?join=${teamCode}`, 540, 1330);
+    // "Join us:"
+    y += 60 + 42;
+    ctx.font = '42px Montserrat, sans-serif'; ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('Join us:', 540, y);
 
-    ctx.font = '38px Montserrat, sans-serif';
-    ctx.fillStyle = '#8ADBFF';
-    ctx.fillText('prayforthecup.com', 540, 1480);
+    // Join URL
+    y += 40 + 44;
+    ctx.font = 'bold 44px Montserrat, sans-serif'; ctx.fillStyle = '#ffffff';
+    ctx.fillText(`prayforthecup.com/app?join=${teamCode}`, 540, y);
+
+    // Bottom URL
+    y += 50 + 38;
+    ctx.font = '38px Montserrat, sans-serif'; ctx.fillStyle = '#8ADBFF';
+    ctx.fillText('prayforthecup.com', 540, y);
   }
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
