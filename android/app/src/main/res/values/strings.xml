@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pray for the Cup</string>
+    <string name="title_activity_main">Pray for the Cup</string>
+    <string name="package_name">com.globalgates.prayforthecup</string>
+    <string name="custom_url_scheme">com.globalgates.prayforthecup</string>
+</resources>

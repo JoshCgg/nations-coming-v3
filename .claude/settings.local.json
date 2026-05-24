@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(Get-ChildItem -Path \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\")",
+      "Bash(Select-Object Name, LastWriteTime)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\joshc\\\\.claude\\\\projects\\\\b--global-gates-digital-projects-nations-coming-v3\\\\memory\")",
+      "Bash(git commit *)",
+      "Bash(Get-ChildItem \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\" -Name)",
+      "Bash(Select-Object -First 20)",
+      "Bash(git stash *)",
+      "Bash(Select-String -Path \"android\\\\app\\\\src\\\\main\\\\assets\\\\public\\\\static\\\\js\\\\main.51e271c8.js\" -Pattern \"pftc_preview\")",
+      "Bash(Measure-Object)",
+      "PowerShell($content = Get-Content \"android\\\\app\\\\src\\\\main\\\\assets\\\\public\\\\static\\\\js\\\\main.51e271c8.js\" -Raw; $idx = $content.IndexOf\\(\"unlock\"\\); $content.Substring\\([Math]::Max\\(0,$idx-200\\), 500\\))"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
+    ]
+  }
+}
