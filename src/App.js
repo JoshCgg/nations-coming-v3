@@ -288,7 +288,7 @@ const RAW_COUNTRIES = [
     rel: "Secular", cap: "Prague", lang: "Czech",
     ug: ["Jewish, Czech", "Deaf", "Roma Czechs"],
     m: "Czechia is statistically the least religious country in Europe — decades of communist rule left a deep spiritual vacuum that consumerism has not filled. Prague is a gospel frontier: beautiful, post-Christian, and quietly searching. A small evangelical movement is growing, but most Czechs have never had a meaningful encounter with the gospel.",
-    ujp: 16, ujp_unreached: 2,
+    ujp: 16, ujp_unreached: 2, jp: "EZ",
   },
   {
     n: "Canada", f: "🇨🇦", iso: "ca",
@@ -348,7 +348,7 @@ const RAW_COUNTRIES = [
     rel: "Secular", cap: "Edinburgh", lang: "English, Scottish Gaelic",
     ug: ["Secular Scots", "Pakistani Scots", "Polish migrants in Scotland"],
     m: "Scotland once sent missionaries to the ends of the earth — David Livingstone, Eric Liddell, and thousands more. Today Scotland is one of the most post-Christian nations in the UK, with church attendance in steep decline. Yet Pakistani Muslim communities in Glasgow and Edinburgh represent a significant and largely unreached diaspora population right in the heart of historic missionary sending country.",
-    ujp: 124, ujp_unreached: 42,
+    ujp: 124, ujp_unreached: 42, jp: "UK",
   },
   {
     n: "USA", f: "🇺🇸", iso: "us",
@@ -389,7 +389,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Berlin", lang: "German",
     ug: ["Turk", "Bosniak", "Arab, Iraqi"],
     m: "Germany is home to over 5 million Muslims, making it one of Europe's largest Muslim-majority diaspora contexts. The Turkish community — over 3 million strong — has been in Germany for generations with minimal evangelical engagement. Berlin, Hamburg, and Frankfurt are also home to growing Kurdish, Afghan, and Arab communities. German churches are beginning to wake up to the unreached peoples in their own cities.",
-    ujp: 104, ujp_unreached: 38,
+    ujp: 104, ujp_unreached: 38, jp: "GM",
   },
   {
     n: "Curaçao", f: "🇨🇼", iso: "cw",
@@ -539,7 +539,7 @@ const RAW_COUNTRIES = [
     ug: ["Yazidis", "Arab, Iraqi", "Kurd, Sorani"],
     m: "Iraq's ancient Assyrian Church — one of Christianity's oldest — was devastated by ISIS and decades of conflict. Yet the Yazidi people, who survived genocide, represent an extraordinary gospel opportunity: a community in trauma, open to spiritual conversation in ways rarely seen before. Iraq is a nation marked by suffering — and by an unexpected openness that suffering has created.",
     diaspora: "Around 344,000 Iraqi Arabs live in North America — with major communities in Detroit, Chicago, Toronto, and Nashville. Explore their story: https://upgnorthamerica.com/project/iraqi-arabs-in-north-america/",
-    ujp: 33, ujp_unreached: 27,
+    ujp: 33, ujp_unreached: 27, jp: "IZ",
   },
   {
     n: "Norway", f: "🇳🇴", iso: "no",
@@ -589,7 +589,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Lisbon", lang: "Portuguese",
     ug: ["Cape Verdean Portuguese", "Angolan Portuguese", "Brazilian migrants"],
     m: "Portugal once launched the Age of Exploration and sent the gospel to Brazil, Angola, and Mozambique. Today, Lisbon is post-Catholic and post-colonial — a city rediscovering its identity as immigration reshapes its demographics. Cape Verdean, Angolan, and Brazilian communities have brought vibrant evangelical Christianity back to Portugal's streets. Lisbon may be one of Europe's most quietly spiritually dynamic cities.",
-    ujp: 35, ujp_unreached: 5,
+    ujp: 35, ujp_unreached: 5, jp: "PO",
   },
   {
     n: "DR Congo", f: "🇨🇩", iso: "cd",
@@ -597,7 +597,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Kinshasa", lang: "French, Lingala, Swahili",
     ug: ["Mongo", "Luba", "Pygmy (Mbuti) peoples"],
     m: "DR Congo has over 200 distinct people groups and Africa's fourth-largest population. While Christianity is widespread, deep syncretism with traditional religion means millions have never encountered an undiluted gospel. Remote frontier communities in the Congo Basin remain among the least-reached in sub-Saharan Africa.",
-    ujp: 231, ujp_unreached: 4,
+    ujp: 231, ujp_unreached: 4, jp: "CG",
   },
   {
     n: "Uzbekistan", f: "🇺🇿", iso: "uz",
@@ -622,7 +622,7 @@ const RAW_COUNTRIES = [
     rel: "Non-religious", cap: "London", lang: "English",
     ug: ["British Pakistanis", "British Bangladeshis", "British Somalis"],
     m: "London is one of the most ethnically diverse cities on earth and home to Europe's largest Pakistani and Bangladeshi Muslim communities. British South Asian Muslims — nearly 4 million across England — represent one of the most significant unreached diaspora populations in the Western world. England's evangelical churches are growing, increasingly multicultural, and waking up to the mission field on their own streets.",
-    ujp: 124, ujp_unreached: 42,
+    ujp: 124, ujp_unreached: 42, jp: "UK",
   },
   {
     n: "Croatia", f: "🇭🇷", iso: "hr",
@@ -1220,7 +1220,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
 
               {/* Links */}
               <div style={{ display: "flex", gap: 10 }}>
-                <a href={`https://joshuaproject.net/countries/${nation.n.replace(/\s/g,"-")}`} target="_blank" rel="noreferrer" style={{
+                <a href={`https://joshuaproject.net/countries/${nation.jp || nation.n.replace(/\s/g,"-")}`} target="_blank" rel="noreferrer" style={{
                   flex: 1, background: C.indigo, color: "#fff",
                   borderRadius: 10, padding: "12px 8px", textAlign: "center",
                   fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13,
@@ -2682,7 +2682,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     setTimeout(() => setNudgedNow(prev => ({ ...prev, [targetUid]: false })), 3000);
   }
 
-  function handleCreateTeam() {
+  async function handleCreateTeam() {
     if (!teamNameInput.trim()) return;
     if (containsBlockedWord(teamNameInput)) {
       setCreateError('Please choose a different team name');
@@ -2715,21 +2715,25 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     try { updateGameState({ teams: updatedTeams }); } catch {}
     const uid = userProfile?.uid || auth.currentUser?.uid;
     if (uid) {
-      setDoc(doc(db, "teams", teamCode), {
-        name: teamNameInput.trim(),
-        kitNation: selectedKit,
-        createdAt: new Date().toISOString(),
-        ownerUid: uid,
-      }, { merge: true }).catch(e => console.error('[createTeam] setDoc error:', e));
-      syncMemberToTeam(teamCode, uid, {
-        name: displayName,
-        nations: (gameState.prayedNations || []).length,
-        streak: gameState.streakCount || 0,
-        inactiveDays: 0,
-        initials: getInitials(displayName),
-        role: "owner",
-        lastUpdated: new Date().toISOString(),
-      });
+      try {
+        await setDoc(doc(db, "teams", teamCode), {
+          name: teamNameInput.trim(),
+          kitNation: selectedKit,
+          createdAt: new Date().toISOString(),
+          ownerUid: uid,
+        }, { merge: true });
+        await syncMemberToTeam(teamCode, uid, {
+          name: displayName,
+          nations: (gameState.prayedNations || []).length,
+          streak: gameState.streakCount || 0,
+          inactiveDays: 0,
+          initials: getInitials(displayName),
+          role: "owner",
+          lastUpdated: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.error('[createTeam] Firestore error:', e);
+      }
     }
     setView('myteam');
     setActiveTeamIndex(updatedTeams.length - 1);
@@ -3863,16 +3867,36 @@ function Onboarding({ onComplete }) {
       const email = user.email;
       const uid = user.uid;
 
-      const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
-
+      // Firestore state takes priority over local state
+      let restoredFromFirestore = false;
       try {
-        await setDoc(doc(db, 'users', uid), {
-          name: displayName,
-          email: email,
-          createdAt: new Date().toISOString(),
-          gameState: existingGame || DEFAULT_GAME_STATE
-        }, { merge: true });
-      } catch (e) { console.log('Firestore error:', e.message); }
+        const snap = await getDoc(doc(db, 'users', uid));
+        if (snap.exists() && snap.data().gameState) {
+          const fsState = snap.data().gameState;
+          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
+          restoredFromFirestore = true;
+        }
+      } catch (e) { console.log('Firestore read error:', e.message); }
+
+      if (!restoredFromFirestore) {
+        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+        try {
+          await setDoc(doc(db, 'users', uid), {
+            name: displayName,
+            email: email,
+            createdAt: new Date().toISOString(),
+            gameState: existingGame || DEFAULT_GAME_STATE
+          }, { merge: true });
+        } catch (e) { console.log('Firestore error:', e.message); }
+      } else {
+        try {
+          await setDoc(doc(db, 'users', uid), {
+            name: displayName,
+            email: email,
+            createdAt: new Date().toISOString(),
+          }, { merge: true });
+        } catch (e) { console.log('Firestore error:', e.message); }
+      }
 
       localStorage.setItem('userProfile', JSON.stringify({
         displayName,
@@ -4482,7 +4506,9 @@ export default function App() {
     const newlyEarned = checkAchievements(nextState);
     if (newlyEarned.length > 0) {
       updateGameState({ goalsAchieved: [...(gameState.goalsAchieved || []), ...newlyEarned] });
-      setToastQueue(q => [...q, ...newlyEarned]);
+      if (userProfile?.uid && nextState.journeyMode) {
+        setToastQueue(q => [...q, ...newlyEarned]);
+      }
     }
     if ((nextState.prayedNations || []).length !== (gameState.prayedNations || []).length) {
       const uid = userProfile?.uid || auth.currentUser?.uid;
@@ -4556,16 +4582,36 @@ export default function App() {
 
       console.log('Google user returned at top level:', email);
 
-      const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
-
+      // Firestore state takes priority over local state
+      let restoredFromFirestore = false;
       try {
-        await setDoc(doc(db, 'users', uid), {
-          name: displayName,
-          email: email,
-          createdAt: new Date().toISOString(),
-          gameState: existingGame || DEFAULT_GAME_STATE
-        }, { merge: true });
-      } catch (e) { console.log('Firestore error:', e.message); }
+        const snap = await getDoc(doc(db, 'users', uid));
+        if (snap.exists() && snap.data().gameState) {
+          const fsState = snap.data().gameState;
+          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
+          restoredFromFirestore = true;
+        }
+      } catch (e) { console.log('Firestore read error:', e.message); }
+
+      if (!restoredFromFirestore) {
+        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+        try {
+          await setDoc(doc(db, 'users', uid), {
+            name: displayName,
+            email: email,
+            createdAt: new Date().toISOString(),
+            gameState: existingGame || DEFAULT_GAME_STATE
+          }, { merge: true });
+        } catch (e) { console.log('Firestore error:', e.message); }
+      } else {
+        try {
+          await setDoc(doc(db, 'users', uid), {
+            name: displayName,
+            email: email,
+            createdAt: new Date().toISOString(),
+          }, { merge: true });
+        } catch (e) { console.log('Firestore error:', e.message); }
+      }
 
       localStorage.setItem('userProfile', JSON.stringify({
         displayName,
@@ -4659,14 +4705,14 @@ export default function App() {
       teamsCTARef.current =
         document.querySelector('[data-tooltip-target="teams-cta"]') ||
         document.querySelector('[data-tooltip-target="team-card"]');
-      const el = [devotionalCardRef, checkInBtnRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
+      const el = [checkInBtnRef, devotionalCardRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
       if (!el || el.dataset.locked === 'true') return;
 
-      // Step 0: scroll the carousel container (page scroll) to the top of the viewport so
+      // Step 1: scroll the carousel container (page scroll) to the top of the viewport so
       // there is room below it for the tooltip. Scrolling the container itself is safe —
       // scrollIntoView on the container scrolls its ancestors, not its own scrollLeft.
       // For other steps: scroll the target element to center.
-      if (tooltipStep === 0) {
+      if (tooltipStep === 1) {
         const carouselContainer = document.querySelector('.carousel-scroll-wrap');
         if (carouselContainer) carouselContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
@@ -4678,7 +4724,7 @@ export default function App() {
       if (cancelled) return;
 
       const rect = getAbsoluteRect(el);
-      if (tooltipStep === 0) {
+      if (tooltipStep === 1) {
         const carouselContainer = document.querySelector('.carousel-scroll-wrap');
         if (carouselContainer) {
           const cr = carouselContainer.getBoundingClientRect();
@@ -4870,7 +4916,7 @@ export default function App() {
         }} />
 
         {/* Home Screen Banner */}
-        {showBanner && <HomeScreenBanner onDismiss={() => setShowBanner(false)} />}
+        {showBanner && !window.Capacitor?.isNative && <HomeScreenBanner onDismiss={() => setShowBanner(false)} />}
 
         {/* Tab Bar */}
         <div style={{ background: C.indigo, padding: "8px 0 0" }}>
@@ -4912,7 +4958,19 @@ export default function App() {
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} onOpenSettings={() => setShowSettings(true)} />
           ) : tab === "teams" ? (
-            <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
+            userProfile?.uid ? (
+              <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 32px", textAlign: "center" }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>🏆</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, color: C.indigo, marginBottom: 8 }}>Sign in to join or create a team</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, color: C.blue, marginBottom: 24, lineHeight: 1.5 }}>Pray with others and track collective progress across all 48 nations.</div>
+                <button
+                  onClick={() => updateGameState({ hasOnboarded: false })}
+                  style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 12, padding: "15px 32px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
+                >Sign in →</button>
+              </div>
+            )
           ) : (
             <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} onPray={handleNationPray} />
           )}
@@ -4956,17 +5014,27 @@ export default function App() {
               {/* Journey Mode row */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Prayer Journey</div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ flex: 1, marginRight: 16 }}>
-                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Journey Mode</div>
-                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Track streaks, achievements, and your prayer score</div>
+                {userProfile?.uid ? (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ flex: 1, marginRight: 16 }}>
+                      <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Journey Mode</div>
+                      <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Track streaks, achievements, and your prayer score</div>
+                    </div>
+                    <ToggleSwitch value={gameState.journeyMode} onToggle={() => {
+                      const turningOn = !gameState.journeyMode;
+                      updateGameState({ journeyMode: turningOn });
+                      if (turningOn) { setTab("digest"); setSelectedDayIdx(null); }
+                    }} />
                   </div>
-                  <ToggleSwitch value={gameState.journeyMode} onToggle={() => {
-                    const turningOn = !gameState.journeyMode;
-                    updateGameState({ journeyMode: turningOn });
-                    if (turningOn) { setTab("digest"); setSelectedDayIdx(null); }
-                  }} />
-                </div>
+                ) : (
+                  <div style={{ background: C.brightGray, borderRadius: 12, padding: "14px 16px" }}>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo, marginBottom: 8 }}>Sign in to track your prayer journey</div>
+                    <button
+                      onClick={() => { setShowSettings(false); updateGameState({ hasOnboarded: false }); }}
+                      style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+                    >Sign in →</button>
+                  </div>
+                )}
               </div>
 
               {/* Divider */}
@@ -4999,14 +5067,17 @@ export default function App() {
                     );
                   }
                   return (
-                    <div onClick={() => setShowSettings(false)} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                    <button
+                      onClick={() => { setShowSettings(false); updateGameState({ hasOnboarded: false }); }}
+                      style={{ display: "flex", alignItems: "center", cursor: "pointer", background: "none", border: "none", padding: 0, width: "100%", textAlign: "left" }}
+                    >
                       <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo }}>Sign In / Register</div>
                         <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: C.blue, marginTop: 2 }}>Save your progress and track your prayer journey</div>
                       </div>
                       <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
-                    </div>
+                    </button>
                   );
                 })()}
               </div>
@@ -5143,7 +5214,8 @@ export default function App() {
               onClick={e => e.stopPropagation()}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "20px 20px 16px",
+                paddingTop: "calc(env(safe-area-inset-top, 0px) + 20px)",
+                paddingBottom: 16, paddingLeft: 20, paddingRight: 20,
                 borderBottom: "1px solid rgba(255,255,255,0.15)",
                 flexShrink: 0,
               }}
@@ -5284,12 +5356,12 @@ export default function App() {
             </div>
           )}
 
-          {/* Tooltip card — anchored below carousel on step 0, fixed bottom center otherwise */}
+          {/* Tooltip card — anchored below carousel on step 1, fixed bottom center otherwise */}
           <div onClick={advanceTooltip} style={{
             position: "fixed",
             ...((() => {
               const TOOLTIP_H = 160;
-              if (tooltipStep === 0 && pulsePos?.carouselBottom != null) {
+              if (tooltipStep === 1 && pulsePos?.carouselBottom != null) {
                 const below = pulsePos.carouselBottom + 12;
                 if (below + TOOLTIP_H <= window.innerHeight) return { top: below };
                 const above = pulsePos.carouselTop - TOOLTIP_H - 12;
@@ -5311,9 +5383,9 @@ export default function App() {
             </div>
             <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 17, color: "#ffffff", lineHeight: 1.7, marginBottom: 12 }}>
               {tooltipStep === 0
-                ? "Today's devotional — tap to read, reflect, and pray."
-                : tooltipStep === 1
                 ? "Check in each day to log your prayer and keep your streak."
+                : tooltipStep === 1
+                ? "Today's devotional — tap to read, reflect, and pray."
                 : tooltipStep === 2
                 ? "Tap any nation to pray. Track your progress across all 48 nations."
                 : (gameState.teams?.length > 0
