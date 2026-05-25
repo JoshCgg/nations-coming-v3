@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithPopup, signInWithRedirect, signInWithCredential, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
   try {
@@ -4157,9 +4158,57 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     const auth = getAuth();
 
     if (window.Capacitor?.isNative) {
-      // On native, redirect to Google auth; getRedirectResult in App's useEffect handles the result on return
-      try { await signInWithRedirect(auth, googleProvider); } catch (e) {
-        console.log('Redirect sign-in error:', e.code, e.message);
+      try {
+        const nativeResult = await FirebaseAuthentication.signInWithGoogle();
+        const idToken = nativeResult.credential?.idToken;
+        const credential = GoogleAuthProvider.credential(idToken);
+        const result = await signInWithCredential(auth, credential);
+        const user = result.user;
+        const displayName = user.displayName?.split(' ')[0] || 'Friend';
+        const email = user.email;
+        const uid = user.uid;
+
+        let restoredFromFirestore = false;
+        try {
+          const snap = await getDoc(doc(db, 'users', uid));
+          if (snap.exists() && snap.data().gameState) {
+            const fsState = snap.data().gameState;
+            try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
+            restoredFromFirestore = true;
+          }
+        } catch (e) { console.log('Firestore read error:', e.message); }
+
+        if (!restoredFromFirestore) {
+          const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+          try {
+            await setDoc(doc(db, 'users', uid), {
+              name: displayName, email, createdAt: new Date().toISOString(),
+              gameState: existingGame || DEFAULT_GAME_STATE
+            }, { merge: true });
+          } catch (e) { console.log('Firestore error:', e.message); }
+        } else {
+          try {
+            await setDoc(doc(db, 'users', uid), {
+              name: displayName, email, createdAt: new Date().toISOString(),
+            }, { merge: true });
+          } catch (e) { console.log('Firestore error:', e.message); }
+        }
+
+        localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
+        localStorage.setItem('hasOnboarded', 'true');
+
+        try {
+          await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, firstName: displayName, listId: 64 })
+          });
+        } catch (e) { console.log('Brevo error:', e.message); }
+
+        console.log('Native sign-in success — entering app');
+        setStep(4);
+      } catch (e) {
+        console.log('Native sign-in error:', e.code, e.message);
         setGoogleLoading(false);
       }
       return;
