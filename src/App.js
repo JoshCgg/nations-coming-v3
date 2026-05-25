@@ -4159,6 +4159,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
     if (window.Capacitor?.isNative) {
       try {
+        console.log('using native sign in');
         const nativeResult = await FirebaseAuthentication.signInWithGoogle();
         const idToken = nativeResult.credential?.idToken;
         const credential = GoogleAuthProvider.credential(idToken);
