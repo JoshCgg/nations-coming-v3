@@ -4154,11 +4154,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   }
 
   const handleGoogleSignIn = async () => {
-    console.log('Capacitor isNative:', window.Capacitor?.isNative);
+    console.log('Capacitor isNative:', window.Capacitor?.isNativePlatform?.());
     setGoogleLoading(true);
     const auth = getAuth();
 
-    if (window.Capacitor?.isNative) {
+    if (window.Capacitor?.isNativePlatform?.()) {
       try {
         console.log('using native sign in');
         const nativeResult = await FirebaseAuthentication.signInWithGoogle();
