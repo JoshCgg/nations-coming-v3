@@ -15,7 +15,9 @@
       "Bash(git stash *)",
       "Bash(Select-String -Path \"android\\\\app\\\\src\\\\main\\\\assets\\\\public\\\\static\\\\js\\\\main.51e271c8.js\" -Pattern \"pftc_preview\")",
       "Bash(Measure-Object)",
-      "PowerShell($content = Get-Content \"android\\\\app\\\\src\\\\main\\\\assets\\\\public\\\\static\\\\js\\\\main.51e271c8.js\" -Raw; $idx = $content.IndexOf\\(\"unlock\"\\); $content.Substring\\([Math]::Max\\(0,$idx-200\\), 500\\))"
+      "PowerShell($content = Get-Content \"android\\\\app\\\\src\\\\main\\\\assets\\\\public\\\\static\\\\js\\\\main.51e271c8.js\" -Raw; $idx = $content.IndexOf\\(\"unlock\"\\); $content.Substring\\([Math]::Max\\(0,$idx-200\\), 500\\))",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
