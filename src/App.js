@@ -4154,6 +4154,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   }
 
   const handleGoogleSignIn = async () => {
+    console.log('Capacitor isNative:', window.Capacitor?.isNative);
     setGoogleLoading(true);
     const auth = getAuth();
 
