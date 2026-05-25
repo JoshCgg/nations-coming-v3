@@ -4136,9 +4136,9 @@ function ObOrangeBtn({ children, onClick, style = {} }) {
   );
 }
 
-function Onboarding({ onComplete }) {
-  const [step, setStep] = useState(1);
-  const [journeyPath, setJourneyPath] = useState(null);
+function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) {
+  const [step, setStep] = useState(initialStep);
+  const [journeyPath, setJourneyPath] = useState(initialJourneyPath);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
@@ -4864,6 +4864,7 @@ export default function App() {
   const firstNationRef = useRef(null);
   const teamsCTARef = useRef(null);
   const [pulsePos, setPulsePos] = useState(null);
+  const [showSignIn, setShowSignIn] = useState(false);
   const [pendingJoinCode, setPendingJoinCode] = useState(null);
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
@@ -5188,12 +5189,16 @@ export default function App() {
     );
   }
 
-  if (!gameState.hasOnboarded) {
+  if (!gameState.hasOnboarded || showSignIn) {
     return (
       <>
         <style>{FONTS}</style>
         <style>{`* { -webkit-tap-highlight-color: transparent; } body { margin: 0; background: #ffffff; } ::-webkit-scrollbar { display: none; } button { -webkit-appearance: none; } input { -webkit-appearance: none; }`}</style>
-        <Onboarding onComplete={handleOnboardingComplete} />
+        <Onboarding
+          initialStep={showSignIn ? 3 : 1}
+          initialJourneyPath={showSignIn ? true : null}
+          onComplete={showSignIn ? () => setShowSignIn(false) : handleOnboardingComplete}
+        />
       </>
     );
   }
@@ -5347,7 +5352,7 @@ export default function App() {
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, color: C.indigo, marginBottom: 8 }}>Sign in to join or create a team</div>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, color: C.blue, marginBottom: 24, lineHeight: 1.5 }}>Pray with others and track collective progress across all 48 nations.</div>
                 <button
-                  onClick={() => updateGameState({ hasOnboarded: false })}
+                  onClick={() => setShowSignIn(true)}
                   style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 12, padding: "15px 32px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
                 >Sign in →</button>
               </div>
@@ -5411,7 +5416,7 @@ export default function App() {
                   <div style={{ background: C.brightGray, borderRadius: 12, padding: "14px 16px" }}>
                     <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo, marginBottom: 8 }}>Sign in to track your prayer journey</div>
                     <button
-                      onClick={() => { setShowSettings(false); updateGameState({ hasOnboarded: false }); }}
+                      onClick={() => { setShowSettings(false); setShowSignIn(true); }}
                       style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
                     >Sign in →</button>
                   </div>
@@ -5497,14 +5502,7 @@ export default function App() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => {
-                      setShowSettings(false);
-                      try {
-                        const gs = JSON.parse(localStorage.getItem('pftc_game') || '{}');
-                        localStorage.setItem('pftc_game', JSON.stringify({ ...gs, hasOnboarded: false }));
-                      } catch {}
-                      window.location.reload();
-                    }}
+                    onClick={() => { setShowSettings(false); setShowSignIn(true); }}
                     style={{ display: "flex", alignItems: "center", cursor: "pointer", background: "none", border: "none", padding: 0, width: "100%", textAlign: "left" }}
                   >
                     <span style={{ fontSize: 20, marginRight: 12 }}>👤</span>
