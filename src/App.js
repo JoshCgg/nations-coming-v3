@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithPopup, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
   try {
@@ -4155,6 +4155,16 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     const auth = getAuth();
+
+    if (window.Capacitor?.isNative) {
+      // On native, redirect to Google auth; getRedirectResult in App's useEffect handles the result on return
+      try { await signInWithRedirect(auth, googleProvider); } catch (e) {
+        console.log('Redirect sign-in error:', e.code, e.message);
+        setGoogleLoading(false);
+      }
+      return;
+    }
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
