@@ -4968,7 +4968,7 @@ export default function App() {
       .finally(() => {
         setIsProcessingMagicLink(false);
       });
-  }, []);
+  }, [updateGameState]);
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEditValue, setNameEditValue] = useState('');
   const [nameEditError, setNameEditError] = useState('');
