@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4143,6 +4143,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
@@ -4415,41 +4416,89 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
             />
             <input
               type="email" placeholder="Email address"
-              value={email} onChange={e => setEmail(e.target.value)}
+              value={email} onChange={e => { setEmail(e.target.value); setEmailError(""); }}
               style={{
                 padding: "16px 18px", borderRadius: 12,
-                border: `2px solid ${OB.lightBlue}`, background: "#f6fbff",
+                border: `2px solid ${emailError ? '#e05c2a' : OB.lightBlue}`, background: "#f6fbff",
                 fontFamily: "Montserrat, sans-serif", fontSize: 16,
                 outline: "none", color: OB.navy,
                 boxSizing: "border-box", width: "100%",
               }}
             />
+            {emailError && (
+              <div style={{
+                fontFamily: "Montserrat, sans-serif", fontSize: 13,
+                color: "#e05c2a", fontWeight: 600,
+                padding: "6px 4px 0",
+              }}>
+                {emailError}
+              </div>
+            )}
           </div>
 
           <ObOrangeBtn onClick={async () => {
-            const autoPassword = email + '_pftc_' + Date.now();
-            try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword })); } catch {}
+            let storedProfile = {};
+            try { storedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch {}
 
+            let succeeded = false;
             try {
-              const cred = await createUserWithEmailAndPassword(auth, email, autoPassword);
+              let cred;
+              let autoPassword = storedProfile.autoPassword;
+
+              if (autoPassword) {
+                try {
+                  cred = await signInWithEmailAndPassword(auth, email, autoPassword);
+                } catch (signInErr) {
+                  if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
+                    autoPassword = email + '_pftc_' + Date.now();
+                    cred = await createUserWithEmailAndPassword(auth, email, autoPassword);
+                    await setDoc(doc(db, "users", cred.user.uid), {
+                      name: displayName,
+                      email: email,
+                      createdAt: new Date().toISOString(),
+                      gameState: DEFAULT_GAME_STATE,
+                    });
+                    fetch('/api/subscribe', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
+                    });
+                  } else {
+                    throw signInErr;
+                  }
+                }
+              } else {
+                autoPassword = email + '_pftc_' + Date.now();
+                try {
+                  cred = await createUserWithEmailAndPassword(auth, email, autoPassword);
+                } catch (createErr) {
+                  if (createErr.code === 'auth/email-already-in-use') {
+                    setEmailError("An account with this email already exists. Try a different email, or use the same device you signed up with.");
+                    return;
+                  }
+                  throw createErr;
+                }
+                await setDoc(doc(db, "users", cred.user.uid), {
+                  name: displayName,
+                  email: email,
+                  createdAt: new Date().toISOString(),
+                  gameState: DEFAULT_GAME_STATE,
+                });
+                fetch('/api/subscribe', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
+                });
+              }
+
               const uid = cred.user.uid;
-              await setDoc(doc(db, "users", uid), {
-                name: displayName,
-                email: email,
-                createdAt: new Date().toISOString(),
-                gameState: DEFAULT_GAME_STATE,
-              });
               try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword, uid })); } catch {}
-              fetch('/api/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
-              });
+              succeeded = true;
             } catch (err) {
-              console.error("Firebase registration error:", err);
+              console.error("Firebase auth error:", err);
             }
 
-            setStep(4);
+            if (succeeded) setStep(4);
           }}>
             Start My Prayer Journey →
           </ObOrangeBtn>
@@ -4839,9 +4888,22 @@ export default function App() {
   const [showNationNudge, setShowNationNudge] = useState(false);
   const [pendingNationPray, setPendingNationPray] = useState(null);
   const nationTapTimes = useRef([]);
-  const [userProfile] = useState(() => {
+  const [userProfile, setUserProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUserProfile(prev => {
+          const next = { ...prev, uid: firebaseUser.uid, email: firebaseUser.email || prev.email };
+          try { localStorage.setItem("userProfile", JSON.stringify(next)); } catch {}
+          return next;
+        });
+      }
+    });
+    return unsubscribe;
+  }, []);
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEditValue, setNameEditValue] = useState('');
   const [nameEditError, setNameEditError] = useState('');
