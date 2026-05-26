@@ -1573,22 +1573,23 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
           <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
             <div style={{ display: "flex", gap: 8, padding: "0 16px", width: "max-content" }}>
               {RAW_SCHEDULE.map((s, i) => {
-                const dayLocked = gameState.journeyMode && scheduleToISO(s.d) > todayStr;
+                const isFutureDate = scheduleToISO(s.d) > todayStr;
                 return (
-                  <button key={i} onClick={() => { if (!dayLocked) { setDayIdx(i); window.scrollTo(0,0); } }} disabled={dayLocked} style={{
+                  <button key={i} onClick={() => { if (!isFutureDate) { setDayIdx(i); window.scrollTo(0,0); } }} disabled={isFutureDate} style={{
                     background: i === dayIdx ? C.indigo : C.brightGray,
-                    color: i === dayIdx ? "#fff" : dayLocked ? "#bbb" : C.indigo,
+                    color: i === dayIdx ? "#fff" : isFutureDate ? "#bbb" : C.indigo,
                     border: "none",
                     borderRadius: 10,
                     padding: "10px 14px",
                     fontFamily: "Montserrat, sans-serif",
                     fontWeight: 700,
                     fontSize: 13,
-                    cursor: dayLocked ? "not-allowed" : "pointer",
+                    cursor: isFutureDate ? "not-allowed" : "pointer",
                     whiteSpace: "nowrap",
                     flexShrink: 0,
                     minWidth: 64,
-                    opacity: dayLocked ? 0.4 : 1,
+                    opacity: isFutureDate ? 0.4 : 1,
+                    pointerEvents: isFutureDate ? 'none' : 'auto',
                   }}>{s.d}</button>
                 );
               })}
@@ -4459,11 +4460,19 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
             {emailError && (
               <div style={{ padding: "6px 4px 0" }}>
                 {magicLinkSent ? (
-                  <div style={{
-                    fontFamily: "Montserrat, sans-serif", fontSize: 13,
-                    color: "#2a7e4e", fontWeight: 600,
-                  }}>
-                    Check your email! Tap the link to sign back in. It will open in your browser.
+                  <div>
+                    <div style={{
+                      fontFamily: "Montserrat, sans-serif", fontSize: 13,
+                      color: "#2a7e4e", fontWeight: 600, marginBottom: 6,
+                    }}>
+                      Check your email! Tap the link to sign back in. It will open in your browser.
+                    </div>
+                    <div style={{
+                      fontFamily: "Montserrat, sans-serif", fontSize: 12,
+                      color: "#888", fontWeight: 500,
+                    }}>
+                      Don't see it? Check your spam folder.
+                    </div>
                   </div>
                 ) : (
                   <>
