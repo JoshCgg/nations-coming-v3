@@ -1357,7 +1357,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
 }
 
 /* ─── DAILY DIGEST TAB ─── */
-function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, userProfile }) {
+function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, userProfile, onSignIn }) {
   const today = new Date();
   const startOfTournament = new Date("2026-06-11");
   let defaultDay = 0;
@@ -1371,6 +1371,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
   const matchesToShow = day.matches;
   const isLastDay = dayIdx === RAW_SCHEDULE.length - 1;
   const todayStr = new Date().toISOString().slice(0, 10);
+  const isFutureDay = scheduleToISO(day.d) > todayStr;
   const nextLocked = !isLastDay && gameState.journeyMode && scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr;
   const unlockDate = !isLastDay
     ? new Date(scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -1597,6 +1598,33 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
 
         {/* Check-in */}
         {(() => {
+          if (!userProfile?.uid) {
+            return (
+              <div style={{ marginBottom: 14 }}>
+                <button
+                  onClick={onSignIn}
+                  style={{
+                    width: "100%",
+                    background: "transparent",
+                    border: `2px solid ${C.indigo}`,
+                    borderRadius: 14,
+                    padding: 18,
+                    fontFamily: "Montserrat, sans-serif",
+                    fontWeight: 700,
+                    fontSize: 15,
+                    cursor: "pointer",
+                    color: C.indigo,
+                  }}
+                >
+                  Sign in to track your prayer journey →
+                </button>
+              </div>
+            );
+          }
+
+          if (!gameState.journeyMode) return null;
+          if (isFutureDay) return null;
+
           const todayISO = new Date().toISOString().split('T')[0];
           const alreadyCheckedIn = gameState.checkedInDays.includes(todayISO);
 
@@ -1780,9 +1808,11 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
           const isPast   = i < todayIdx;
           const isFuture = i > todayIdx;
           const locked    = isFuture && gameState.journeyMode;
-          const isActive  = i === activeCard;
-          const cardClass = (isActive && !locked) ? "today" : (locked ? "future" : "past");
-          const cardStyle = isActive ? {} : locked ? { transform: 'scale(0.92)' } : { opacity: 0.5, transform: 'scale(0.92)' };
+          const isActive  = i === activeCard && !isFuture;
+          const cardClass = isFuture ? "future" : (isActive ? "today" : "past");
+          const cardStyle = isFuture
+            ? { opacity: 0.4, pointerEvents: 'none' }
+            : isActive ? {} : { opacity: 0.5, transform: 'scale(0.92)' };
           const featNations = (d.feat || [])
             .filter(name => name !== "All Nations")
             .map(name => RAW_COUNTRIES.find(c => c.n === name))
@@ -1806,11 +1836,11 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
               key={i}
               className={`devo-card ${cardClass}`}
               style={cardStyle}
-              onClick={locked ? undefined : () => onCardTap(i)}
+              onClick={isFuture ? undefined : () => onCardTap(i)}
               {...(isToday ? { 'data-tooltip-target': 'devotional-card' } : {})}
-              {...(locked ? { 'data-locked': 'true' } : {})}
+              {...(isFuture ? { 'data-locked': 'true' } : {})}
             >
-              {locked && <div className="devo-lock">🔒</div>}
+              {isFuture && <div className="devo-lock">🔒</div>}
               <div className="devo-card-inner" style={{ ...innerStyle, ...(!isActive && !locked ? { filter: 'brightness(0.75)' } : {}) }}>
                 {d.img && (
                   <div style={{
@@ -5411,6 +5441,7 @@ export default function App() {
                   updateGameState={handleGameStateUpdate}
                   onPray={handleNationPray}
                   userProfile={userProfile}
+                  onSignIn={() => setShowSignIn(true)}
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} onOpenSettings={() => setShowSettings(true)} />
           ) : tab === "teams" ? (
