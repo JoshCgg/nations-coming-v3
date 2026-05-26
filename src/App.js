@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithPopup, signInWithRedirect, signInWithCredential, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithCredential, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -91,7 +91,6 @@ const scheduleMatchDayNotifications = async () => {
   } catch (e) {}
 };
 
-const googleProvider = new GoogleAuthProvider();
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400;1,700&display=swap');
