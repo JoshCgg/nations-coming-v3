@@ -22,7 +22,8 @@
       "Bash(JAVA_HOME=\"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\" ./gradlew :app:dependencies --configuration releaseRuntimeClasspath)",
       "Bash(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\")",
       "Bash(Select-Object LastWriteTime)",
-      "PowerShell(\\(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\"\\).LastWriteTime)"
+      "PowerShell(\\(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\"\\).LastWriteTime)",
+      "Bash(npx cap *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
