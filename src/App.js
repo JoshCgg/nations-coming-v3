@@ -4958,6 +4958,7 @@ export default function App() {
           try { localStorage.setItem("userProfile", JSON.stringify(next)); } catch {}
           return next;
         });
+        updateGameState({ hasOnboarded: true });
         try { localStorage.removeItem("emailForSignIn"); } catch {}
         window.history.replaceState({}, document.title, window.location.pathname);
       })
