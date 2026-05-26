@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4144,6 +4144,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
@@ -4416,7 +4417,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
             />
             <input
               type="email" placeholder="Email address"
-              value={email} onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+              value={email} onChange={e => { setEmail(e.target.value); setEmailError(""); setMagicLinkSent(false); }}
               style={{
                 padding: "16px 18px", borderRadius: 12,
                 border: `2px solid ${emailError ? '#e05c2a' : OB.lightBlue}`, background: "#f6fbff",
@@ -4426,12 +4427,46 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
               }}
             />
             {emailError && (
-              <div style={{
-                fontFamily: "Montserrat, sans-serif", fontSize: 13,
-                color: "#e05c2a", fontWeight: 600,
-                padding: "6px 4px 0",
-              }}>
-                {emailError}
+              <div style={{ padding: "6px 4px 0" }}>
+                {magicLinkSent ? (
+                  <div style={{
+                    fontFamily: "Montserrat, sans-serif", fontSize: 13,
+                    color: "#2a7e4e", fontWeight: 600,
+                  }}>
+                    Check your email! Tap the link to sign back in. It will open in your browser.
+                  </div>
+                ) : (
+                  <>
+                    <div style={{
+                      fontFamily: "Montserrat, sans-serif", fontSize: 13,
+                      color: "#e05c2a", fontWeight: 600, marginBottom: 10,
+                    }}>
+                      {emailError}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await sendSignInLinkToEmail(auth, email, {
+                            url: 'https://prayforthecup.com/app',
+                            handleCodeInApp: true,
+                          });
+                          try { localStorage.setItem("emailForSignIn", email); } catch {}
+                          setMagicLinkSent(true);
+                        } catch (err) {
+                          console.error("Magic link error:", err);
+                        }
+                      }}
+                      style={{
+                        width: "100%", padding: "12px 0", borderRadius: 10,
+                        border: `2px solid ${OB.navy}`, background: "transparent",
+                        fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14,
+                        color: OB.navy, cursor: "pointer",
+                      }}
+                    >
+                      Send me a sign-in link
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -4903,6 +4938,28 @@ export default function App() {
       }
     });
     return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (!isSignInWithEmailLink(auth, window.location.href)) return;
+    let emailForSignIn = "";
+    try { emailForSignIn = localStorage.getItem("emailForSignIn") || ""; } catch {}
+    if (!emailForSignIn) return;
+    signInWithEmailLink(auth, emailForSignIn, window.location.href)
+      .then((result) => {
+        const uid = result.user.uid;
+        const email = result.user.email || emailForSignIn;
+        setUserProfile(prev => {
+          const next = { ...prev, uid, email, displayName: prev.displayName || "" };
+          try { localStorage.setItem("userProfile", JSON.stringify(next)); } catch {}
+          return next;
+        });
+        try { localStorage.removeItem("emailForSignIn"); } catch {}
+        window.history.replaceState({}, document.title, window.location.pathname);
+      })
+      .catch((err) => {
+        console.error("Magic link sign-in error:", err);
+      });
   }, []);
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEditValue, setNameEditValue] = useState('');
@@ -5633,7 +5690,7 @@ export default function App() {
                 Sign out?
               </div>
               <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#555', marginBottom: 24, lineHeight: 1.6 }}>
-                This will sign you out and clear your local data. Your prayer progress is saved to your account and will be restored when you sign back in.
+                You'll lose access to your streak and team until you sign back in.
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button
