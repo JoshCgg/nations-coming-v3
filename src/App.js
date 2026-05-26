@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, getAuth, signInWithCredential, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4941,72 +4941,6 @@ export default function App() {
   }, [pendingJoinCode, gameState.hasOnboarded, tab]);
 
   useEffect(() => {
-    const auth = getAuth();
-    getRedirectResult(auth).then(async (result) => {
-      console.log('Top-level redirect result:', result);
-      if (!result) return;
-
-      const user = result.user;
-      const displayName = user.displayName?.split(' ')[0] || 'Friend';
-      const email = user.email;
-      const uid = user.uid;
-
-      console.log('Google user returned at top level:', email);
-
-      // Firestore state takes priority over local state
-      let restoredFromFirestore = false;
-      try {
-        const snap = await getDoc(doc(db, 'users', uid));
-        if (snap.exists() && snap.data().gameState) {
-          const fsState = snap.data().gameState;
-          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
-          restoredFromFirestore = true;
-        }
-      } catch (e) { console.log('Firestore read error:', e.message); }
-
-      if (!restoredFromFirestore) {
-        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName,
-            email: email,
-            createdAt: new Date().toISOString(),
-            gameState: existingGame || DEFAULT_GAME_STATE
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-      } else {
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName,
-            email: email,
-            createdAt: new Date().toISOString(),
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-      }
-
-      localStorage.setItem('userProfile', JSON.stringify({
-        displayName,
-        email,
-        uid,
-        autoPassword: null
-      }));
-
-      localStorage.setItem('hasOnboarded', 'true');
-
-      try {
-        await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, firstName: displayName, listId: 64 })
-        });
-      } catch (e) { console.log('Brevo error:', e.message); }
-
-      console.log('Setting hasOnboarded and entering app');
-      updateGameState({ hasOnboarded: true });
-    }).catch(e => {
-      console.log('Redirect result error:', e.code, e.message);
-    });
-
     const joinCode = new URLSearchParams(window.location.search).get('join');
     if (joinCode) {
       setPendingJoinCode(joinCode.trim().toUpperCase());
