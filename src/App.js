@@ -4909,6 +4909,7 @@ export default function App() {
   const showApp = isLaunched || isPreview || previewUnlocked;
   const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
   const logoTapTimes = useRef([]);
+  const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(() => isSignInWithEmailLink(auth, window.location.href));
 
   const [tab, setTab] = useState("digest");
   const [selectedDayIdx, setSelectedDayIdx] = useState(null);
@@ -4944,7 +4945,10 @@ export default function App() {
     if (!isSignInWithEmailLink(auth, window.location.href)) return;
     let emailForSignIn = "";
     try { emailForSignIn = localStorage.getItem("emailForSignIn") || ""; } catch {}
-    if (!emailForSignIn) return;
+    if (!emailForSignIn) {
+      setIsProcessingMagicLink(false);
+      return;
+    }
     signInWithEmailLink(auth, emailForSignIn, window.location.href)
       .then((result) => {
         const uid = result.user.uid;
@@ -4959,6 +4963,9 @@ export default function App() {
       })
       .catch((err) => {
         console.error("Magic link sign-in error:", err);
+      })
+      .finally(() => {
+        setIsProcessingMagicLink(false);
       });
   }, []);
   const [showNameEdit, setShowNameEdit] = useState(false);
@@ -5245,6 +5252,23 @@ export default function App() {
           onComplete={showSignIn ? () => setShowSignIn(false) : handleOnboardingComplete}
         />
       </>
+    );
+  }
+
+  if (isProcessingMagicLink) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: '#00476B',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+          fontSize: 16, color: '#fff', opacity: 0.8,
+        }}>
+          Signing you in…
+        </div>
+      </div>
     );
   }
 
