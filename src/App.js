@@ -4192,8 +4192,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
     try {
       await SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } });
-      const result = await SocialLogin.login({ provider: 'google', options: {} });
-      const idToken = result.result.idToken;
+      const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
+      const idToken = socialResult.result.idToken;
       const credential = GoogleAuthProvider.credential(idToken);
       const result = await signInWithCredential(auth, credential);
       const user = result.user;
