@@ -4,6 +4,7 @@ import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
+import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
   try {
@@ -4186,6 +4187,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   }
 
   const handleGoogleSignIn = async () => {
+    console.log('Platform:', Capacitor.getPlatform());
+    console.log('isNativePlatform:', Capacitor.isNativePlatform());
     setGoogleLoading(true);
 
     try {
