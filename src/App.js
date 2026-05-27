@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4187,7 +4187,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const auth = getAuth();
 
     try {
       await SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } });
