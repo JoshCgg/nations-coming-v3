@@ -4192,6 +4192,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     setGoogleLoading(true);
 
     try {
+      const platform = Capacitor.getPlatform();
+      if (platform !== 'android' && platform !== 'ios') {
+        throw new Error('SocialLogin only runs on native platforms, current platform: ' + platform);
+      }
       await SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } });
       const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
       const idToken = socialResult.result.idToken;
@@ -4243,6 +4247,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     } catch (e) {
       console.log('Sign-in error:', e.code, e.message);
       console.error('Native Google Sign-In error:', JSON.stringify(e));
+      alert('Sign-in error: ' + (e.message || JSON.stringify(e)));
       setGoogleLoading(false);
     }
   };
