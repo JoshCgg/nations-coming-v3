@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, getAuth, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
