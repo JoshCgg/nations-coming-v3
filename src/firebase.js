@@ -16,7 +16,10 @@ const app = initializeApp(firebaseConfig);
 // Use initializeAuth on native platforms to prevent Firebase from loading
 // its browser popup/redirect resolver, which causes Chrome to open on Android
 const auth = Capacitor.isNativePlatform()
-  ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
+  ? initializeAuth(app, {
+      persistence: indexedDBLocalPersistence,
+      popupRedirectResolver: undefined
+    })
   : getAuth(app);
 export { auth };
 export const db = getFirestore(app);
