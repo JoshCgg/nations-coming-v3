@@ -4187,10 +4187,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   }
 
   const handleGoogleSignIn = async () => {
-    const { Capacitor } = await import('@capacitor/core');
+    const { Capacitor } = await import('@capacitor/core'); // eslint-disable-line no-unused-vars
     const platform = Capacitor.getPlatform();
     const isNative = Capacitor.isNativePlatform();
     document.title = 'P:' + platform + ' N:' + isNative;
+    void SocialLogin; void GoogleAuthProvider; void signInWithCredential; void setGoogleLoading;
   };
 
   function handleNotifAllow() {
