@@ -28,7 +28,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
                 Log.i("Google Activity Result", "SocialLogin plugin instance is not SocialLoginPlugin");
                 return;
             }
-            ((SocialLoginPlugin) plugin).handleGoogleLoginIntent(requestCode, resultCode, data);
+            ((SocialLoginPlugin) plugin).handleGoogleLoginIntent(requestCode, data);
         }
     }
 }
