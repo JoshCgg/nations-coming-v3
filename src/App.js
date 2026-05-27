@@ -4,7 +4,6 @@ import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
-// eslint-disable-next-line no-unused-vars
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4183,16 +4182,79 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   const isAndroid = /Android/i.test(ua);
 
+  // Initialize SocialLogin once on mount so it's ready before the user taps
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } })
+        .catch(e => console.log('SocialLogin.initialize error:', e.message));
+    }
+  }, []);
+
   function finishOnboarding(opts = {}) {
     onComplete({ journeyMode: journeyPath === true, ...opts });
   }
 
   const handleGoogleSignIn = async () => {
-    const { Capacitor } = await import('@capacitor/core'); // eslint-disable-line no-unused-vars
-    const platform = Capacitor.getPlatform();
-    const isNative = Capacitor.isNativePlatform();
-    document.title = 'P:' + platform + ' N:' + isNative;
-    void SocialLogin; void GoogleAuthProvider; void signInWithCredential; void setGoogleLoading;
+    setGoogleLoading(true);
+
+    try {
+      const platform = Capacitor.getPlatform();
+      if (platform !== 'android' && platform !== 'ios') {
+        throw new Error('SocialLogin only runs on native platforms, current platform: ' + platform);
+      }
+      const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
+      const idToken = socialResult.result.idToken;
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
+      const user = result.user;
+      const displayName = user.displayName?.split(' ')[0] || 'Friend';
+      const email = user.email;
+      const uid = user.uid;
+
+      let restoredFromFirestore = false;
+      try {
+        const snap = await getDoc(doc(db, 'users', uid));
+        if (snap.exists() && snap.data().gameState) {
+          const fsState = snap.data().gameState;
+          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
+          restoredFromFirestore = true;
+        }
+      } catch (e) { console.log('Firestore read error:', e.message); }
+
+      if (!restoredFromFirestore) {
+        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+        try {
+          await setDoc(doc(db, 'users', uid), {
+            name: displayName, email, createdAt: new Date().toISOString(),
+            gameState: existingGame || DEFAULT_GAME_STATE
+          }, { merge: true });
+        } catch (e) { console.log('Firestore error:', e.message); }
+      } else {
+        try {
+          await setDoc(doc(db, 'users', uid), {
+            name: displayName, email, createdAt: new Date().toISOString(),
+          }, { merge: true });
+        } catch (e) { console.log('Firestore error:', e.message); }
+      }
+
+      localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
+      localStorage.setItem('hasOnboarded', 'true');
+
+      try {
+        await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, firstName: displayName, listId: 64 })
+        });
+      } catch (e) { console.log('Brevo error:', e.message); }
+
+      setStep(4);
+    } catch (e) {
+      console.log('Sign-in error:', e.code, e.message);
+      console.error('Native Google Sign-In error:', JSON.stringify(e));
+      alert('Sign-in error: ' + (e.message || JSON.stringify(e)));
+      setGoogleLoading(false);
+    }
   };
 
   function handleNotifAllow() {
