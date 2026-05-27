@@ -4250,9 +4250,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
       setStep(4);
     } catch (e) {
-      console.log('Sign-in error:', e.code, e.message);
-      console.error('Native Google Sign-In error:', JSON.stringify(e));
-      alert('Sign-in error: ' + (e.message || JSON.stringify(e)));
       setGoogleLoading(false);
     }
   };
