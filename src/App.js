@@ -4,6 +4,7 @@ import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
+// eslint-disable-next-line no-unused-vars
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
