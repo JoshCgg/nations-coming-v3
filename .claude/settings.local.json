@@ -23,7 +23,8 @@
       "Bash(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\")",
       "Bash(Select-Object LastWriteTime)",
       "PowerShell(\\(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\"\\).LastWriteTime)",
-      "Bash(npx cap *)"
+      "Bash(npx cap *)",
+      "Bash(git check-ignore *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
