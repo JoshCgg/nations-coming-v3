@@ -4187,69 +4187,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   }
 
   const handleGoogleSignIn = async () => {
-    console.log('Platform:', Capacitor.getPlatform());
-    console.log('isNativePlatform:', Capacitor.isNativePlatform());
-    setGoogleLoading(true);
-
-    try {
-      const platform = Capacitor.getPlatform();
-      if (platform !== 'android' && platform !== 'ios') {
-        throw new Error('SocialLogin only runs on native platforms, current platform: ' + platform);
-      }
-      await SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } });
-      const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
-      const idToken = socialResult.result.idToken;
-      const credential = GoogleAuthProvider.credential(idToken);
-      const result = await signInWithCredential(auth, credential);
-      const user = result.user;
-      const displayName = user.displayName?.split(' ')[0] || 'Friend';
-      const email = user.email;
-      const uid = user.uid;
-
-      let restoredFromFirestore = false;
-      try {
-        const snap = await getDoc(doc(db, 'users', uid));
-        if (snap.exists() && snap.data().gameState) {
-          const fsState = snap.data().gameState;
-          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
-          restoredFromFirestore = true;
-        }
-      } catch (e) { console.log('Firestore read error:', e.message); }
-
-      if (!restoredFromFirestore) {
-        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName, email, createdAt: new Date().toISOString(),
-            gameState: existingGame || DEFAULT_GAME_STATE
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-      } else {
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName, email, createdAt: new Date().toISOString(),
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-      }
-
-      localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
-      localStorage.setItem('hasOnboarded', 'true');
-
-      try {
-        await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, firstName: displayName, listId: 64 })
-        });
-      } catch (e) { console.log('Brevo error:', e.message); }
-
-      setStep(4);
-    } catch (e) {
-      console.log('Sign-in error:', e.code, e.message);
-      console.error('Native Google Sign-In error:', JSON.stringify(e));
-      alert('Sign-in error: ' + (e.message || JSON.stringify(e)));
-      setGoogleLoading(false);
-    }
+    const { Capacitor } = await import('@capacitor/core');
+    const platform = Capacitor.getPlatform();
+    const isNative = Capacitor.isNativePlatform();
+    document.title = 'P:' + platform + ' N:' + isNative;
   };
 
   function handleNotifAllow() {
