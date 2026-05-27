@@ -4605,7 +4605,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
             }
           })()}
           <button
-            onClick={handleGoogleSignIn}
+            onClick={() => { console.log('Google button tapped'); handleGoogleSignIn(); }}
             disabled={googleLoading}
             style={{
               display: 'flex',
