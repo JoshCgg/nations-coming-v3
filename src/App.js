@@ -4174,7 +4174,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [googleTapConfirm, setGoogleTapConfirm] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
 
@@ -4187,15 +4186,12 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   }
 
   const handleGoogleSignIn = async () => {
-    console.log('handleGoogleSignIn called');
     setGoogleLoading(true);
     const auth = getAuth();
 
     try {
       await SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } });
-      console.log('SocialLogin.initialize done');
       const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
-      console.log('SocialLogin.login result:', JSON.stringify(socialResult));
       const idToken = socialResult.result.idToken;
       const credential = GoogleAuthProvider.credential(idToken);
       const result = await signInWithCredential(auth, credential);
@@ -4606,7 +4602,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
             }
           })()}
           <button
-            onClick={() => { console.log('Google button tapped'); setGoogleTapConfirm(true); handleGoogleSignIn(); }}
+            onClick={() => { handleGoogleSignIn(); }}
             disabled={googleLoading}
             style={{
               display: 'flex',
@@ -4653,11 +4649,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
               </>
             )}
           </button>
-          {googleTapConfirm && (
-            <div style={{ fontFamily: 'Montserrat', fontSize: 12, color: '#22c55e', textAlign: 'center', marginTop: 4 }}>
-              ✓ tapped
-            </div>
-          )}
 
           <div style={{
             fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#8899AA",

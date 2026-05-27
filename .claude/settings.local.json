@@ -24,7 +24,8 @@
       "Bash(Select-Object LastWriteTime)",
       "PowerShell(\\(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\"\\).LastWriteTime)",
       "Bash(npx cap *)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "PowerShell(git fetch --all --prune 2>&1)"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
