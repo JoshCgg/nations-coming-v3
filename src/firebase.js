@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqVDqKc1SN9yix0gMbjJg_ItSi1zBEFKc",
-  authDomain: "pray-for-the-cup.firebaseapp.com",
+  authDomain: "prayforthecup.com",
   projectId: "pray-for-the-cup",
   storageBucket: "pray-for-the-cup.firebasestorage.app",
   messagingSenderId: "13754311833",
