@@ -4247,7 +4247,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showNamePicker, setShowNamePicker] = useState(false);
   const [pendingNamePickerValue, setPendingNamePickerValue] = useState('');
-  const [pendingNamePickerData, setPendingNamePickerData] = useState(null);
+  const [pendingNamePickerData] = useState(null);
 
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
