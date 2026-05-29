@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
@@ -4199,14 +4199,18 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
     try {
       const platform = Capacitor.getPlatform();
-      if (platform !== 'android' && platform !== 'ios') {
-        throw new Error('SocialLogin only runs on native platforms, current platform: ' + platform);
+      let user;
+      if (platform === 'android' || platform === 'ios') {
+        const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
+        const idToken = socialResult.result.idToken;
+        const credential = GoogleAuthProvider.credential(idToken);
+        const result = await signInWithCredential(auth, credential);
+        user = result.user;
+      } else {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        user = result.user;
       }
-      const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
-      const idToken = socialResult.result.idToken;
-      const credential = GoogleAuthProvider.credential(idToken);
-      const result = await signInWithCredential(auth, credential);
-      const user = result.user;
       const displayName = user.displayName?.split(' ')[0] || 'Friend';
       const email = user.email;
       const uid = user.uid;
