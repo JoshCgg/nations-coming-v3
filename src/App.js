@@ -5165,6 +5165,16 @@ export default function App() {
         setIsProcessingMagicLink(false);
       });
   }, [updateGameState]);
+  useEffect(() => {
+    if (!userProfile?.uid) return;
+    if (localStorage.getItem('namePickerShown')) return;
+    if (localStorage.getItem('nameSetByUser')) return;
+    const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (stored.autoPassword) return;
+    setAppNamePickerValue(stored.displayName || '');
+    setShowAppNamePicker(true);
+  }, [userProfile?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [nameEditValue, setNameEditValue] = useState('');
   const [nameEditError, setNameEditError] = useState('');
@@ -5181,6 +5191,25 @@ export default function App() {
   const [pulsePos, setPulsePos] = useState(null);
   const [showSignIn, setShowSignIn] = useState(false);
   const [pendingJoinCode, setPendingJoinCode] = useState(null);
+  const [showAppNamePicker, setShowAppNamePicker] = useState(false);
+  const [appNamePickerValue, setAppNamePickerValue] = useState('');
+
+  async function handleAppNamePickerConfirm() {
+    const trimmed = appNamePickerValue.trim() || 'Friend';
+    const uid = userProfile?.uid;
+    if (!uid) return;
+    try {
+      await setDoc(doc(db, 'users', uid), { displayName: trimmed, name: trimmed }, { merge: true });
+    } catch {}
+    const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    stored.displayName = trimmed;
+    localStorage.setItem('userProfile', JSON.stringify(stored));
+    localStorage.setItem('namePickerShown', 'true');
+    localStorage.setItem('nameSetByUser', 'true');
+    setUserProfile(prev => ({ ...prev, displayName: trimmed }));
+    setSettingsDisplayName(trimmed);
+    setShowAppNamePicker(false);
+  }
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
     updateGameState({ hasOnboarded: true, journeyMode });
@@ -6130,6 +6159,27 @@ export default function App() {
             </div>
           </div>
         </>
+      )}
+
+      {showAppNamePicker && createPortal(
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div style={{ background: '#fff', borderRadius: 20, padding: '32px 24px', maxWidth: 340, width: '100%', boxShadow: '0 8px 40px rgba(0,0,0,0.25)' }}>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 20, color: C.indigo, marginBottom: 8 }}>Choose your display name</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: C.blue, marginBottom: 20, lineHeight: 1.6 }}>This name will be visible to others on your teams.</div>
+            <input
+              value={appNamePickerValue}
+              onChange={e => setAppNamePickerValue(e.target.value)}
+              maxLength={40}
+              autoFocus
+              style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 16, padding: '12px 14px', borderRadius: 10, border: `1.5px solid ${C.blue}`, color: C.indigo, outline: 'none', width: '100%', boxSizing: 'border-box', marginBottom: 20 }}
+            />
+            <button
+              onClick={handleAppNamePickerConfirm}
+              style={{ width: '100%', background: C.orange, border: 'none', borderRadius: 12, padding: '14px 0', fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: '#fff', cursor: 'pointer' }}
+            >Continue →</button>
+          </div>
+        </div>,
+        document.body
       )}
     </>
   );
