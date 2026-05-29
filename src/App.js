@@ -2828,6 +2828,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [snapVersion, setSnapVersion] = useState(0);
   const [nudgedNow, setNudgedNow] = useState({});
   const [copyToast, setCopyToast] = useState(false);
+  const [memberToast, setMemberToast] = useState(null);
+  const prevMembersRef = useRef({});
 
   useEffect(() => {
     if (view === 'create') {
@@ -2888,6 +2890,34 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
               memberCount: Object.keys(snapData.members || {}).length,
             },
           }));
+
+          const newMembers = snapData.members || {};
+          const prev = prevMembersRef.current[team.id];
+          if (prev === undefined) {
+            prevMembersRef.current = { ...prevMembersRef.current, [team.id]: newMembers };
+          } else {
+            const prevUids = Object.keys(prev);
+            const newUids = Object.keys(newMembers);
+            for (const uid of newUids) {
+              if (!prev[uid]) {
+                const name = newMembers[uid].name || 'Someone';
+                setMemberToast(`🙏 ${name} joined your team!`);
+                setTimeout(() => setMemberToast(null), 3000);
+                break;
+              }
+            }
+            if (currentUid === snapData.ownerUid) {
+              for (const uid of prevUids) {
+                if (!newMembers[uid]) {
+                  const name = prev[uid].name || 'Someone';
+                  setMemberToast(`${name} left the team.`);
+                  setTimeout(() => setMemberToast(null), 3000);
+                  break;
+                }
+              }
+            }
+            prevMembersRef.current = { ...prevMembersRef.current, [team.id]: newMembers };
+          }
         });
         unsubs.push(unsub);
       }
@@ -4153,6 +4183,16 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         zIndex: 2000, whiteSpace: 'nowrap',
       }}>
         Message copied! 📋
+      </div>
+    )}
+    {memberToast && (
+      <div style={{
+        position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+        background: '#1B456A', color: '#fff', borderRadius: 10, padding: '10px 20px',
+        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+        zIndex: 2000, whiteSpace: 'nowrap',
+      }}>
+        {memberToast}
       </div>
     )}
     </>
