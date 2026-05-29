@@ -4245,6 +4245,9 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [showNamePicker, setShowNamePicker] = useState(false);
+  const [pendingNamePickerValue, setPendingNamePickerValue] = useState('');
+  const [pendingNamePickerData, setPendingNamePickerData] = useState(null);
 
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
@@ -4320,11 +4323,32 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
         });
       } catch (e) { console.log('Brevo error:', e.message); }
 
-      setStep(4);
+      if (!restoredFromFirestore) {
+        setPendingNamePickerValue(displayName);
+        setPendingNamePickerData({ uid, email });
+        setShowNamePicker(true);
+        setGoogleLoading(false);
+      } else {
+        setStep(4);
+      }
     } catch (e) {
       setGoogleLoading(false);
     }
   };
+
+  async function handleNamePickerConfirm() {
+    const trimmedName = pendingNamePickerValue.trim() || 'Friend';
+    const { uid, email } = pendingNamePickerData;
+    try {
+      await setDoc(doc(db, 'users', uid), { name: trimmedName }, { merge: true });
+    } catch (e) {}
+    try {
+      const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      localStorage.setItem('userProfile', JSON.stringify({ ...stored, displayName: trimmedName }));
+    } catch (e) {}
+    setShowNamePicker(false);
+    setStep(4);
+  }
 
   function handleNotifAllow() {
     scheduleMatchDayNotifications();
@@ -4333,6 +4357,46 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     } else {
       finishOnboarding();
     }
+  }
+
+  // ─── Name Picker (Google Sign-In new users) ───
+  if (showNamePicker) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+        zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+      }}>
+        <div style={{
+          background: '#fff', borderRadius: 20, padding: 28,
+          width: '100%', maxWidth: 420, boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+        }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 22, color: OB.navy, marginBottom: 8 }}>
+            Choose your display name
+          </div>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: '#666', marginBottom: 20, lineHeight: 1.5 }}>
+            This name will be visible to others on your teams
+          </div>
+          <input
+            type="text"
+            value={pendingNamePickerValue}
+            onChange={e => setPendingNamePickerValue(e.target.value)}
+            autoFocus
+            style={{
+              width: '100%', padding: '14px 16px', borderRadius: 12,
+              border: `2px solid ${OB.lightBlue}`, background: '#f6fbff',
+              fontFamily: 'Montserrat, sans-serif', fontSize: 16, color: OB.navy,
+              outline: 'none', boxSizing: 'border-box', marginBottom: 20,
+            }}
+          />
+          <ObOrangeBtn
+            onClick={handleNamePickerConfirm}
+            style={{ opacity: pendingNamePickerValue.trim() ? 1 : 0.5 }}
+          >
+            Continue →
+          </ObOrangeBtn>
+        </div>
+      </div>
+    );
   }
 
   // ─── STEP 1 — Welcome ───
@@ -4517,17 +4581,22 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-            <input
-              type="text" placeholder="Your name"
-              value={displayName} onChange={e => setDisplayName(e.target.value)}
-              style={{
-                padding: "16px 18px", borderRadius: 12,
-                border: `2px solid ${OB.lightBlue}`, background: "#f6fbff",
-                fontFamily: "Montserrat, sans-serif", fontSize: 16,
-                outline: "none", color: OB.navy,
-                boxSizing: "border-box", width: "100%",
-              }}
-            />
+            <div>
+              <input
+                type="text" placeholder="Your name"
+                value={displayName} onChange={e => setDisplayName(e.target.value)}
+                style={{
+                  padding: "16px 18px", borderRadius: 12,
+                  border: `2px solid ${OB.lightBlue}`, background: "#f6fbff",
+                  fontFamily: "Montserrat, sans-serif", fontSize: 16,
+                  outline: "none", color: OB.navy,
+                  boxSizing: "border-box", width: "100%",
+                }}
+              />
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#888", marginTop: 4 }}>
+                This name will be visible to others if you join or create a team.
+              </div>
+            </div>
             <input
               type="email" placeholder="Email address"
               value={email} onChange={e => { setEmail(e.target.value); setEmailError(""); setMagicLinkSent(false); }}
