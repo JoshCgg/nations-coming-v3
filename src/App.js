@@ -4271,12 +4271,16 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     const uid = user.uid;
 
     let restoredFromFirestore = false;
+    let firestoreDisplayName = null;
     try {
       const snap = await getDoc(doc(db, 'users', uid));
-      if (snap.exists() && snap.data().gameState) {
-        const fsState = snap.data().gameState;
-        try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
-        restoredFromFirestore = true;
+      if (snap.exists()) {
+        const snapData = snap.data();
+        firestoreDisplayName = snapData.displayName || null;
+        if (snapData.gameState) {
+          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...snapData.gameState })); } catch {}
+          restoredFromFirestore = true;
+        }
       }
     } catch (e) { console.log('Firestore read error:', e.message); }
 
@@ -4297,7 +4301,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     }
 
     if (restoredFromFirestore) {
-      localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
+      const nameToStore = firestoreDisplayName || displayName;
+      localStorage.setItem('userProfile', JSON.stringify({ displayName: nameToStore, email, uid, autoPassword: null }));
     }
     localStorage.setItem('hasOnboarded', 'true');
 
