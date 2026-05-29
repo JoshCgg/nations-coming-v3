@@ -28,7 +28,9 @@
       "PowerShell(git fetch --all --prune 2>&1)",
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; cd \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\"; .\\\\gradlew signingReport 2>&1)",
       "Bash(grep -v \"//\\\\|^\\\\s*//\")",
-      "Bash(grep -iv \"//.*unused\\\\|style\\\\|color\\\\|font\\\\|padding\")"
+      "Bash(grep -iv \"//.*unused\\\\|style\\\\|color\\\\|font\\\\|padding\")",
+      "Bash(awk -F: '$2 > 4000 {print; exit}')",
+      "Bash(awk -F: '$2 > 3800 && $2 < 4200 {print}')"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"

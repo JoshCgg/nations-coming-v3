@@ -2827,6 +2827,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [showRemoveSubmenu, setShowRemoveSubmenu] = useState(false);
   const [snapVersion, setSnapVersion] = useState(0);
   const [nudgedNow, setNudgedNow] = useState({});
+  const [copyToast, setCopyToast] = useState(false);
 
   useEffect(() => {
     if (view === 'create') {
@@ -2964,19 +2965,25 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     }
   };
 
-  function handleNudge(targetUid, memberName) {
-    const now = Date.now();
-    const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
-    if (cooldowns[targetUid] && now - cooldowns[targetUid] < 3600000) return;
+  async function handleNudge(targetUid, memberName) {
+    const messages = [
+      `Hey! I've been praying for the nations with Pray for the Cup 🌍⚽ — come join me!`,
+      `Praying for the World Cup nations today — come join the prayer journey! ⚽🙏`,
+      `Let's pray for the nations together — Pray for the Cup is awesome!`,
+      `The World Cup is happening and so is prayer 🙏 Come join me on Pray for the Cup!`,
+    ];
+    const selectedMessage = messages[Math.floor(Math.random() * messages.length)];
 
-    const senderName = userProfile?.displayName || 'A teammate';
-    const teamName = activeTeam?.name || 'Your team';
-    updateDoc(doc(db, 'users', targetUid), {
-      pendingNudge: { from: senderName, teamName, sentAt: new Date().toISOString() }
-    }).catch(() => {});
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Pray for the Cup', text: selectedMessage, url: 'https://prayforthecup.com/app' });
+      } else {
+        await navigator.clipboard.writeText(selectedMessage);
+        setCopyToast(true);
+        setTimeout(() => setCopyToast(false), 3000);
+      }
+    } catch (e) {}
 
-    cooldowns[targetUid] = now;
-    localStorage.setItem('nudgeCooldowns', JSON.stringify(cooldowns));
     setNudgedNow(prev => ({ ...prev, [targetUid]: true }));
     setTimeout(() => setNudgedNow(prev => ({ ...prev, [targetUid]: false })), 3000);
   }
@@ -3534,27 +3541,24 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                   {(() => {
                     const currentUid = userProfile?.uid || auth.currentUser?.uid;
                     if (uid === currentUid) return null;
-                    const cooldowns = JSON.parse(localStorage.getItem('nudgeCooldowns') || '{}');
-                    const cooldownActive = cooldowns[uid] && Date.now() - cooldowns[uid] < 3600000;
                     const justNudged = nudgedNow[uid];
-                    const isDisabled = cooldownActive || justNudged;
                     return (
                       <button
                         onClick={() => handleNudge(uid, member.name)}
-                        disabled={isDisabled}
+                        disabled={justNudged}
                         style={{
                           background: 'transparent',
-                          border: `1.5px solid ${isDisabled ? '#ccc' : '#E06520'}`,
+                          border: `1.5px solid ${justNudged ? '#ccc' : '#E06520'}`,
                           borderRadius: 8, padding: '6px 10px',
-                          cursor: isDisabled ? 'default' : 'pointer',
+                          cursor: justNudged ? 'default' : 'pointer',
                           flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4,
                           fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12,
-                          color: isDisabled ? '#ccc' : '#E06520',
+                          color: justNudged ? '#ccc' : '#E06520',
                         }}
                         title={`Nudge ${member.name}`}
                       >
-                        <img src="/images/whistle.svg" width={14} height={14} alt="" style={{ verticalAlign: 'middle', opacity: isDisabled ? 0.4 : 1 }} />
-                        {justNudged ? 'Nudged! 👋' : (cooldownActive ? 'Nudged' : 'Nudge')}
+                        <img src="/images/whistle.svg" width={14} height={14} alt="" style={{ verticalAlign: 'middle', opacity: justNudged ? 0.4 : 1 }} />
+                        {justNudged ? 'Nudged! 👋' : 'Nudge'}
                       </button>
                     );
                   })()}
@@ -4140,6 +4144,16 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         </div>
       </div>
     </div>
+    {copyToast && (
+      <div style={{
+        position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+        background: '#222', color: '#fff', borderRadius: 10, padding: '10px 20px',
+        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+        zIndex: 2000, whiteSpace: 'nowrap',
+      }}>
+        Message copied! 📋
+      </div>
+    )}
   );
 };
 
@@ -5140,38 +5154,6 @@ export default function App() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    const uid = userProfile?.uid;
-    if (!uid) return;
-    getDoc(doc(db, 'users', uid)).then(snap => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      if (!data.pendingNudge) return;
-      const { from, teamName } = data.pendingNudge;
-      setPendingToast({ type: 'nudge', from, teamName });
-      updateDoc(doc(db, 'users', uid), { pendingNudge: deleteField() }).catch(() => {});
-    }).catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userProfile?.uid]);
-
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        const uid = userProfile?.uid || auth.currentUser?.uid;
-        if (!uid) return;
-        getDoc(doc(db, 'users', uid)).then(snap => {
-          if (snap.exists() && snap.data().pendingNudge) {
-            const { from, teamName } = snap.data().pendingNudge;
-            setPendingToast({ type: 'nudge', from, teamName });
-            updateDoc(doc(db, 'users', uid), { pendingNudge: deleteField() }).catch(() => {});
-          }
-        }).catch(() => {});
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [userProfile?.uid]);
 
   useEffect(() => {
     setPulsePos(null); // clear immediately so full-dim shows while transitioning
