@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
@@ -4261,19 +4261,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     }
   }, []);
 
-  // Pick up the result after signInWithRedirect returns the user to the app (web only)
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) return;
-    getRedirectResult(auth).then(async (result) => {
-      if (!result) return;
-      setGoogleLoading(true);
-      await processGoogleUser(result.user);
-    }).catch(() => {
-      setGoogleLoading(false);
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   function finishOnboarding(opts = {}) {
     onComplete({ journeyMode: journeyPath === true, ...opts });
   }
@@ -4344,8 +4331,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
         await processGoogleUser(result.user);
       } else {
         const provider = new GoogleAuthProvider();
-        await signInWithRedirect(auth, provider);
-        // page navigates away — getRedirectResult useEffect handles the result on return
+        const result = await signInWithPopup(auth, provider);
+        await processGoogleUser(result.user);
       }
     } catch (e) {
       setGoogleLoading(false);
