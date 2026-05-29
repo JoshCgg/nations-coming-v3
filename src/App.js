@@ -5420,7 +5420,7 @@ export default function App() {
         }} />
 
         {/* Home Screen Banner */}
-        {showBanner && !window.Capacitor?.isNative && <HomeScreenBanner onDismiss={() => setShowBanner(false)} />}
+        {showBanner && !Capacitor.isNativePlatform() && <HomeScreenBanner onDismiss={() => setShowBanner(false)} />}
 
         {/* Tab Bar */}
         <div style={{ background: C.indigo, padding: "8px 0 0" }}>
