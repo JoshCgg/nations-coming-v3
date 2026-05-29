@@ -22,6 +22,18 @@ const scheduleMatchDayNotifications = async () => {
 
     await LocalNotifications.cancel({ notifications: Array.from({length: 40}, (_, i) => ({ id: i + 1 })) });
 
+    if (process.env.NODE_ENV === 'development') {
+      const testTime = new Date(Date.now() + 15000);
+      await LocalNotifications.schedule({ notifications: [{
+        id: 999,
+        title: 'Test Notification ⚽',
+        body: 'Local notifications are working!',
+        schedule: { at: testTime },
+        smallIcon: 'ic_stat_icon_config_sample',
+        iconColor: '#E06520'
+      }]});
+    }
+
     const schedule = [
       { id: 1,  date: '2026-06-11', nations: 'Mexico & South Africa' },
       { id: 2,  date: '2026-06-12', nations: 'Haiti & Scotland' },
