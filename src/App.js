@@ -2967,10 +2967,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   async function handleNudge(targetUid, memberName) {
     const messages = [
-      `Hey! I've been praying for the nations with Pray for the Cup 🌍⚽ — come join me!`,
-      `Praying for the World Cup nations today — come join the prayer journey! ⚽🙏`,
-      `Let's pray for the nations together — Pray for the Cup is awesome!`,
-      `The World Cup is happening and so is prayer 🙏 Come join me on Pray for the Cup!`,
+      `🟨 Yellow card — you've been caught missing your prayer time!\nJust kidding — but your team misses you. Hebrews 10:24 says to "spur one another on." Consider yourself spurred. 🙏 prayforthecup.com/app`,
+      `⚽ Your Captain is calling you back into the game!\nGood teammates carry each other — "carry each other's burdens." — Gal 6:2. Come pray with us! 🙏 prayforthecup.com/app`,
+      `🚩 Offside! You've drifted from your prayer habit — but your team needs you.\n"As iron sharpens iron, so one person sharpens another." — Prov 27:17 prayforthecup.com/app`,
+      `💧 Water break! Time to pause and pray for the nations.\nYou've got a teammate cheering you on — "Let us not give up meeting together." — Heb 10:25 prayforthecup.com/app`,
     ];
     const selectedMessage = messages[Math.floor(Math.random() * messages.length)];
 
