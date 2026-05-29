@@ -4023,6 +4023,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   /* ── JOIN SHEET ── */
   const joinPreview = joinCodeInput.length === 6;
   return (
+    <>
     <div style={{ minHeight: '100%', background: '#F5F7F8' }}>
       <div
         onClick={() => setView(teams.length > 0 ? 'myteam' : 'empty')}
@@ -4154,6 +4155,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         Message copied! 📋
       </div>
     )}
+    </>
   );
 };
 
