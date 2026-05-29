@@ -4341,17 +4341,12 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   async function handleNamePickerConfirm() {
     const trimmedName = pendingNamePickerValue.trim() || 'Friend';
     const { uid, email } = pendingNamePickerData;
-    console.log('NAME PICKER: saving to Firestore', { uid, displayName: trimmedName });
     try {
       await setDoc(doc(db, 'users', uid), { displayName: trimmedName, name: trimmedName }, { merge: true });
-      console.log('NAME PICKER: Firestore write complete');
-    } catch (e) { console.log('NAME PICKER: Firestore write ERROR', e); }
+    } catch (e) {}
     const userProfileToSave = { displayName: trimmedName, email, uid, autoPassword: null };
-    console.log('NAME PICKER: saving to localStorage', userProfileToSave);
     localStorage.setItem('userProfile', JSON.stringify(userProfileToSave));
-    console.log('NAME PICKER: localStorage write complete');
     setShowNamePicker(false);
-    console.log('NAME PICKER: advancing to app');
     setStep(4);
   }
 
