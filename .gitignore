@@ -25,3 +25,7 @@ yarn-error.log*
 
 # Android secrets
 android/app/google-services.json
+
+# Scripts secrets
+scripts/service-account.json
+scripts/node_modules
