@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
@@ -4261,77 +4261,91 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     }
   }, []);
 
+  // Pick up the result after signInWithRedirect returns the user to the app (web only)
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) return;
+    getRedirectResult(auth).then(async (result) => {
+      if (!result) return;
+      setGoogleLoading(true);
+      await processGoogleUser(result.user);
+    }).catch(() => {
+      setGoogleLoading(false);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function finishOnboarding(opts = {}) {
     onComplete({ journeyMode: journeyPath === true, ...opts });
   }
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
+  const processGoogleUser = async (user) => {
+    const displayName = user.displayName?.split(' ')[0] || 'Friend';
+    const email = user.email;
+    const uid = user.uid;
+
+    let restoredFromFirestore = false;
+    try {
+      const snap = await getDoc(doc(db, 'users', uid));
+      if (snap.exists() && snap.data().gameState) {
+        const fsState = snap.data().gameState;
+        try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
+        restoredFromFirestore = true;
+      }
+    } catch (e) { console.log('Firestore read error:', e.message); }
+
+    if (!restoredFromFirestore) {
+      const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
+      try {
+        await setDoc(doc(db, 'users', uid), {
+          name: displayName, email, createdAt: new Date().toISOString(),
+          gameState: existingGame || DEFAULT_GAME_STATE
+        }, { merge: true });
+      } catch (e) { console.log('Firestore error:', e.message); }
+    } else {
+      try {
+        await setDoc(doc(db, 'users', uid), {
+          name: displayName, email, createdAt: new Date().toISOString(),
+        }, { merge: true });
+      } catch (e) { console.log('Firestore error:', e.message); }
+    }
+
+    if (restoredFromFirestore) {
+      localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
+    }
+    localStorage.setItem('hasOnboarded', 'true');
 
     try {
+      await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, firstName: displayName, listId: 64 })
+      });
+    } catch (e) { console.log('Brevo error:', e.message); }
+
+    if (!restoredFromFirestore) {
+      setPendingNamePickerValue(displayName);
+      setPendingNamePickerData({ uid, email });
+      setShowNamePicker(true);
+      setGoogleLoading(false);
+    } else {
+      setStep(4);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
       const platform = Capacitor.getPlatform();
-      let user;
       if (platform === 'android' || platform === 'ios') {
         const socialResult = await SocialLogin.login({ provider: 'google', options: {} });
         const idToken = socialResult.result.idToken;
         const credential = GoogleAuthProvider.credential(idToken);
         const result = await signInWithCredential(auth, credential);
-        user = result.user;
+        await processGoogleUser(result.user);
       } else {
         const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        user = result.user;
-      }
-      const displayName = user.displayName?.split(' ')[0] || 'Friend';
-      const email = user.email;
-      const uid = user.uid;
-
-      let restoredFromFirestore = false;
-      try {
-        const snap = await getDoc(doc(db, 'users', uid));
-        if (snap.exists() && snap.data().gameState) {
-          const fsState = snap.data().gameState;
-          try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...fsState })); } catch {}
-          restoredFromFirestore = true;
-        }
-      } catch (e) { console.log('Firestore read error:', e.message); }
-
-      if (!restoredFromFirestore) {
-        const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName, email, createdAt: new Date().toISOString(),
-            gameState: existingGame || DEFAULT_GAME_STATE
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-      } else {
-        try {
-          await setDoc(doc(db, 'users', uid), {
-            name: displayName, email, createdAt: new Date().toISOString(),
-          }, { merge: true });
-        } catch (e) { console.log('Firestore error:', e.message); }
-      }
-
-      if (restoredFromFirestore) {
-        localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
-      }
-      localStorage.setItem('hasOnboarded', 'true');
-
-      try {
-        await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, firstName: displayName, listId: 64 })
-        });
-      } catch (e) { console.log('Brevo error:', e.message); }
-
-      if (!restoredFromFirestore) {
-        setPendingNamePickerValue(displayName);
-        setPendingNamePickerData({ uid, email });
-        setShowNamePicker(true);
-        setGoogleLoading(false);
-      } else {
-        setStep(4);
+        await signInWithRedirect(auth, provider);
+        // page navigates away — getRedirectResult useEffect handles the result on return
       }
     } catch (e) {
       setGoogleLoading(false);
