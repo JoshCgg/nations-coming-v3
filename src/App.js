@@ -4309,14 +4309,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
       });
     } catch (e) { console.log('Brevo error:', e.message); }
 
-    if (!restoredFromFirestore) {
-      setPendingNamePickerValue(displayName);
-      setPendingNamePickerData({ uid, email });
-      setShowNamePicker(true);
-      setGoogleLoading(false);
-    } else {
-      setStep(4);
-    }
+    setStep(4);
   };
 
   const handleGoogleSignIn = async () => {
@@ -5168,11 +5161,19 @@ export default function App() {
   useEffect(() => {
     if (!userProfile?.uid) return;
     if (localStorage.getItem('namePickerShown')) return;
-    if (localStorage.getItem('nameSetByUser')) return;
     const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
     if (stored.autoPassword) return;
-    setAppNamePickerValue(stored.displayName || '');
-    setShowAppNamePicker(true);
+    (async () => {
+      try {
+        const snap = await getDoc(doc(db, 'users', userProfile.uid));
+        if (snap.exists() && snap.data().nameSetByUser) {
+          localStorage.setItem('namePickerShown', 'true');
+          return;
+        }
+      } catch {}
+      setAppNamePickerValue(stored.displayName || '');
+      setShowAppNamePicker(true);
+    })();
   }, [userProfile?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showNameEdit, setShowNameEdit] = useState(false);
@@ -5199,7 +5200,7 @@ export default function App() {
     const uid = userProfile?.uid;
     if (!uid) return;
     try {
-      await setDoc(doc(db, 'users', uid), { displayName: trimmed, name: trimmed }, { merge: true });
+      await setDoc(doc(db, 'users', uid), { displayName: trimmed, name: trimmed, nameSetByUser: true }, { merge: true });
     } catch {}
     const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
     stored.displayName = trimmed;
