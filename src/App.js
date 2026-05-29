@@ -4236,7 +4236,7 @@ function ObOrangeBtn({ children, onClick, style = {} }) {
   );
 }
 
-function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) {
+function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, setSettingsDisplayName }) {
   const [step, setStep] = useState(initialStep);
   const [journeyPath, setJourneyPath] = useState(initialJourneyPath);
   const [displayName, setDisplayName] = useState("");
@@ -4303,6 +4303,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
     if (restoredFromFirestore) {
       const nameToStore = firestoreDisplayName || displayName;
       localStorage.setItem('userProfile', JSON.stringify({ displayName: nameToStore, email, uid, autoPassword: null }));
+      setSettingsDisplayName(nameToStore);
     }
     localStorage.setItem('hasOnboarded', 'true');
 
@@ -5450,6 +5451,7 @@ export default function App() {
           initialStep={showSignIn ? 3 : 1}
           initialJourneyPath={showSignIn ? true : null}
           onComplete={showSignIn ? () => setShowSignIn(false) : handleOnboardingComplete}
+          setSettingsDisplayName={setSettingsDisplayName}
         />
       </>
     );
