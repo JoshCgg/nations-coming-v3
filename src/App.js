@@ -5464,9 +5464,9 @@ export default function App() {
                 />
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} onOpenSettings={() => setShowSettings(true)} />
           ) : tab === "teams" ? (
-            userProfile?.uid ? (
+            (userProfile?.uid && (gameState.teams || []).length > 0) ? (
               <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
-            ) : (
+            ) : !userProfile?.uid ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 32px", textAlign: "center" }}>
                 <div style={{ fontSize: 40, marginBottom: 16 }}>🏆</div>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, color: C.indigo, marginBottom: 8 }}>Sign in to join or create a team</div>
@@ -5476,6 +5476,18 @@ export default function App() {
                   style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 12, padding: "15px 32px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
                 >Sign in →</button>
               </div>
+            ) : !gameState.journeyMode ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 32px", textAlign: "center" }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>🏆</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 18, color: C.indigo, marginBottom: 8 }}>Activate Journey Mode to join or create a team</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, color: C.blue, marginBottom: 24, lineHeight: 1.5 }}>Turn on Journey Mode in Settings to pray with others and track collective progress.</div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 12, padding: "15px 32px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
+                >Open Settings →</button>
+              </div>
+            ) : (
+              <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
             )
           ) : (
             <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} onPray={handleNationPray} />
