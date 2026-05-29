@@ -1372,7 +1372,7 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
   const matchesToShow = day.matches;
   const isLastDay = dayIdx === RAW_SCHEDULE.length - 1;
   const todayStr = new Date().toISOString().slice(0, 10);
-  const isFutureDay = scheduleToISO(day.d) > todayStr;
+  const isFutureDay = dayIdx > defaultDay;
   const nextLocked = !isLastDay && gameState.journeyMode && scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr;
   const unlockDate = !isLastDay
     ? new Date(scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })

@@ -25,7 +25,9 @@
       "PowerShell(\\(Get-Item \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\\\\app\\\\google-services.json\"\\).LastWriteTime)",
       "Bash(npx cap *)",
       "Bash(git check-ignore *)",
-      "PowerShell(git fetch --all --prune 2>&1)"
+      "PowerShell(git fetch --all --prune 2>&1)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; cd \"b:\\\\global-gates-digital-projects\\\\nations-coming-v3\\\\android\"; .\\\\gradlew signingReport 2>&1)",
+      "Bash(grep -v \"//\\\\|^\\\\s*//\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
