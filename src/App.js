@@ -5534,11 +5534,7 @@ export default function App() {
                   </div>
                 ) : (
                   <div style={{ background: C.brightGray, borderRadius: 12, padding: "14px 16px" }}>
-                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 600, color: C.indigo, marginBottom: 8 }}>Sign in to track your prayer journey</div>
-                    <button
-                      onClick={() => { setShowSettings(false); setShowSignIn(true); }}
-                      style={{ background: C.orange, color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
-                    >Sign in →</button>
+                    <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, color: C.blue }}>Sign in below to activate Prayer Journey</div>
                   </div>
                 )}
               </div>
