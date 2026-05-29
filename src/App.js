@@ -4312,7 +4312,9 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
         } catch (e) { console.log('Firestore error:', e.message); }
       }
 
-      localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
+      if (restoredFromFirestore) {
+        localStorage.setItem('userProfile', JSON.stringify({ displayName, email, uid, autoPassword: null }));
+      }
       localStorage.setItem('hasOnboarded', 'true');
 
       try {
@@ -4338,14 +4340,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
   async function handleNamePickerConfirm() {
     const trimmedName = pendingNamePickerValue.trim() || 'Friend';
-    const { uid } = pendingNamePickerData;
+    const { uid, email } = pendingNamePickerData;
     try {
-      await setDoc(doc(db, 'users', uid), { name: trimmedName }, { merge: true });
+      await setDoc(doc(db, 'users', uid), { displayName: trimmedName, name: trimmedName }, { merge: true });
     } catch (e) {}
-    try {
-      const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      localStorage.setItem('userProfile', JSON.stringify({ ...stored, displayName: trimmedName }));
-    } catch (e) {}
+    localStorage.setItem('userProfile', JSON.stringify({ displayName: trimmedName, email, uid, autoPassword: null }));
     setShowNamePicker(false);
     setStep(4);
   }
