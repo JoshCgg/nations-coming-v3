@@ -4338,7 +4338,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null }) 
 
   async function handleNamePickerConfirm() {
     const trimmedName = pendingNamePickerValue.trim() || 'Friend';
-    const { uid, email } = pendingNamePickerData;
+    const { uid } = pendingNamePickerData;
     try {
       await setDoc(doc(db, 'users', uid), { name: trimmedName }, { merge: true });
     } catch (e) {}
