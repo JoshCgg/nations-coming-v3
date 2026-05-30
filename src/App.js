@@ -4368,8 +4368,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
 
     let restoredFromFirestore = false;
     let firestoreDisplayName = null;
+    let docExists = false;
     try {
       const snap = await getDoc(doc(db, 'users', uid));
+      docExists = snap.exists();
       if (snap.exists()) {
         const snapData = snap.data();
         firestoreDisplayName = snapData.displayName || null;
@@ -4381,7 +4383,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       }
     } catch {}
 
-    if (!restoredFromFirestore) {
+    if (!docExists) {
+      // Brand new user — no Firestore doc yet
       const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
       try {
         await setDoc(doc(db, 'users', uid), {
@@ -4390,9 +4393,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         }, { merge: true });
       } catch {}
     } else {
+      // Doc exists (with or without gameState) — never overwrite gameState
       try {
         await setDoc(doc(db, 'users', uid), {
-          displayName, name: displayName, email, createdAt: new Date().toISOString(),
+          displayName, name: displayName, email, updatedAt: new Date().toISOString(),
         }, { merge: true });
       } catch {}
     }
