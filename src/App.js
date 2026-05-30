@@ -4361,14 +4361,14 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       });
 
       const idToken = result?.result?.idToken;
-      const accessToken = result?.result?.accessToken?.token || result?.result?.accessToken;
       if (!idToken) throw new Error('No identity token from Apple');
 
       const provider = new OAuthProvider('apple.com');
+      provider.addScope('email');
+      provider.addScope('name');
       const credential = provider.credential({
-        idToken,
-        rawNonce,
-        ...(accessToken ? { accessToken } : {}),
+        idToken: idToken,
+        rawNonce: rawNonce,
       });
 
       const userCredential = await signInWithCredential(auth, credential);
