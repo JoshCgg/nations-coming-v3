@@ -1372,11 +1372,16 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
 /* ─── DAILY DIGEST TAB ─── */
 function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, userProfile, onSignIn }) {
   const today = new Date();
-  const startOfTournament = new Date("2026-06-11");
+  const VIDEO_MODE = true; // TEMP — remove before archive
   let defaultDay = 0;
-  if (today >= startOfTournament) {
-    const diff = Math.floor((today - startOfTournament) / 86400000);
-    defaultDay = Math.min(diff, RAW_SCHEDULE.length - 1);
+  if (VIDEO_MODE) {
+    defaultDay = 10;
+  } else {
+    const startOfTournament = new Date('2026-06-11');
+    if (today >= startOfTournament) {
+      const diff = Math.floor((today - startOfTournament) / 86400000);
+      defaultDay = Math.min(diff, RAW_SCHEDULE.length - 1);
+    }
   }
   const [dayIdx, setDayIdx] = useState(initialDay ?? defaultDay);
   const [selectedNation, setSelectedNation] = useState(null);
@@ -5176,6 +5181,27 @@ export default function App() {
   const [userProfile, setUserProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
+
+  useEffect(() => {
+    const VIDEO_MODE = true; // TEMP — remove before archive
+    if (!VIDEO_MODE) return;
+    if (localStorage.getItem('pftc_game')) return;
+    const today = new Date();
+    const days = Array.from({ length: 7 }, (_, i) =>
+      new Date(today - (6 - i) * 86400000).toISOString().split('T')[0]
+    );
+    const seed = {
+      journeyMode: true,
+      hasOnboarded: true,
+      streakCount: 7,
+      lastCheckIn: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+      checkedInDays: days,
+      completedDevotionals: days,
+      prayedNations: RAW_COUNTRIES.slice(0, 10).map(c => c.n),
+      goalsAchieved: ['first_touch', 'hat_trick', 'clean_sheet', 'golden_boot'],
+    };
+    localStorage.setItem('pftc_game', JSON.stringify(seed));
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
