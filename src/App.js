@@ -5913,8 +5913,11 @@ export default function App() {
                             style={{ fontFamily: "Montserrat, sans-serif", fontSize: '16px', padding: "10px 12px", borderRadius: 8, border: `1px solid ${C.blue}`, color: C.indigo, outline: "none", width: "100%", boxSizing: "border-box" }}
                             autoFocus
                             onBlur={() => {
-                              const viewport = document.querySelector('meta[name=viewport]');
-                              if (viewport) { viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1'); }
+                              const v = document.querySelector('meta[name=viewport]');
+                              if (v) {
+                                v.content = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
+                                setTimeout(() => { v.content = 'width=device-width, initial-scale=1, viewport-fit=cover'; }, 300);
+                              }
                             }}
                           />
                           {nameEditError && <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#e03030" }}>{nameEditError}</div>}
