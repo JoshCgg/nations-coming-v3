@@ -5550,6 +5550,7 @@ export default function App() {
         background: C.brightGray,
         display: "flex",
         flexDirection: "column",
+        overflowX: "hidden",
       }}>
 
         {/* App Header */}
