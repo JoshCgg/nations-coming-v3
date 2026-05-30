@@ -4,7 +4,6 @@ import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
-import { SignInWithApple } from '@capacitor-community/apple-sign-in';
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4341,28 +4340,31 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   };
 
   const handleAppleSignIn = async () => {
-    if (!Capacitor.isNativePlatform()) return;
+    if (Capacitor.getPlatform() !== 'ios') return;
     setAppleLoading(true);
     try {
-      const result = await SignInWithApple.authorize({
-        clientId: 'com.globalgates.prayforthecup',
-        redirectURI: 'https://prayforthecup.com/app',
-        scopes: 'email name',
+      const result = await SocialLogin.login({
+        provider: 'apple',
+        options: {
+          scopes: ['email', 'name'],
+        },
       });
-      const { identityToken, givenName, familyName, email } = result.response;
+      const idToken = result?.result?.idToken;
+      if (!idToken) throw new Error('No identity token from Apple');
       const provider = new OAuthProvider('apple.com');
-      const credential = provider.credential({ idToken: identityToken });
+      const credential = provider.credential({ idToken });
       const userCredential = await signInWithCredential(auth, credential);
       const user = userCredential.user;
-      const firstName = givenName || '';
-      const lastName = familyName || '';
-      const fullName = (firstName + ' ' + lastName).trim()
+      const profile = result?.result?.profile;
+      const fullName = (
+        ((profile?.givenName || '') + ' ' + (profile?.familyName || '')).trim()
         || user.displayName
-        || (email || user.email || '').split('@')[0]
-        || 'Friend';
+        || (user.email || '').split('@')[0]
+        || 'Friend'
+      );
       await processGoogleUser(user.uid, fullName, user.email);
     } catch (err) {
-      if (err?.code !== '1001') console.error('Apple sign-in error:', err);
+      if (err?.message !== 'cancelled') console.error('Apple sign-in error:', err);
     } finally {
       setAppleLoading(false);
     }
