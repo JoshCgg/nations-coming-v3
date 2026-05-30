@@ -2827,6 +2827,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   const [showTeamMenu, setShowTeamMenu] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [editName, setEditName] = useState('');
   const [editKit, setEditKit] = useState('');
   const [teamUpdateBanner, setTeamUpdateBanner] = useState(false);
@@ -3197,6 +3198,26 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     }
   }
 
+  function handleLeaveTeam() {
+    triggerHaptic('warning');
+    const uid = userProfile?.uid || auth.currentUser?.uid;
+    if (uid) {
+      updateDoc(doc(db, 'teams', activeTeam.id), {
+        [`members.${uid}`]: deleteField(),
+        memberCount: Math.max(0, (liveTeamData[activeTeam.id]?.memberCount || 1) - 1),
+      }).catch(() => {});
+    }
+    const updatedTeams = (gameState.teams || []).filter(t => t.id !== activeTeam.id);
+    updateGameState({ teams: updatedTeams });
+    setShowLeaveConfirm(false);
+    setShowTeamMenu(false);
+    if (updatedTeams.length === 0) {
+      setView('empty');
+    } else {
+      setActiveTeamIndex(prev => Math.min(prev, updatedTeams.length - 1));
+    }
+  }
+
   const safeIndex = Math.min(activeTeamIndex, Math.max(0, teams.length - 1));
   const activeTeam = teams.length > 0 ? (teams[safeIndex] || null) : null;
   function handleRemoveMember(uid) {
@@ -3386,8 +3407,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
               >
                 {inviteCopied ? 'Link copied! 📋' : '🔗 Invite'}
               </button>
-              {(activeTeam.role === 'owner' || activeTeam.role === 'Team Leader') && (
-                <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button
                     onClick={() => {
                       setEditName(displayName);
@@ -3411,7 +3431,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                       borderRadius: 10, zIndex: 50, minWidth: 180,
                       boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
                     }}>
-                      {!showRemoveSubmenu ? (
+                      {(activeTeam.role === 'owner' || activeTeam.role === 'Team Leader') ? (
+                      !showRemoveSubmenu ? (
                         <>
                           <button
                             onClick={() => { setShowTeamMenu(false); setShowEditSheet(true); }}
@@ -3487,11 +3508,23 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                             ));
                           })()}
                         </>
+                      )
+                      ) : (
+                        <button
+                          onClick={() => { setShowTeamMenu(false); setShowLeaveConfirm(true); }}
+                          style={{
+                            width: '100%', background: 'transparent', border: 'none',
+                            padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
+                            fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+                            color: '#FF6B6B', display: 'flex', alignItems: 'center', gap: 8,
+                          }}
+                        >
+                          🚪 Leave Team
+                        </button>
                       )}
                     </div>
                   )}
                 </div>
-              )}
             </div>
 
             {/* Nations progress bar */}
@@ -3814,6 +3847,58 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
                   }}
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Leave team confirm modal */}
+        {showLeaveConfirm && (
+          <div
+            onClick={() => setShowLeaveConfirm(false)}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+              zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 24,
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#FFFFFF', borderRadius: 20, padding: '28px 24px',
+                maxWidth: 320, width: '100%',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#1B2B3A', marginBottom: 12 }}>
+                Leave {activeTeam?.name}?
+              </div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#555', marginBottom: 24, lineHeight: 1.6 }}>
+                You'll lose your team streak and progress. You can rejoin with the team code.
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setShowLeaveConfirm(false)}
+                  style={{
+                    flex: 1, background: 'transparent', border: '2px solid #ECF1EE',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#1B2B3A',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLeaveTeam}
+                  style={{
+                    flex: 1, background: '#E53935', border: 'none',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Leave Team
                 </button>
               </div>
             </div>
