@@ -4312,7 +4312,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
 
     console.log('Calling Brevo subscribe for:', email);
     try {
-      await fetch('/api/subscribe', {
+      await fetch('https://prayforthecup.com/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName: displayName, listId: 64 })
