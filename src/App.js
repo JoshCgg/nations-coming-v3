@@ -173,6 +173,7 @@ const DEFAULT_GAME_STATE = {
   lastCheckIn: null,
   goalsAchieved: [],
   teams: [],
+  notifTime: '08:00',
 };
 
 function useGameState(uid) {
@@ -4343,7 +4344,7 @@ function ObOrangeBtn({ children, onClick, style = {} }) {
   );
 }
 
-function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, setSettingsDisplayName }) {
+function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, setSettingsDisplayName, setNotifTime }) {
   const [step, setStep] = useState(initialStep);
   const [journeyPath, setJourneyPath] = useState(initialJourneyPath);
   const [displayName, setDisplayName] = useState("");
@@ -4394,6 +4395,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         if (snapData.gameState) {
           try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...snapData.gameState })); } catch {}
           restoredFromFirestore = true;
+          if (snapData.gameState.notifTime) {
+            try { localStorage.setItem('notificationTime', snapData.gameState.notifTime); } catch {}
+            setNotifTime?.(snapData.gameState.notifTime);
+            scheduleMatchDayNotifications();
+          }
         }
       }
     } catch {}
@@ -5610,6 +5616,7 @@ export default function App() {
           initialJourneyPath={showSignIn ? true : null}
           onComplete={showSignIn ? () => setShowSignIn(false) : handleOnboardingComplete}
           setSettingsDisplayName={setSettingsDisplayName}
+          setNotifTime={setNotifTime}
         />
       </>
     );
@@ -5983,6 +5990,7 @@ export default function App() {
                           if (!val) return;
                           setNotifTime(val);
                           localStorage.setItem('notificationTime', val);
+                          updateGameState({ notifTime: val });
                           scheduleMatchDayNotifications();
                           setNotifTimeConfirm(true);
                           setTimeout(() => setNotifTimeConfirm(false), 3000);
