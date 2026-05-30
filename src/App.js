@@ -1277,7 +1277,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
           </button>
         </div>
 
-        <div key={nation.n} style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "16px", paddingBottom: 24 }}>
+        <div key={nation.n} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch", padding: "16px", paddingBottom: 24 }}>
           {nation.contenders ? (
             <div style={{ background: C.brightGray, borderRadius: 12, padding: 16, marginBottom: 16 }}>
               <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13, color: C.indigo, marginBottom: 6 }}>PLAYOFF CONTENDERS</div>
@@ -5905,7 +5905,7 @@ export default function App() {
                           <span style={{ fontSize: 18, color: C.blue, marginLeft: 8 }}>›</span>
                         </button>
                       ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowX: "hidden", maxWidth: "100%" }}>
                           <input
                             value={nameEditValue}
                             onChange={e => setNameEditValue(e.target.value)}
