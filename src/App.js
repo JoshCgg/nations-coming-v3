@@ -8,10 +8,18 @@ import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
   try {
-    const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-    const styleMap = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
-    await Haptics.impact({ style: styleMap[style] || ImpactStyle.Medium });
-  } catch (e) {}
+    const { Haptics, ImpactStyle, NotificationType } = await import('@capacitor/haptics');
+    if (style === 'success') {
+      await Haptics.notification({ type: NotificationType.Success });
+    } else if (style === 'warning') {
+      await Haptics.notification({ type: NotificationType.Warning });
+    } else if (style === 'error') {
+      await Haptics.notification({ type: NotificationType.Error });
+    } else {
+      const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
+      await Haptics.impact({ style: map[style] ?? ImpactStyle.Medium });
+    }
+  } catch {}
 };
 
 const scheduleMatchDayNotifications = async () => {
@@ -3070,6 +3078,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         console.error('[createTeam] Firestore error:', e);
       }
     }
+    triggerHaptic('success');
     setView('myteam');
     setActiveTeamIndex(updatedTeams.length - 1);
     const createdName = teamNameInput.trim();
@@ -3142,6 +3151,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         role: 'member',
         lastUpdated: new Date().toISOString(),
       });
+      triggerHaptic('success');
       setJoinSuccess(`You joined ${data.name}! 🙌`);
       setJoinCodeInput('');
       setView('myteam');
@@ -3174,6 +3184,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   }
 
   function handleDeleteTeam() {
+    triggerHaptic('warning');
     const updatedTeams = (gameState.teams || []).filter(t => t.id !== activeTeam.id);
     updateGameState({ teams: updatedTeams });
     deleteDoc(doc(db, 'teams', activeTeam.id)).catch(() => {});
