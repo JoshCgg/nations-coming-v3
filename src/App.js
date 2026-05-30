@@ -4248,7 +4248,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showNamePicker, setShowNamePicker] = useState(false);
   const [pendingNamePickerValue, setPendingNamePickerValue] = useState('');
-  const [pendingNamePickerData] = useState(null);
+  const [pendingNamePickerData, setPendingNamePickerData] = useState(null);
 
   const ua = navigator.userAgent || "";
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
@@ -4291,14 +4291,14 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
       try {
         await setDoc(doc(db, 'users', uid), {
-          name: displayName, email, createdAt: new Date().toISOString(),
+          displayName, name: displayName, email, createdAt: new Date().toISOString(),
           gameState: existingGame || DEFAULT_GAME_STATE
         }, { merge: true });
       } catch (e) { console.log('Firestore error:', e.message); }
     } else {
       try {
         await setDoc(doc(db, 'users', uid), {
-          name: displayName, email, createdAt: new Date().toISOString(),
+          displayName, name: displayName, email, createdAt: new Date().toISOString(),
         }, { merge: true });
       } catch (e) { console.log('Firestore error:', e.message); }
     }
@@ -4380,7 +4380,18 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         || (user.email || '').split('@')[0]
         || 'Friend'
       );
-      await processGoogleUser(user.uid, fullName, user.email);
+      await processGoogleUser({ uid: user.uid, displayName: fullName, email: user.email });
+
+      // Show name picker if user hasn't set a name yet
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (!snap.exists() || !snap.data().nameSetByUser) {
+          localStorage.setItem('namePickerShown', 'true'); // prevent App-level picker from also firing
+          setPendingNamePickerData({ uid: user.uid, email: user.email });
+          setPendingNamePickerValue(fullName);
+          setShowNamePicker(true);
+        }
+      } catch {}
     } catch (err) {
       if (err?.message !== 'cancelled') console.error('Apple sign-in error:', err);
     } finally {
@@ -4392,10 +4403,12 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     const trimmedName = pendingNamePickerValue.trim() || 'Friend';
     const { uid, email } = pendingNamePickerData;
     try {
-      await setDoc(doc(db, 'users', uid), { displayName: trimmedName, name: trimmedName }, { merge: true });
+      await setDoc(doc(db, 'users', uid), { displayName: trimmedName, name: trimmedName, nameSetByUser: true }, { merge: true });
     } catch (e) {}
     const userProfileToSave = { displayName: trimmedName, email, uid, autoPassword: null };
     localStorage.setItem('userProfile', JSON.stringify(userProfileToSave));
+    localStorage.setItem('namePickerShown', 'true');
+    setSettingsDisplayName(trimmedName);
     setShowNamePicker(false);
     setStep(4);
   }
