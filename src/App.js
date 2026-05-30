@@ -1372,16 +1372,11 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
 /* ─── DAILY DIGEST TAB ─── */
 function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, userProfile, onSignIn }) {
   const today = new Date();
-  const VIDEO_MODE = true; // TEMP — remove before archive
+  const startOfTournament = new Date('2026-06-11');
   let defaultDay = 0;
-  if (VIDEO_MODE) {
-    defaultDay = 10;
-  } else {
-    const startOfTournament = new Date('2026-06-11');
-    if (today >= startOfTournament) {
-      const diff = Math.floor((today - startOfTournament) / 86400000);
-      defaultDay = Math.min(diff, RAW_SCHEDULE.length - 1);
-    }
+  if (today >= startOfTournament) {
+    const diff = Math.floor((today - startOfTournament) / 86400000);
+    defaultDay = Math.min(diff, RAW_SCHEDULE.length - 1);
   }
   const [dayIdx, setDayIdx] = useState(initialDay ?? defaultDay);
   const [selectedNation, setSelectedNation] = useState(null);
@@ -1389,8 +1384,8 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
   const matchesToShow = day.matches;
   const isLastDay = dayIdx === RAW_SCHEDULE.length - 1;
   const todayStr = new Date().toISOString().slice(0, 10);
-  const isFutureDay = VIDEO_MODE ? dayIdx > 10 : dayIdx > defaultDay;
-  const nextLocked = !isLastDay && gameState.journeyMode && (VIDEO_MODE ? dayIdx >= 10 : scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr);
+  const isFutureDay = dayIdx > defaultDay;
+  const nextLocked = !isLastDay && gameState.journeyMode && scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr;
   const unlockDate = !isLastDay
     ? new Date(scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '';
@@ -1715,17 +1710,12 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
   const carouselRef = useRef(null);
   const skipScrollRef = useRef(false);
 
-  const VIDEO_MODE = true; // TEMP — remove before archive
+  const today = new Date();
+  const startOfTournament = new Date("2026-06-11");
   let todayIdx = 0;
-  if (VIDEO_MODE) {
-    todayIdx = 10;
-  } else {
-    const today = new Date();
-    const startOfTournament = new Date("2026-06-11");
-    if (today >= startOfTournament) {
-      const diff = Math.floor((today - startOfTournament) / 86400000);
-      todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
-    }
+  if (today >= startOfTournament) {
+    const diff = Math.floor((today - startOfTournament) / 86400000);
+    todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
   }
 
   const [activeCard, setActiveCard] = useState(todayIdx);
@@ -2219,17 +2209,12 @@ function MyJourney({ gameState, setTab }) {
   const earned = gameState.goalsAchieved || [];
   const carouselRef = useRef(null);
 
-  const VIDEO_MODE = true; // TEMP — remove before archive
+  const today = new Date();
+  const startOfTournament = new Date("2026-06-11");
   let todayIdx = 0;
-  if (VIDEO_MODE) {
-    todayIdx = 10;
-  } else {
-    const today = new Date();
-    const startOfTournament = new Date("2026-06-11");
-    if (today >= startOfTournament) {
-      const diff = Math.floor((today - startOfTournament) / 86400000);
-      todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
-    }
+  if (today >= startOfTournament) {
+    const diff = Math.floor((today - startOfTournament) / 86400000);
+    todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
   }
 
   const [activeCard, setActiveCard] = useState(todayIdx);
@@ -5191,27 +5176,6 @@ export default function App() {
   const [userProfile, setUserProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
   });
-
-  useEffect(() => {
-    const VIDEO_MODE = true; // TEMP — remove before archive
-    if (!VIDEO_MODE) return;
-    if (localStorage.getItem('pftc_game')) return;
-    const today = new Date();
-    const days = Array.from({ length: 7 }, (_, i) =>
-      new Date(today - (6 - i) * 86400000).toISOString().split('T')[0]
-    );
-    const seed = {
-      journeyMode: true,
-      hasOnboarded: true,
-      streakCount: 7,
-      lastCheckIn: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-      checkedInDays: days,
-      completedDevotionals: days,
-      prayedNations: RAW_COUNTRIES.slice(0, 10).map(c => c.n),
-      goalsAchieved: ['first_touch', 'hat_trick', 'clean_sheet', 'golden_boot'],
-    };
-    localStorage.setItem('pftc_game', JSON.stringify(seed));
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
