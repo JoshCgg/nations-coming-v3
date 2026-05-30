@@ -4278,6 +4278,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       if (snap.exists()) {
         const snapData = snap.data();
         firestoreDisplayName = snapData.displayName || null;
+        if (snapData.tutorialSeen) { try { localStorage.setItem('pftc_tooltips_done', 'true'); } catch {} }
         if (snapData.gameState) {
           try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...snapData.gameState })); } catch {}
           restoredFromFirestore = true;
@@ -4779,6 +4780,12 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
               }
 
               const uid = cred.user.uid;
+              try {
+                const tutSnap = await getDoc(doc(db, 'users', uid));
+                if (tutSnap.exists() && tutSnap.data().tutorialSeen) {
+                  localStorage.setItem('pftc_tooltips_done', 'true');
+                }
+              } catch {}
               try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword, uid })); } catch {}
               succeeded = true;
             } catch (err) {
@@ -5229,9 +5236,15 @@ export default function App() {
       return;
     }
     signInWithEmailLink(auth, emailForSignIn, window.location.href)
-      .then((result) => {
+      .then(async (result) => {
         const uid = result.user.uid;
         const email = result.user.email || emailForSignIn;
+        try {
+          const tutSnap = await getDoc(doc(db, 'users', uid));
+          if (tutSnap.exists() && tutSnap.data().tutorialSeen) {
+            localStorage.setItem('pftc_tooltips_done', 'true');
+          }
+        } catch {}
         setUserProfile(prev => {
           const next = { ...prev, uid, email, displayName: prev.displayName || "" };
           try { localStorage.setItem("userProfile", JSON.stringify(next)); } catch {}
@@ -5276,6 +5289,7 @@ export default function App() {
   const [notifTimeConfirm, setNotifTimeConfirm] = useState(false);
   const [showTutorialVideo, setShowTutorialVideo] = useState(false);
   const videoRef = useRef(null);
+  const pendingTutorialRef = useRef(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [pendingJoinCode, setPendingJoinCode] = useState(null);
   const [showAppNamePicker, setShowAppNamePicker] = useState(false);
@@ -5296,6 +5310,18 @@ export default function App() {
     setUserProfile(prev => ({ ...prev, displayName: trimmed }));
     setSettingsDisplayName(trimmed);
     setShowAppNamePicker(false);
+    if (pendingTutorialRef.current && !localStorage.getItem('pftc_tooltips_done')) {
+      pendingTutorialRef.current = false;
+      setShowTutorialVideo(true);
+    }
+  }
+
+  function dismissTutorialVideo() {
+    localStorage.setItem('pftc_tooltips_done', 'true');
+    setShowTutorialVideo(false);
+    if (userProfile?.uid) {
+      setDoc(doc(db, 'users', userProfile.uid), { tutorialSeen: true }, { merge: true }).catch(() => {});
+    }
   }
 
   function handleOnboardingComplete({ journeyMode = false } = {}) {
@@ -5351,7 +5377,12 @@ export default function App() {
 
   useEffect(() => {
     if (gameState.hasOnboarded && !localStorage.getItem('pftc_tooltips_done')) {
-      setShowTutorialVideo(true);
+      if (!localStorage.getItem('namePickerShown')) {
+        // Name picker is about to appear; let its confirm handler trigger the video
+        pendingTutorialRef.current = true;
+      } else {
+        setShowTutorialVideo(true);
+      }
     }
   }, [gameState.hasOnboarded]);
 
@@ -6079,13 +6110,13 @@ export default function App() {
           />
           <div style={{ marginTop: 20, textAlign: "center" }}>
             <div
-              onClick={() => { localStorage.setItem('pftc_tooltips_done', 'true'); setShowTutorialVideo(false); }}
+              onClick={dismissTutorialVideo}
               style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)", cursor: "pointer", marginBottom: 14 }}
             >
               Skip
             </div>
             <button
-              onClick={() => { localStorage.setItem('pftc_tooltips_done', 'true'); setShowTutorialVideo(false); }}
+              onClick={dismissTutorialVideo}
               style={{ background: C.orange, border: "none", borderRadius: 12, padding: "14px 40px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16, color: "#fff", cursor: "pointer" }}
             >
               Got it 🙏
