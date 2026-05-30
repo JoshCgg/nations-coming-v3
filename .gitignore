@@ -23,8 +23,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Android secrets
+# iOS/Android secrets
 android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
 
 # Scripts secrets
 scripts/service-account.json
