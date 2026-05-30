@@ -33,7 +33,12 @@
       "Bash(awk -F: '$2 > 3800 && $2 < 4200 {print}')",
       "Bash(awk -F: '$2 > 3200 && $2 < 3400')",
       "Bash(awk -F: '$2 > 3100 && $2 < 3400')",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "Bash(git rm *)",
+      "Bash(awk -F'width: ' '{print NR\": \"$0}')",
+      "Bash(grep -E \"[0-9]{3,}\")",
+      "Bash(awk -F: '$2 <= 4380 {last=$0} END {print last}')",
+      "Bash(awk -F: '$2 <= 4380')"
     ],
     "additionalDirectories": [
       "C:\\Users\\joshc\\.claude\\projects\\b--global-gates-digital-projects-nations-coming-v3\\memory"
