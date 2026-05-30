@@ -1389,8 +1389,8 @@ function DailyDigest({ gameState, updateGameState, initialDay, onBack, onPray, u
   const matchesToShow = day.matches;
   const isLastDay = dayIdx === RAW_SCHEDULE.length - 1;
   const todayStr = new Date().toISOString().slice(0, 10);
-  const isFutureDay = dayIdx > defaultDay;
-  const nextLocked = !isLastDay && gameState.journeyMode && scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr;
+  const isFutureDay = VIDEO_MODE ? dayIdx > 10 : dayIdx > defaultDay;
+  const nextLocked = !isLastDay && gameState.journeyMode && (VIDEO_MODE ? dayIdx >= 10 : scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) > todayStr);
   const unlockDate = !isLastDay
     ? new Date(scheduleToISO(RAW_SCHEDULE[dayIdx + 1].d) + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '';
@@ -1715,12 +1715,17 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
   const carouselRef = useRef(null);
   const skipScrollRef = useRef(false);
 
-  const today = new Date();
-  const startOfTournament = new Date("2026-06-11");
+  const VIDEO_MODE = true; // TEMP — remove before archive
   let todayIdx = 0;
-  if (today >= startOfTournament) {
-    const diff = Math.floor((today - startOfTournament) / 86400000);
-    todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
+  if (VIDEO_MODE) {
+    todayIdx = 10;
+  } else {
+    const today = new Date();
+    const startOfTournament = new Date("2026-06-11");
+    if (today >= startOfTournament) {
+      const diff = Math.floor((today - startOfTournament) / 86400000);
+      todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
+    }
   }
 
   const [activeCard, setActiveCard] = useState(todayIdx);
@@ -2214,12 +2219,17 @@ function MyJourney({ gameState, setTab }) {
   const earned = gameState.goalsAchieved || [];
   const carouselRef = useRef(null);
 
-  const today = new Date();
-  const startOfTournament = new Date("2026-06-11");
+  const VIDEO_MODE = true; // TEMP — remove before archive
   let todayIdx = 0;
-  if (today >= startOfTournament) {
-    const diff = Math.floor((today - startOfTournament) / 86400000);
-    todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
+  if (VIDEO_MODE) {
+    todayIdx = 10;
+  } else {
+    const today = new Date();
+    const startOfTournament = new Date("2026-06-11");
+    if (today >= startOfTournament) {
+      const diff = Math.floor((today - startOfTournament) / 86400000);
+      todayIdx = Math.min(diff, RAW_SCHEDULE.length - 1);
+    }
   }
 
   const [activeCard, setActiveCard] = useState(todayIdx);
