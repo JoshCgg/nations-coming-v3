@@ -5910,8 +5910,12 @@ export default function App() {
                             value={nameEditValue}
                             onChange={e => setNameEditValue(e.target.value)}
                             maxLength={40}
-                            style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, padding: "10px 12px", borderRadius: 8, border: `1px solid ${C.blue}`, color: C.indigo, outline: "none", width: "100%", boxSizing: "border-box" }}
+                            style={{ fontFamily: "Montserrat, sans-serif", fontSize: '16px', padding: "10px 12px", borderRadius: 8, border: `1px solid ${C.blue}`, color: C.indigo, outline: "none", width: "100%", boxSizing: "border-box" }}
                             autoFocus
+                            onBlur={() => {
+                              const viewport = document.querySelector('meta[name=viewport]');
+                              if (viewport) { viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1'); }
+                            }}
                           />
                           {nameEditError && <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#e03030" }}>{nameEditError}</div>}
                           <div style={{ display: "flex", gap: 8 }}>
