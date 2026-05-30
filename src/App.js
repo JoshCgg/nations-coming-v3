@@ -5275,6 +5275,7 @@ export default function App() {
   const [notifTime, setNotifTime] = useState(() => localStorage.getItem('notificationTime') || '08:00');
   const [notifTimeConfirm, setNotifTimeConfirm] = useState(false);
   const [showTutorialVideo, setShowTutorialVideo] = useState(false);
+  const videoRef = useRef(null);
   const [showSignIn, setShowSignIn] = useState(false);
   const [pendingJoinCode, setPendingJoinCode] = useState(null);
   const [showAppNamePicker, setShowAppNamePicker] = useState(false);
@@ -5353,6 +5354,13 @@ export default function App() {
       setShowTutorialVideo(true);
     }
   }, [gameState.hasOnboarded]);
+
+  useEffect(() => {
+    if (showTutorialVideo && videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [showTutorialVideo]);
 
   useEffect(() => {
     if (!gameState.hasOnboarded) return;
@@ -6060,10 +6068,12 @@ export default function App() {
       {showTutorialVideo && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
           <video
-            src="/videos/tutorial.mp4"
+            ref={videoRef}
+            src="https://prayforthecup.com/videos/tutorial.mp4"
             autoPlay
             muted
             playsInline
+            preload="auto"
             controls={false}
             style={{ maxWidth: "100%", maxHeight: "80vh", display: "block" }}
           />
