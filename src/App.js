@@ -4317,7 +4317,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName: displayName, listId: 64 })
       });
-    } catch (e) { console.log('Brevo error:', e.message); }
+    } catch (err) { console.log('Brevo error:', err?.message, err?.name, JSON.stringify(err)); }
 
     setStep(4);
   };
