@@ -3517,7 +3517,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
         {/* Members */}
         {activeTeam && (Object.keys(liveTeamData[activeTeam.id]?.members || {}).length > 0 || (activeTeam.memberSummaries || []).length > 0) && (
           <div style={{ padding: '0 16px 16px' }}>
-            {console.log('[Teams] liveTeamData for', activeTeam.id, liveTeamData[activeTeam.id])}
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11, color: '#3E67AC', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
               Members
             </div>
@@ -4269,7 +4268,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       SocialLogin.initialize({
         google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID },
         apple: { clientId: 'com.globalgates.prayforthecup' },
-      }).catch(e => console.log('SocialLogin.initialize error:', e.message));
+      }).catch(() => {});
     }
   }, []);
 
@@ -4295,7 +4294,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
           restoredFromFirestore = true;
         }
       }
-    } catch (e) { console.log('Firestore read error:', e.message); }
+    } catch {}
 
     if (!restoredFromFirestore) {
       const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
@@ -4304,13 +4303,13 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
           displayName, name: displayName, email, createdAt: new Date().toISOString(),
           gameState: existingGame || DEFAULT_GAME_STATE
         }, { merge: true });
-      } catch (e) { console.log('Firestore error:', e.message); }
+      } catch {}
     } else {
       try {
         await setDoc(doc(db, 'users', uid), {
           displayName, name: displayName, email, createdAt: new Date().toISOString(),
         }, { merge: true });
-      } catch (e) { console.log('Firestore error:', e.message); }
+      } catch {}
     }
 
     if (restoredFromFirestore) {
@@ -4320,14 +4319,13 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     }
     localStorage.setItem('hasOnboarded', 'true');
 
-    console.log('Calling Brevo subscribe for:', email);
     try {
       await fetch('https://prayforthecup.com/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName: displayName, listId: 64 })
       });
-    } catch (err) { console.log('Brevo error:', err?.message, err?.name, JSON.stringify(err)); }
+    } catch {}
 
     setStep(4);
   };
@@ -4757,7 +4755,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                       createdAt: new Date().toISOString(),
                       gameState: DEFAULT_GAME_STATE,
                     });
-                    console.log('Brevo email call firing:', { email, firstName: displayName, listId: 64 });
                     fetch('https://prayforthecup.com/api/subscribe', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -4784,7 +4781,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                   createdAt: new Date().toISOString(),
                   gameState: DEFAULT_GAME_STATE,
                 });
-                console.log('Brevo email call firing:', { email, firstName: displayName, listId: 64 });
                 fetch('https://prayforthecup.com/api/subscribe', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
