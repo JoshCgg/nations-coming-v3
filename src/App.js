@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
 import { Capacitor } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
@@ -4243,6 +4244,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showNamePicker, setShowNamePicker] = useState(false);
@@ -4335,6 +4337,34 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       }
     } catch (e) {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    if (!Capacitor.isNativePlatform()) return;
+    setAppleLoading(true);
+    try {
+      const result = await SignInWithApple.authorize({
+        clientId: 'com.globalgates.prayforthecup',
+        redirectURI: 'https://prayforthecup.com/app',
+        scopes: 'email name',
+      });
+      const { identityToken, givenName, familyName, email } = result.response;
+      const provider = new OAuthProvider('apple.com');
+      const credential = provider.credential({ idToken: identityToken });
+      const userCredential = await signInWithCredential(auth, credential);
+      const user = userCredential.user;
+      const firstName = givenName || '';
+      const lastName = familyName || '';
+      const fullName = (firstName + ' ' + lastName).trim()
+        || user.displayName
+        || (email || user.email || '').split('@')[0]
+        || 'Friend';
+      await processGoogleUser(user.uid, fullName, user.email);
+    } catch (err) {
+      if (err?.code !== '1001') console.error('Apple sign-in error:', err);
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -4799,6 +4829,33 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
               </>
             )}
           </button>
+
+          {Capacitor.isNativePlatform() && (
+            <button
+              onClick={handleAppleSignIn}
+              disabled={appleLoading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '12px',
+                marginTop: '12px',
+                backgroundColor: '#000000',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                fontFamily: 'Montserrat, sans-serif',
+                cursor: appleLoading ? 'not-allowed' : 'pointer',
+                opacity: appleLoading ? 0.7 : 1,
+              }}
+            >
+              {appleLoading ? 'Signing in...' : <>&#63743; Sign in with Apple</>}
+            </button>
+          )}
 
           <div style={{
             fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#8899AA",
