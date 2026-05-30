@@ -175,7 +175,7 @@ const DEFAULT_GAME_STATE = {
   teams: [],
 };
 
-function useGameState() {
+function useGameState(uid) {
   const [gameState, setGameState] = useState(DEFAULT_GAME_STATE);
 
   useEffect(() => {
@@ -186,11 +186,11 @@ function useGameState() {
   }, []);
 
   useEffect(() => {
+    const resolvedUid = uid || auth.currentUser?.uid;
+    if (!resolvedUid) return;
     async function restoreFromFirestore() {
       try {
-        const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-        if (!profile.uid) return;
-        const snap = await getDoc(doc(db, "users", profile.uid));
+        const snap = await getDoc(doc(db, "users", resolvedUid));
         if (!snap.exists()) return;
         const fsState = snap.data().gameState;
         if (!fsState) return;
@@ -207,7 +207,7 @@ function useGameState() {
       }
     }
     restoreFromFirestore();
-  }, []);
+  }, [uid]);
 
   function updateGameState(changes) {
     setGameState(prev => {
@@ -5303,15 +5303,15 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [showFinalWhistleShare, setShowFinalWhistleShare] = useState(false);
-  const [gameState, updateGameState] = useGameState();
+  const [userProfile, setUserProfile] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
+  });
+  const [gameState, updateGameState] = useGameState(userProfile?.uid);
   const [pendingToast, setPendingToast] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
   const [showNationNudge, setShowNationNudge] = useState(false);
   const [pendingNationPray, setPendingNationPray] = useState(null);
   const nationTapTimes = useRef([]);
-  const [userProfile, setUserProfile] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
-  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
