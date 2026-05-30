@@ -4359,7 +4359,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       });
 
       const idToken = result?.result?.idToken;
-      const accessToken = result?.result?.accessToken;
+      const accessToken = result?.result?.accessToken?.token || result?.result?.accessToken;
       if (!idToken) throw new Error('No identity token from Apple');
 
       const provider = new OAuthProvider('apple.com');
