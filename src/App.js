@@ -188,6 +188,7 @@ function useGameState(uid) {
   useEffect(() => {
     const resolvedUid = uid || auth.currentUser?.uid;
     if (!resolvedUid) return;
+    console.log('Firestore restore effect running, uid:', uid);
     async function restoreFromFirestore() {
       try {
         const snap = await getDoc(doc(db, "users", resolvedUid));
@@ -218,6 +219,7 @@ function useGameState(uid) {
       try {
         const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
         const uid = profile.uid || auth.currentUser?.uid;
+        console.log('updateGameState called with:', JSON.stringify(next), 'uid:', profile?.uid || auth.currentUser?.uid, 'stack:', new Error().stack.split('\n')[2]);
         if (uid) {
           const sanitized = JSON.parse(JSON.stringify(next));
           updateDoc(doc(db, "users", uid), { gameState: sanitized }).catch(err =>
@@ -4373,8 +4375,9 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     try {
       const snap = await getDoc(doc(db, 'users', uid));
       docExists = snap.exists();
+      const snapData = snap.exists() ? snap.data() : null;
+      console.log('processGoogleUser snap exists:', snap.exists(), 'gameState:', JSON.stringify(snapData?.gameState));
       if (snap.exists()) {
-        const snapData = snap.data();
         firestoreDisplayName = snapData.displayName || null;
         if (snapData.tutorialSeen) { try { localStorage.setItem('pftc_tooltips_done', 'true'); } catch {} }
         if (snapData.gameState) {
