@@ -4257,8 +4257,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   // Initialize SocialLogin once on mount so it's ready before the user taps
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      SocialLogin.initialize({ google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID } })
-        .catch(e => console.log('SocialLogin.initialize error:', e.message));
+      SocialLogin.initialize({
+        google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID },
+        apple: { clientId: 'com.globalgates.prayforthecup' },
+      }).catch(e => console.log('SocialLogin.initialize error:', e.message));
     }
   }, []);
 
