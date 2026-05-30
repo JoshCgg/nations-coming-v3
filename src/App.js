@@ -217,9 +217,10 @@ function useGameState() {
       } catch {}
       try {
         const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
-        if (profile.uid) {
+        const uid = profile.uid || auth.currentUser?.uid;
+        if (uid) {
           const sanitized = JSON.parse(JSON.stringify(next));
-          updateDoc(doc(db, "users", profile.uid), { gameState: sanitized }).catch(err =>
+          updateDoc(doc(db, "users", uid), { gameState: sanitized }).catch(err =>
             console.error("Firestore sync error:", err)
           );
         }
