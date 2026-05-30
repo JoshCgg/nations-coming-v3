@@ -12,6 +12,7 @@
     { "src": "(.*)\\.svg", "dest": "$1.svg" },
     { "src": "(.*)\\.json", "dest": "$1.json" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/videos/(.*)", "dest": "/videos/$1" },
     { "src": "(.*)", "dest": "/index.html" }
   ]
 }
