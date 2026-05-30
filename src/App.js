@@ -212,7 +212,18 @@ function useGameState(uid) {
 
   function updateGameState(changes) {
     setGameState(prev => {
-      const next = { ...prev, ...changes };
+      // If localStorage is ahead of React state (e.g. processGoogleUser wrote Firestore
+      // data there before the restore effect updated React state), use it as the base so
+      // an onboarding call like updateGameState({ hasOnboarded: true }) doesn't clobber
+      // nations that are in localStorage but not yet reflected in prev.
+      let base = prev;
+      try {
+        const stored = JSON.parse(localStorage.getItem("pftc_game") || "{}");
+        if ((stored.prayedNations || []).length > (prev.prayedNations || []).length) {
+          base = { ...DEFAULT_GAME_STATE, ...stored };
+        }
+      } catch {}
+      const next = { ...base, ...changes };
       try {
         localStorage.setItem("pftc_game", JSON.stringify(next));
       } catch {}
