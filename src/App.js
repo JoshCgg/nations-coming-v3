@@ -4747,7 +4747,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                       createdAt: new Date().toISOString(),
                       gameState: DEFAULT_GAME_STATE,
                     });
-                    fetch('/api/subscribe', {
+                    fetch('https://prayforthecup.com/api/subscribe', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
@@ -4773,7 +4773,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                   createdAt: new Date().toISOString(),
                   gameState: DEFAULT_GAME_STATE,
                 });
-                fetch('/api/subscribe', {
+                fetch('https://prayforthecup.com/api/subscribe', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
