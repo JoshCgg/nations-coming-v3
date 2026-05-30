@@ -4343,16 +4343,30 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     if (Capacitor.getPlatform() !== 'ios') return;
     setAppleLoading(true);
     try {
+      const rawNonce = Math.random().toString(36).substring(2, 18);
+      const encoder = new TextEncoder();
+      const data = encoder.encode(rawNonce);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashedNonce = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
       const result = await SocialLogin.login({
         provider: 'apple',
         options: {
           scopes: ['email', 'name'],
+          nonce: hashedNonce,
         },
       });
+
       const idToken = result?.result?.idToken;
       if (!idToken) throw new Error('No identity token from Apple');
+
       const provider = new OAuthProvider('apple.com');
-      const credential = provider.credential({ idToken });
+      const credential = provider.credential({
+        idToken,
+        rawNonce,
+      });
+
       const userCredential = await signInWithCredential(auth, credential);
       const user = userCredential.user;
       const profile = result?.result?.profile;
