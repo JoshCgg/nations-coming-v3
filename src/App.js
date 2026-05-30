@@ -4746,11 +4746,12 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                       createdAt: new Date().toISOString(),
                       gameState: DEFAULT_GAME_STATE,
                     });
+                    console.log('Brevo email call firing:', { email, firstName: displayName, listId: 64 });
                     fetch('https://prayforthecup.com/api/subscribe', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
-                    });
+                    }).catch(err => { console.error('Brevo email error:', err); });
                   } else {
                     throw signInErr;
                   }
@@ -4772,11 +4773,12 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                   createdAt: new Date().toISOString(),
                   gameState: DEFAULT_GAME_STATE,
                 });
+                console.log('Brevo email call firing:', { email, firstName: displayName, listId: 64 });
                 fetch('https://prayforthecup.com/api/subscribe', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
-                });
+                }).catch(err => { console.error('Brevo email error:', err); });
               }
 
               const uid = cred.user.uid;
@@ -5244,6 +5246,12 @@ export default function App() {
           if (tutSnap.exists() && tutSnap.data().tutorialSeen) {
             localStorage.setItem('pftc_tooltips_done', 'true');
           }
+          const firstName = (tutSnap.exists() && tutSnap.data().displayName) || email;
+          fetch('https://prayforthecup.com/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, firstName, listId: 64 })
+          }).catch(() => {});
         } catch {}
         setUserProfile(prev => {
           const next = { ...prev, uid, email, displayName: prev.displayName || "" };
