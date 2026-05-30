@@ -4310,6 +4310,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     }
     localStorage.setItem('hasOnboarded', 'true');
 
+    console.log('Calling Brevo subscribe for:', email);
     try {
       await fetch('/api/subscribe', {
         method: 'POST',
