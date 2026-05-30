@@ -5767,7 +5767,7 @@ export default function App() {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: "auto" }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
           {tab === "digest" ? (
             selectedDayIdx !== null
               ? <DailyDigest
@@ -5838,7 +5838,7 @@ export default function App() {
               style={{
                 position: "fixed", bottom: 0, left: 0, right: 0,
                 background: C.white, borderRadius: "20px 20px 0 0",
-                padding: 24, maxHeight: "60vh", overflowY: "auto",
+                padding: 24, maxHeight: "60vh", overflowY: "auto", overflowX: "hidden",
               }}
             >
               {/* Header row */}
