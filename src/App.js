@@ -1785,7 +1785,7 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
       )}
 
       {gameState.journeyMode && (
-        <button className="jny-mission-btn" data-tooltip-target="checkin" onClick={() => onCardTap(todayIdx)}>
+        <button className="jny-mission-btn" onClick={() => onCardTap(todayIdx)}>
           <span>⚡ Today's Mission — Day {todayIdx + 1}</span>
           <span style={{ fontSize: 16 }}>›</span>
         </button>
@@ -1851,7 +1851,6 @@ function DigestHome({ gameState, onCardTap, onOpenSettings }) {
               className={`devo-card ${cardClass}`}
               style={cardStyle}
               onClick={isFuture ? undefined : () => onCardTap(i)}
-              {...(isToday ? { 'data-tooltip-target': 'devotional-card' } : {})}
               {...(isFuture ? { 'data-locked': 'true' } : {})}
             >
               {isFuture && <div className="devo-lock">🔒</div>}
@@ -2016,7 +2015,7 @@ function AllNations({ gameState, updateGameState, onPray }) {
       {/* Nation Cards */}
       <div style={{ padding: "0 16px" }}>
         {filtered.map((c, i) => (
-          <button key={c.n} {...(i === 0 ? { 'data-tooltip-target': 'first-nation' } : {})} onClick={() => setSelectedNation(c)} style={{
+          <button key={c.n} onClick={() => setSelectedNation(c)} style={{
             display: "flex", alignItems: "center", gap: 14, width: "100%",
             background: C.white, border: `1px solid ${C.blue}25`,
             borderRadius: 14, padding: "14px 16px", cursor: "pointer",
@@ -3227,7 +3226,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
             Form a prayer team with friends, track collective progress, and cheer each other on.
           </div>
           <button
-            data-tooltip-target="teams-cta"
             onClick={() => setView('create')}
             style={{
               width: '100%', maxWidth: 320, background: '#E06520', border: 'none',
@@ -3351,7 +3349,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
         {/* Team hero card */}
         {activeTeam && (
-          <div data-tooltip-target="team-card" style={{
+          <div style={{
             background: '#00476B',
             borderLeft: `4px solid ${activeKit.accent}`,
             margin: 16, borderRadius: 14, padding: 16,
@@ -5276,12 +5274,7 @@ export default function App() {
   });
   const [notifTime, setNotifTime] = useState(() => localStorage.getItem('notificationTime') || '08:00');
   const [notifTimeConfirm, setNotifTimeConfirm] = useState(false);
-  const [tooltipStep, setTooltipStep] = useState(null);
-  const devotionalCardRef = useRef(null);
-  const checkInBtnRef = useRef(null);
-  const firstNationRef = useRef(null);
-  const teamsCTARef = useRef(null);
-  const [pulsePos, setPulsePos] = useState(null);
+  const [showTutorialVideo, setShowTutorialVideo] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [pendingJoinCode, setPendingJoinCode] = useState(null);
   const [showAppNamePicker, setShowAppNamePicker] = useState(false);
@@ -5355,20 +5348,9 @@ export default function App() {
     saveNationPrayer(nation);
   }
 
-  function advanceTooltip() {
-    const next = tooltipStep + 1;
-    if (next > 3) {
-      localStorage.setItem('pftc_tooltips_done', 'true');
-      setTab("digest");
-      setTooltipStep(null);
-    } else {
-      setTooltipStep(next);
-    }
-  }
-
   useEffect(() => {
     if (gameState.hasOnboarded && !localStorage.getItem('pftc_tooltips_done')) {
-      setTooltipStep(0);
+      setShowTutorialVideo(true);
     }
   }, [gameState.hasOnboarded]);
 
@@ -5394,74 +5376,6 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    setPulsePos(null); // clear immediately so full-dim shows while transitioning
-    if (tooltipStep === 0 || tooltipStep === 1) setTab("digest");
-    else if (tooltipStep === 2) setTab("nations");
-    else if (tooltipStep === 3) setTab("teams");
-    else return;
-
-    function getAbsoluteRect(el) {
-      const rect = el.getBoundingClientRect();
-      return {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-        cx: rect.left + rect.width / 2,
-        cy: rect.top + rect.height / 2
-      };
-    }
-
-    let cancelled = false;
-
-    // Stage 1 — find element and scroll (50ms for tab to render)
-    const findTimer = setTimeout(async () => {
-      devotionalCardRef.current = document.querySelector('[data-tooltip-target="devotional-card"]');
-      checkInBtnRef.current = document.querySelector('[data-tooltip-target="checkin"]');
-      firstNationRef.current = document.querySelector('[data-tooltip-target="first-nation"]');
-      teamsCTARef.current =
-        document.querySelector('[data-tooltip-target="teams-cta"]') ||
-        document.querySelector('[data-tooltip-target="team-card"]');
-      const el = [checkInBtnRef, devotionalCardRef, firstNationRef, teamsCTARef][tooltipStep]?.current;
-      if (!el || el.dataset.locked === 'true') return;
-
-      // Step 1: scroll the carousel container (page scroll) to the top of the viewport so
-      // there is room below it for the tooltip. Scrolling the container itself is safe —
-      // scrollIntoView on the container scrolls its ancestors, not its own scrollLeft.
-      // For other steps: scroll the target element to center.
-      if (tooltipStep === 1) {
-        const carouselContainer = document.querySelector('.carousel-scroll-wrap');
-        if (carouselContainer) carouselContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-
-      // Wait for page scroll to settle before measuring.
-      await new Promise(resolve => setTimeout(resolve, 300));
-      if (cancelled) return;
-
-      const rect = getAbsoluteRect(el);
-      if (tooltipStep === 1) {
-        const carouselContainer = document.querySelector('.carousel-scroll-wrap');
-        if (carouselContainer) {
-          const cr = carouselContainer.getBoundingClientRect();
-          rect.carouselBottom = cr.bottom;
-          rect.carouselTop = cr.top;
-        }
-      }
-      setPulsePos(rect);
-    }, 50);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(findTimer);
-    };
-  }, [tooltipStep]);
-
-  useEffect(() => {
-    document.body.style.overflow = tooltipStep !== null ? 'hidden' : '';
-  }, [tooltipStep]);
 
   useEffect(() => {
     if (toastQueue.length > 0 && pendingToast === null) {
@@ -5975,7 +5889,7 @@ export default function App() {
                 <button
                   onClick={() => {
                     localStorage.removeItem('pftc_tooltips_done');
-                    setTooltipStep(0);
+                    setShowTutorialVideo(true);
                     setShowSettings(false);
                   }}
                   style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", padding: 0 }}
@@ -6143,116 +6057,31 @@ export default function App() {
         </div>
       </div>
 
-      {tooltipStep !== null && (
-        <>
-          <style>{`
-            @keyframes tooltip-pulse {
-              0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
-              100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
-            }
-          `}</style>
-
-          {/* Dimmed overlay — SVG with evenodd cutout for rounded highlight */}
-          {pulsePos ? (
-            <>
-              {/* Catch-all behind SVG: catches taps through the cutout hole */}
-              <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, zIndex: 99 }} />
-              <svg
-                onClick={advanceTooltip}
-                style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: 100, display: "block" }}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  fill="rgba(0,0,0,0.55)"
-                  d={`
-                    M 0 0 H ${window.innerWidth} V ${window.innerHeight} H 0 Z
-                    M ${pulsePos.left - 4} ${pulsePos.top - 4}
-                    h ${pulsePos.width + 8} a 12 12 0 0 1 12 12
-                    v ${pulsePos.height - 16} a 12 12 0 0 1 -12 12
-                    h -${pulsePos.width + 8} a 12 12 0 0 1 -12 -12
-                    v -${pulsePos.height - 16} a 12 12 0 0 1 12 -12 Z
-                  `}
-                />
-              </svg>
-            </>
-          ) : (
-            <div onClick={advanceTooltip} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100 }} />
-          )}
-
-          {/* Pulsing dot centered on the measured target element */}
-          {pulsePos && (
-            <div style={{
-              position: "fixed",
-              top: pulsePos.cy,
-              left: pulsePos.cx,
-              zIndex: 101, pointerEvents: "none", width: 0, height: 0,
-            }}>
-              <div style={{
-                position: "absolute", width: 40, height: 40, borderRadius: "50%",
-                border: "2px solid #00BAF8",
-                transform: "translate(-50%, -50%)",
-                animation: "tooltip-pulse 1.5s ease-out infinite",
-              }} />
-              <div style={{
-                position: "absolute", width: 10, height: 10, borderRadius: "50%",
-                background: "#00BAF8", transform: "translate(-50%, -50%)",
-              }} />
+      {showTutorialVideo && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <video
+            src="/videos/tutorial.mp4"
+            autoPlay
+            muted
+            playsInline
+            controls={false}
+            style={{ maxWidth: "100%", maxHeight: "80vh", display: "block" }}
+          />
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <div
+              onClick={() => { localStorage.setItem('pftc_tooltips_done', 'true'); setShowTutorialVideo(false); }}
+              style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)", cursor: "pointer", marginBottom: 14 }}
+            >
+              Skip
             </div>
-          )}
-
-          {/* Tooltip card — anchored below carousel on step 1, fixed bottom center otherwise */}
-          <div onClick={advanceTooltip} style={{
-            position: "fixed",
-            ...((() => {
-              const TOOLTIP_H = 160;
-              if (tooltipStep === 1 && pulsePos?.carouselBottom != null) {
-                const below = pulsePos.carouselBottom + 12;
-                if (below + TOOLTIP_H <= window.innerHeight) return { top: below };
-                const above = pulsePos.carouselTop - TOOLTIP_H - 12;
-                if (above >= 0) return { top: above };
-                return { top: Math.round(window.innerHeight / 2 - TOOLTIP_H / 2) };
-              }
-              return { bottom: 80 };
-            })()),
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 'calc(100% - 32px)',
-            maxWidth: 360,
-            right: 'auto',
-            zIndex: 101,
-            background: "#00476B", border: "1.5px solid #00BAF8", borderRadius: 14, padding: 16,
-          }}>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#00BAF8", marginBottom: 8 }}>
-              {tooltipStep <= 1 ? "Home" : tooltipStep === 2 ? "Nations" : "Teams"}
-            </div>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 17, color: "#ffffff", lineHeight: 1.7, marginBottom: 12 }}>
-              {tooltipStep === 0
-                ? "Check in each day to log your prayer and keep your streak."
-                : tooltipStep === 1
-                ? "Today's devotional — tap to read, reflect, and pray."
-                : tooltipStep === 2
-                ? "Tap any nation to pray. Track your progress across all 48 nations."
-                : (gameState.teams?.length > 0
-                  ? "Your team is praying together — every nation you pray counts for the whole group."
-                  : "Create or join a team to pray together and cover all 48 nations collectively.")}
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 12 }}>
-              {[0, 1, 2, 3].map(i => (
-                <div key={i} style={{
-                  width: 6, height: 6, borderRadius: "50%",
-                  background: i === tooltipStep ? "#00BAF8" : "rgba(255,255,255,0.25)",
-                  opacity: i === tooltipStep ? 1 : 0.4,
-                  transition: 'all 0.3s ease',
-                  transitionDelay: i === tooltipStep ? '200ms' : '0ms',
-                }} />
-              ))}
-            </div>
-            <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#8ADBFF", fontStyle: "italic", textAlign: "center" }}>
-              {tooltipStep < 3 ? "Tap anywhere to continue →" : "Tap anywhere to finish ✓"}
-            </div>
+            <button
+              onClick={() => { localStorage.setItem('pftc_tooltips_done', 'true'); setShowTutorialVideo(false); }}
+              style={{ background: C.orange, border: "none", borderRadius: 12, padding: "14px 40px", fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 16, color: "#fff", cursor: "pointer" }}
+            >
+              Got it 🙏
+            </button>
           </div>
-        </>
+        </div>
       )}
 
       {showAppNamePicker && createPortal(
