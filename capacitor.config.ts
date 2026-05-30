@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Pray for the Cup',
   webDir: 'build',
   server: {
-    allowNavigation: ['prayforthecup.com', '*.prayforthecup.com'],
+    allowNavigation: ['prayforthecup.com', '*.prayforthecup.com', 'prayforthecup.com/api/*'],
+    androidScheme: 'https',
   },
 };
 
