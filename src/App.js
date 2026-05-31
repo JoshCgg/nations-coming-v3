@@ -6170,14 +6170,27 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Contributors */}
+              {/* Content */}
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Contributors</div>
-                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 2 }}>
-                  <div>App Design &amp; Development — [coming soon]</div>
-                  <div>Content &amp; Devotionals — [coming soon]</div>
-                  <div>Nation Research — [coming soon]</div>
-                  <div>Prayer Points — [coming soon]</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Content</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 1.6 }}>
+                  Articles and prayer points by Global Gates missionaries and co-laborers serving among the unreached
+                </div>
+              </div>
+
+              {/* Design */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Design</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 1.6 }}>
+                  Graphics and visuals by Global Gates Communications
+                </div>
+              </div>
+
+              {/* Development */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Development</div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 1.6 }}>
+                  Built by Global Gates Digital
                 </div>
               </div>
 
