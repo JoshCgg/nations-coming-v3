@@ -5396,6 +5396,9 @@ export default function App() {
           return;
         }
       } catch {}
+      // Re-check after the async gap: the Apple/Google sign-in handler runs its own
+      // getDoc and sets namePickerShown between the synchronous guard above and here.
+      if (localStorage.getItem('namePickerShown')) return;
       setAppNamePickerValue(stored.displayName || '');
       setShowAppNamePicker(true);
     })();
