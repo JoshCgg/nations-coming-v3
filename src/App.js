@@ -6062,8 +6062,18 @@ export default function App() {
                 </button>
               </div>
 
-              {/* About & Credits link */}
+              {/* Share a Testimony link */}
               <div style={{ textAlign: "center", marginTop: 16 }}>
+                <button
+                  onClick={() => window.open('https://forms.gle/ayoxq6JYQ49fvuVv9', '_blank')}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "underline", padding: 0 }}
+                >
+                  ✍️ Share a Testimony
+                </button>
+              </div>
+
+              {/* About & Credits link */}
+              <div style={{ textAlign: "center", marginTop: 10 }}>
                 <span
                   onClick={() => { setShowSettings(false); setShowAbout(true); }}
                   style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "underline", cursor: "pointer" }}
