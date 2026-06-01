@@ -6034,16 +6034,14 @@ export default function App() {
 
               {/* Privacy Policy link */}
               <div style={{ textAlign: "center", marginTop: 16 }}>
-                <a
-                  href="https://prayforthecup.com/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "none" }}
+                <button
+                  onClick={() => window.open('https://prayforthecup.com/privacy', '_blank')}
+                  style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "none", padding: 0 }}
                   onMouseEnter={e => e.target.style.textDecoration = "underline"}
                   onMouseLeave={e => e.target.style.textDecoration = "none"}
                 >
                   Privacy Policy
-                </a>
+                </button>
               </div>
 
               {/* Sign out */}
