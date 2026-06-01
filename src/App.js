@@ -5,6 +5,7 @@ import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
   try {
@@ -6041,7 +6042,7 @@ export default function App() {
               {/* Privacy Policy link */}
               <div style={{ textAlign: "center", marginTop: 16 }}>
                 <button
-                  onClick={() => window.open('https://prayforthecup.com/privacy', '_blank')}
+                  onClick={() => Browser.open({ url: 'https://prayforthecup.com/privacy' })}
                   style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#00BAF8", textDecoration: "none", padding: 0 }}
                   onMouseEnter={e => e.target.style.textDecoration = "underline"}
                   onMouseLeave={e => e.target.style.textDecoration = "none"}
