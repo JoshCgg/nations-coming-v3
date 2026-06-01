@@ -5002,7 +5002,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
             )}
           </button>
 
-          {Capacitor.isNativePlatform() && (
+          {Capacitor.getPlatform() === 'ios' && (
             <button
               onClick={handleAppleSignIn}
               disabled={appleLoading}
