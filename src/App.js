@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -4359,13 +4359,15 @@ function ObOrangeBtn({ children, onClick, style = {} }) {
 function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, setSettingsDisplayName, setNotifTime }) {
   const [step, setStep] = useState(initialStep);
   const [journeyPath, setJourneyPath] = useState(initialJourneyPath);
-  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [carouselIdx, setCarouselIdx] = useState(0);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordMsg, setForgotPasswordMsg] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
   const [showNamePicker, setShowNamePicker] = useState(false);
   const [pendingNamePickerValue, setPendingNamePickerValue] = useState('');
   const [pendingNamePickerData, setPendingNamePickerData] = useState(null);
@@ -4390,7 +4392,9 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   }
 
   const processGoogleUser = async (user) => {
-    const displayName = user.displayName?.split(' ')[0] || 'Friend';
+    const rawDisplayName = user.displayName?.split(' ')[0] || null;
+    const displayName = rawDisplayName || 'Friend';
+    const hasRealName = !!rawDisplayName;
     const email = user.email;
     const uid = user.uid;
 
@@ -4421,7 +4425,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       const existingGame = JSON.parse(localStorage.getItem('pftc_game') || 'null');
       try {
         await setDoc(doc(db, 'users', uid), {
-          displayName, name: displayName, email, createdAt: new Date().toISOString(),
+          ...(hasRealName && { displayName, name: displayName }),
+          email, createdAt: new Date().toISOString(),
           gameState: existingGame || DEFAULT_GAME_STATE
         }, { merge: true });
       } catch {}
@@ -4429,7 +4434,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       // Doc exists (with or without gameState) — never overwrite gameState
       try {
         await setDoc(doc(db, 'users', uid), {
-          displayName, name: displayName, email, updatedAt: new Date().toISOString(),
+          ...(hasRealName && { displayName, name: displayName }),
+          email, updatedAt: new Date().toISOString(),
         }, { merge: true });
       } catch {}
     }
@@ -4779,26 +4785,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
             </span>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-            <div>
-              <input
-                type="text" placeholder="Your name"
-                value={displayName} onChange={e => setDisplayName(e.target.value)}
-                style={{
-                  padding: "16px 18px", borderRadius: 12,
-                  border: `2px solid ${OB.lightBlue}`, background: "#f6fbff",
-                  fontFamily: "Montserrat, sans-serif", fontSize: 16,
-                  outline: "none", color: OB.navy,
-                  boxSizing: "border-box", width: "100%",
-                }}
-              />
-              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#888", marginTop: 4 }}>
-                This name will be visible to others if you join or create a team.
-              </div>
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 8 }}>
             <input
               type="email" placeholder="Email address"
-              value={email} onChange={e => { setEmail(e.target.value); setEmailError(""); setMagicLinkSent(false); }}
+              value={email} onChange={e => { setEmail(e.target.value); setEmailError(""); setForgotPasswordMsg(""); }}
               style={{
                 padding: "16px 18px", borderRadius: 12,
                 border: `2px solid ${emailError ? '#e05c2a' : OB.lightBlue}`, background: "#f6fbff",
@@ -4807,132 +4797,116 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                 boxSizing: "border-box", width: "100%",
               }}
             />
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"} placeholder="Password"
+                value={password} onChange={e => { setPassword(e.target.value); setEmailError(""); }}
+                style={{
+                  padding: "16px 48px 16px 18px", borderRadius: 12,
+                  border: `2px solid ${emailError ? '#e05c2a' : OB.lightBlue}`, background: "#f6fbff",
+                  fontFamily: "Montserrat, sans-serif", fontSize: 16,
+                  outline: "none", color: OB.navy,
+                  boxSizing: "border-box", width: "100%",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                style={{
+                  position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)",
+                  background: "none", border: "none", cursor: "pointer", padding: 0,
+                  color: OB.navy, opacity: 0.5, fontSize: 18, lineHeight: 1,
+                }}
+              >
+                {showPassword ? "🙈" : "👁"}
+              </button>
+            </div>
             {emailError && (
-              <div style={{ padding: "6px 4px 0" }}>
-                {magicLinkSent ? (
-                  <div>
-                    <div style={{
-                      fontFamily: "Montserrat, sans-serif", fontSize: 13,
-                      color: "#2a7e4e", fontWeight: 600, marginBottom: 6,
-                    }}>
-                      Check your email! Tap the link to sign back in. It will open in your browser.
-                    </div>
-                    <div style={{
-                      fontFamily: "Montserrat, sans-serif", fontSize: 12,
-                      color: "#888", fontWeight: 500,
-                    }}>
-                      Don't see it? Check your spam folder.
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{
-                      fontFamily: "Montserrat, sans-serif", fontSize: 13,
-                      color: "#e05c2a", fontWeight: 600, marginBottom: 10,
-                    }}>
-                      {emailError}
-                    </div>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await sendSignInLinkToEmail(auth, email, {
-                            url: 'https://prayforthecup.com/app',
-                            handleCodeInApp: true,
-                          });
-                          try { localStorage.setItem("emailForSignIn", email); } catch {}
-                          setMagicLinkSent(true);
-                        } catch (err) {
-                          console.error("Magic link error:", err);
-                        }
-                      }}
-                      style={{
-                        width: "100%", padding: "12px 0", borderRadius: 10,
-                        border: `2px solid ${OB.navy}`, background: "transparent",
-                        fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14,
-                        color: OB.navy, cursor: "pointer",
-                      }}
-                    >
-                      Send me a sign-in link
-                    </button>
-                  </>
-                )}
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#e05c2a", fontWeight: 600, padding: "2px 4px 0" }}>
+                {emailError}
               </div>
             )}
           </div>
 
-          <ObOrangeBtn onClick={async () => {
-            let storedProfile = {};
-            try { storedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch {}
+          {/* Forgot password */}
+          <div style={{ marginBottom: 16, textAlign: "right" }}>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!email.trim()) { setForgotPasswordMsg("Please enter your email first."); return; }
+                try {
+                  await sendPasswordResetEmail(auth, email.trim());
+                  setForgotPasswordMsg("Check your email to reset your password.");
+                } catch {
+                  setForgotPasswordMsg("Could not send reset email. Check the address and try again.");
+                }
+              }}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontFamily: "Montserrat, sans-serif", fontSize: 13, fontWeight: 600,
+                color: OB.lightBlue, textDecoration: "underline", padding: 0,
+              }}
+            >
+              Forgot password?
+            </button>
+            {forgotPasswordMsg && (
+              <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#2a7e4e", fontWeight: 600, marginTop: 4 }}>
+                {forgotPasswordMsg}
+              </div>
+            )}
+          </div>
 
-            let succeeded = false;
-            try {
+          <ObOrangeBtn
+            style={{ opacity: emailLoading ? 0.6 : 1 }}
+            onClick={async () => {
+              if (emailLoading) return;
+              if (!email.trim()) { setEmailError("Please enter your email."); return; }
+              if (!password) { setEmailError("Please enter a password."); return; }
+              setEmailLoading(true);
+              setEmailError("");
+              setForgotPasswordMsg("");
+
+              let storedProfile = {};
+              try { storedProfile = JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch {}
+
               let cred;
-              let autoPassword = storedProfile.autoPassword;
+              let usedPassword = password;
 
-              if (autoPassword) {
+              if (storedProfile.autoPassword && storedProfile.autoPassword !== password) {
                 try {
-                  cred = await signInWithEmailAndPassword(auth, email, autoPassword);
-                } catch (signInErr) {
-                  if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
-                    autoPassword = email + '_pftc_' + Date.now();
-                    cred = await createUserWithEmailAndPassword(auth, email, autoPassword);
-                    await setDoc(doc(db, "users", cred.user.uid), {
-                      name: displayName,
-                      email: email,
-                      createdAt: new Date().toISOString(),
-                      gameState: DEFAULT_GAME_STATE,
-                    });
-                    CapacitorHttp.request({
-                      method: 'POST',
-                      url: 'https://prayforthecup.com/api/subscribe',
-                      headers: { 'Content-Type': 'application/json' },
-                      data: { email: email, firstName: displayName, listId: 64 },
-                    }).catch(err => { console.error('Brevo email error:', err); });
-                  } else {
-                    throw signInErr;
-                  }
-                }
-              } else {
-                autoPassword = email + '_pftc_' + Date.now();
-                try {
-                  cred = await createUserWithEmailAndPassword(auth, email, autoPassword);
-                } catch (createErr) {
-                  if (createErr.code === 'auth/email-already-in-use') {
-                    setEmailError("An account with this email already exists. Try a different email, or use the same device you signed up with.");
-                    return;
-                  }
-                  throw createErr;
-                }
-                await setDoc(doc(db, "users", cred.user.uid), {
-                  name: displayName,
-                  email: email,
-                  createdAt: new Date().toISOString(),
-                  gameState: DEFAULT_GAME_STATE,
-                });
-                CapacitorHttp.request({
-                  method: 'POST',
-                  url: 'https://prayforthecup.com/api/subscribe',
-                  headers: { 'Content-Type': 'application/json' },
-                  data: { email: email, firstName: displayName, listId: 64 },
-                }).catch(err => { console.error('Brevo email error:', err); });
+                  cred = await signInWithEmailAndPassword(auth, email, storedProfile.autoPassword);
+                  usedPassword = storedProfile.autoPassword;
+                } catch {}
               }
 
-              const uid = cred.user.uid;
-              try {
-                const tutSnap = await getDoc(doc(db, 'users', uid));
-                if (tutSnap.exists() && tutSnap.data().tutorialSeen) {
-                  localStorage.setItem('pftc_tooltips_done', 'true');
+              if (!cred) {
+                try {
+                  cred = await signInWithEmailAndPassword(auth, email, password);
+                } catch (signInErr) {
+                  if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
+                    try {
+                      cred = await createUserWithEmailAndPassword(auth, email, password);
+                    } catch (createErr) {
+                      setEmailError("Could not sign in or create an account. Check your details and try again.");
+                      setEmailLoading(false);
+                      return;
+                    }
+                  } else {
+                    setEmailError(signInErr.code === 'auth/wrong-password' ? "Incorrect password." : "Something went wrong. Please try again.");
+                    setEmailLoading(false);
+                    return;
+                  }
                 }
-              } catch {}
-              try { localStorage.setItem("userProfile", JSON.stringify({ displayName, email, autoPassword, uid })); } catch {}
-              succeeded = true;
-            } catch (err) {
-              console.error("Firebase auth error:", err);
-            }
+              }
 
-            if (succeeded) setStep(4);
+              await processGoogleUser({ uid: cred.user.uid, email, displayName: null });
+              try {
+                const latestStored = JSON.parse(localStorage.getItem("userProfile") || "{}");
+                localStorage.setItem("userProfile", JSON.stringify({ ...latestStored, autoPassword: usedPassword }));
+              } catch {}
+              setEmailLoading(false);
           }}>
-            Start My Prayer Journey →
+            {emailLoading ? "Signing in…" : "Start My Prayer Journey →"}
           </ObOrangeBtn>
 
           {/* Divider */}
@@ -5329,8 +5303,6 @@ export default function App() {
   const showApp = true; // launch gate disabled — was: isLaunched || isPreview || previewUnlocked
   const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
   const logoTapTimes = useRef([]);
-  const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(() => isSignInWithEmailLink(auth, window.location.href));
-
   const [tab, setTab] = useState("digest");
   const [selectedDayIdx, setSelectedDayIdx] = useState(null);
   const [showBanner, setShowBanner] = useState(true);
@@ -5362,51 +5334,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!isSignInWithEmailLink(auth, window.location.href)) return;
-    let emailForSignIn = "";
-    try { emailForSignIn = localStorage.getItem("emailForSignIn") || ""; } catch {}
-    if (!emailForSignIn) {
-      setIsProcessingMagicLink(false);
-      return;
-    }
-    signInWithEmailLink(auth, emailForSignIn, window.location.href)
-      .then(async (result) => {
-        const uid = result.user.uid;
-        const email = result.user.email || emailForSignIn;
-        try {
-          const tutSnap = await getDoc(doc(db, 'users', uid));
-          if (tutSnap.exists() && tutSnap.data().tutorialSeen) {
-            localStorage.setItem('pftc_tooltips_done', 'true');
-          }
-          const firstName = (tutSnap.exists() && tutSnap.data().displayName) || email;
-          CapacitorHttp.request({
-            method: 'POST',
-            url: 'https://prayforthecup.com/api/subscribe',
-            headers: { 'Content-Type': 'application/json' },
-            data: { email, firstName, listId: 64 },
-          }).catch(() => {});
-        } catch {}
-        setUserProfile(prev => {
-          const next = { ...prev, uid, email, displayName: prev.displayName || "" };
-          try { localStorage.setItem("userProfile", JSON.stringify(next)); } catch {}
-          return next;
-        });
-        updateGameState({ hasOnboarded: true });
-        try { localStorage.removeItem("emailForSignIn"); } catch {}
-        window.history.replaceState({}, document.title, window.location.pathname);
-      })
-      .catch((err) => {
-        console.error("Magic link sign-in error:", err);
-      })
-      .finally(() => {
-        setIsProcessingMagicLink(false);
-      });
-  }, [updateGameState]);
-  useEffect(() => {
     if (!userProfile?.uid) return;
     if (localStorage.getItem('namePickerShown')) return;
     const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    if (stored.autoPassword) return;
     (async () => {
       try {
         const snap = await getDoc(doc(db, 'users', userProfile.uid));
@@ -5641,22 +5571,6 @@ export default function App() {
     );
   }
 
-  if (isProcessingMagicLink) {
-    return (
-      <div style={{
-        position: 'fixed', inset: 0,
-        background: '#00476B',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: 16, color: '#fff', opacity: 0.8,
-        }}>
-          Signing you in…
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
