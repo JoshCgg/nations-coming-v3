@@ -405,7 +405,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Pretoria", lang: "Zulu, Xhosa, Afrikaans, English",
     ug: ["Cape Malay Muslims", "Zulu traditionalists", "Indian South Africans"],
     m: "South Africa has one of Africa's largest and most resourced churches — yet significant Muslim and traditional communities remain unreached. The Cape Malay Muslim community in Cape Town, descended from Southeast Asian slaves, has seen almost no gospel engagement for centuries. South Africa is both a sending nation and a mission field.",
-    ujp: 63, ujp_unreached: 9, jp: "SF",
+    ujp: 63, ujp_unreached: 9, jp: "SF", ow: "soua",
   },
   {
     n: "South Korea", f: "🇰🇷", iso: "kr",
@@ -413,7 +413,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Seoul", lang: "Korean",
     ug: ["Korean non-religious", "Joseonjok (ethnic Koreans in China)", "North Koreans"],
     m: "South Korea has sent over 20,000 missionaries worldwide — second only to the United States. Yet at home, the church faces declining attendance among younger generations, and the 2.5 million Koreans in North America include many who are culturally Christian but spiritually distant. And yet the nation most on the hearts of South Korean believers — North Korea — remains one of the world's most closed and unreachable.",
-    ujp: 30, ujp_unreached: 13, jp: "KS",
+    ujp: 30, ujp_unreached: 13, jp: "KS", ow: "souk",
   },
   {
     n: "Czechia", f: "🇨🇿", iso: "cz",
@@ -440,7 +440,7 @@ const RAW_COUNTRIES = [
     ug: ["Bosniak", "Roma Bosnians", "Albanian Muslims"],
     m: "Sarajevo is one of Europe's most Muslim cities — the legacy of Ottoman rule still shapes daily life. A small but growing evangelical church is quietly taking root in the Balkans, one of the last Protestant frontiers on the continent. The scars of the 1990s war run deep across Bosnian society — making the gospel of reconciliation uniquely compelling in this context.",
     diaspora: "An estimated 350,000 Bosniaks live in the US and Canada, many of them refugees still processing war, displacement, and identity. Learn more: https://upgnorthamerica.com/project/bosniaks-in-north-america/",
-    ujp: 8, ujp_unreached: 3, jp: "BK",
+    ujp: 8, ujp_unreached: 3, jp: "BK", ow: "bosnia-and-herzegovina",
   },
   {
     n: "Qatar", f: "🇶🇦", iso: "qa",
@@ -489,7 +489,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Washington D.C.", lang: "English",
     ug: ["Arab Americans", "Jewish Americans", "Somali Americans"],
     m: "The United States is simultaneously the world's largest missionary-sending nation and home to millions of unreached peoples. Over 400 people groups live in American cities with little or no gospel witness in their own language and culture. Arab, Somali, Afghan, and South Asian Muslim communities in New York, Minneapolis, Houston, and Dearborn represent some of the greatest mission opportunities on earth.",
-    ujp: 498, ujp_unreached: 92, jp: "US",
+    ujp: 498, ujp_unreached: 92, jp: "US", ow: "unst",
   },
   {
     n: "Paraguay", f: "🇵🇾", iso: "py",
@@ -514,7 +514,7 @@ const RAW_COUNTRIES = [
     ug: ["Turk", "Kurd, Kurmanji", "Turk, Alevi"],
     m: "Türkiye is home to 15 million Kurds — one of the world's largest unreached people groups — and hosts over 3 million Syrian refugees. The tiny Turkish church faces significant legal and social pressure, yet continues to grow. Türkiye is both a mission field and a strategic bridge between Europe, Central Asia, and the Arab world.",
     diaspora: "Around 425,000 Turks and tens of thousands of Kurds live across North America, in cities from New York to Chicago to Toronto. Explore their communities: https://upgnorthamerica.com/project/turks-in-north-america/",
-    ujp: 85, ujp_unreached: 61, jp: "TU",
+    ujp: 85, ujp_unreached: 61, jp: "TU", ow: "turk",
   },
   {
     n: "Germany", f: "🇩🇪", iso: "de",
@@ -530,7 +530,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Willemstad", lang: "Papiamentu, Dutch, English",
     ug: ["East Indian", "Jewish, Dutch", "Deaf"],
     m: "Curaçao makes a rare World Cup appearance for this small Caribbean island — a Dutch territory with a warm, syncretic Christian heritage. The island has seen a wave of Venezuelan and Haitian migrants in recent years, many in precarious conditions. Curaçao's diaspora in the Netherlands represents a bridge community with gospel potential in both directions.",
-    ujp: 16, ujp_unreached: 3, jp: "UC",
+    ujp: 16, ujp_unreached: 3, jp: "UC", ow: "curacao",
   },
   {
     n: "Côte d'Ivoire", f: "🇨🇮", iso: "ci",
@@ -538,7 +538,7 @@ const RAW_COUNTRIES = [
     rel: "Islam", cap: "Yamoussoukro", lang: "French",
     ug: ["Jula (Dioula)", "Hausa", "Fulani, Maasina"],
     m: "Côte d'Ivoire is evenly divided between Muslim north and Christian south — a spiritual and cultural fault line that has fueled decades of political tension. The Dioula Muslim people are one of the largest unreached groups in West Africa, spread across the Sahel. Yet the Ivorian church is vibrant, growing, and increasingly mission-minded toward its own unreached north.",
-    ujp: 105, ujp_unreached: 32, jp: "IV",
+    ujp: 105, ujp_unreached: 32, jp: "IV", ow: "cote",
   },
   {
     n: "Ecuador", f: "🇪🇨", iso: "ec",
@@ -613,7 +613,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Wellington", lang: "English, Māori",
     ug: ["Māori people", "Pacific Islander migrants", "Indian New Zealanders"],
     m: "New Zealand's indigenous Māori people have a complex relationship with Christianity — the gospel arrived alongside colonization, and reclaiming a distinctly Māori expression of faith is an ongoing journey. Auckland is one of the world's most Polynesian cities and home to growing South Asian and Chinese communities. New Zealand churches are small but engaged in cross-cultural mission both locally and across the Pacific.",
-    ujp: 60, ujp_unreached: 19, jp: "NZ",
+    ujp: 60, ujp_unreached: 19, jp: "NZ", ow: "newz",
   },
   {
     n: "Spain", f: "🇪🇸", iso: "es",
@@ -638,7 +638,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Saudi - Najdi", "Arab, Saudi - Hijazi", "Arab, Bedouin"],
     m: "Saudi Arabia is the birthplace of Islam and one of the most restricted nations for gospel witness — yet something remarkable is happening. Reports of Saudis coming to faith through dreams, visions, and online media have multiplied in recent years. The young population, shaken by rapid modernization and the contradictions of Saudi Arabia's Vision 2030 modernization agenda, is spiritually searching in ways previous generations were not.",
     diaspora: "Saudi Arab communities are present across North America, often students and professionals with rare access to the gospel in their home country. Learn more: https://upgnorthamerica.com/project/saudi-arab-muslims-in-north-america/",
-    ujp: 57, ujp_unreached: 43, jp: "SA",
+    ujp: 57, ujp_unreached: 43, jp: "SA", ow: "saua",
   },
   {
     n: "Uruguay", f: "🇺🇾", iso: "uy",
@@ -730,7 +730,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Kinshasa", lang: "French, Lingala, Swahili",
     ug: ["Mongo", "Luba", "Pygmy (Mbuti) peoples"],
     m: "DR Congo has over 200 distinct people groups and Africa's fourth-largest population. While Christianity is widespread, deep syncretism with traditional religion means millions have never encountered an undiluted gospel. Remote frontier communities in the Congo Basin remain among the least-reached in sub-Saharan Africa.",
-    ujp: 231, ujp_unreached: 4, jp: "CG",
+    ujp: 231, ujp_unreached: 4, jp: "CG", ow: "demc",
   },
   {
     n: "Uzbekistan", f: "🇺🇿", iso: "uz",
@@ -1339,15 +1339,36 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
               {(nation.diasporaLink || nation.diaspora) && (
                 <div style={{ background: "#EEF3FA", borderRadius: 10, padding: 14, marginBottom: 16 }}>
                   <div style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 11, color: C.indigo, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>Diaspora Presence</div>
-                  <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, lineHeight: 1.6, color: C.text }}>
-                    {nation.diasporaLink ? (
+                  {nation.diasporaLink ? (
+                    <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, lineHeight: 1.6, color: C.text }}>
                       <a href={nation.diasporaLink.url} target="_blank" rel="noreferrer" style={{ color: "#E06520", fontWeight: 600 }}>{nation.diasporaLink.text}</a>
-                    ) : (() => {
-                      const lm = nation.diaspora.match(/\[([^\]]+)\]\(([^)]+)\)/);
-                      if (!lm) return nation.diaspora;
-                      return <>{nation.diaspora.slice(0, lm.index)}<a href={lm[2]} target="_blank" rel="noreferrer" style={{ color: C.blue, fontWeight: 600 }}>{lm[1]}</a></>;
-                    })()}
-                  </div>
+                    </div>
+                  ) : (() => {
+                    const urlMatch = nation.diaspora.match(/(https:\/\/\S+)/);
+                    const diasporaUrl = urlMatch ? urlMatch[1] : null;
+                    const diasporaText = diasporaUrl
+                      ? nation.diaspora.replace(/\s+\S[^.]*:\s*https:\/\/\S+/, '').trim()
+                      : nation.diaspora;
+                    return (
+                      <>
+                        <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 15, lineHeight: 1.6, color: C.text }}>{diasporaText}</div>
+                        {diasporaUrl && (
+                          <button
+                            onClick={() => Browser.open({ url: diasporaUrl })}
+                            style={{
+                              marginTop: 10, width: "100%",
+                              background: C.orange, color: "#fff", border: "none",
+                              borderRadius: 10, padding: "12px 8px", textAlign: "center",
+                              fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13,
+                              cursor: "pointer", display: "block",
+                            }}
+                          >
+                            Learn more at UPG North America
+                          </button>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -1359,7 +1380,7 @@ function NationModal({ nation, onClose, gameState, updateGameState, onPray }) {
                   fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13,
                   textDecoration: "none", display: "block",
                 }}>Joshua Project</a>
-                <a href={`https://operationworld.org/locations/`} target="_blank" rel="noreferrer" style={{
+                <a href={`https://operationworld.org/locations/${nation.ow || nation.n.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}/`} target="_blank" rel="noreferrer" style={{
                   flex: 1, background: C.orange, color: "#fff",
                   borderRadius: 10, padding: "12px 8px", textAlign: "center",
                   fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 13,
