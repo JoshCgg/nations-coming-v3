@@ -261,6 +261,19 @@ async function syncMemberToTeam(teamCode, uid, memberData) {
   } catch {}
 }
 
+async function propagateNameToTeams(uid, name, teams) {
+  if (!uid || !teams?.length) return;
+  const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
+  for (const team of teams) {
+    try {
+      await updateDoc(doc(db, 'teams', team.id), {
+        [`members.${uid}.name`]: name,
+        [`members.${uid}.initials`]: initials,
+      });
+    } catch {}
+  }
+}
+
 function calcScore(gameState) {
   const nations = Math.min((gameState.prayedNations || []).length, 48);
   const days    = Math.min((gameState.checkedInDays || []).length, 17);
@@ -4423,6 +4436,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       const nameToStore = firestoreDisplayName || displayName;
       localStorage.setItem('userProfile', JSON.stringify({ displayName: nameToStore, email, uid, autoPassword: null }));
       setSettingsDisplayName(nameToStore);
+      const storedGame = JSON.parse(localStorage.getItem('pftc_game') || '{}');
+      propagateNameToTeams(uid, nameToStore, storedGame.teams || []);
     }
     localStorage.setItem('hasOnboarded', 'true');
 
@@ -4521,6 +4536,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     try {
       await setDoc(doc(db, 'users', uid), { displayName: trimmedName, name: trimmedName, nameSetByUser: true }, { merge: true });
     } catch (e) {}
+    const storedGame = JSON.parse(localStorage.getItem('pftc_game') || '{}');
+    propagateNameToTeams(uid, trimmedName, storedGame.teams || []);
     const userProfileToSave = { displayName: trimmedName, email, uid, autoPassword: null };
     localStorage.setItem('userProfile', JSON.stringify(userProfileToSave));
     localStorage.setItem('namePickerShown', 'true');
@@ -5427,6 +5444,7 @@ export default function App() {
     try {
       await setDoc(doc(db, 'users', uid), { displayName: trimmed, name: trimmed, nameSetByUser: true }, { merge: true });
     } catch {}
+    propagateNameToTeams(uid, trimmed, gameState.teams);
     const stored = JSON.parse(localStorage.getItem('userProfile') || '{}');
     stored.displayName = trimmed;
     localStorage.setItem('userProfile', JSON.stringify(stored));
@@ -5937,6 +5955,7 @@ export default function App() {
                                   setSettingsDisplayName(trimmed);
                                   if (userProfile?.uid) {
                                     try { await updateDoc(doc(db, "users", userProfile.uid), { displayName: trimmed }); } catch {}
+                                    propagateNameToTeams(userProfile.uid, trimmed, gameState.teams);
                                   }
                                   setShowNameEdit(false);
                                   setNameEditError('');
