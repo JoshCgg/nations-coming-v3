@@ -5598,7 +5598,6 @@ export default function App() {
             if (logoTapTimes.current.length >= 5) {
               logoTapTimes.current = [];
               localStorage.setItem('pftc_preview', 'true');
-              setPreviewUnlocked(true);
             }
           }}
         />
