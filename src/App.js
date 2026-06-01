@@ -5321,10 +5321,6 @@ function FinalWhistleShareModal({ onClose }) {
 /* ─── MAIN APP ─── */
 export default function App() {
   const LAUNCH_DATE = new Date('2026-06-11');
-  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true'
-    || localStorage.getItem('pftc_preview') === 'true';
-  const isLaunched = new Date() >= LAUNCH_DATE;
-  const [previewUnlocked, setPreviewUnlocked] = useState(false);
   const showApp = true; // launch gate disabled — was: isLaunched || isPreview || previewUnlocked
   const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
   const logoTapTimes = useRef([]);
