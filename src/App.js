@@ -6225,6 +6225,16 @@ export default function App() {
               <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#8ADBFF", textAlign: "center", marginTop: 16 }}>
                 Pray for the Cup · v1.0 · 2026
               </div>
+
+              {/* Copyright */}
+              <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.1)", textAlign: "center" }}>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, fontWeight: 600, color: "#aaa", marginBottom: 8 }}>
+                  © 2026 Global Gates. All rights reserved.
+                </div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#aaa", lineHeight: 1.6 }}>
+                  This guide may be freely copied, shared, and distributed in its complete, unaltered form for non-commercial ministry use. It may not be sold, charged for, or used for commercial gain without prior written permission from Global Gates. Licensed under Creative Commons BY‑NC‑ND 4.0.
+                </div>
+              </div>
             </div>
           </div>
         )}
