@@ -4471,7 +4471,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         await processGoogleUser(result.user);
       }
     } catch (e) {
-      console.error('Google sign-in error:', e);
       setGoogleLoading(false);
     }
   };
