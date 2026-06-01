@@ -5308,7 +5308,7 @@ export default function App() {
     || localStorage.getItem('pftc_preview') === 'true';
   const isLaunched = new Date() >= LAUNCH_DATE;
   const [previewUnlocked, setPreviewUnlocked] = useState(false);
-  const showApp = isLaunched || isPreview || previewUnlocked;
+  const showApp = true; // launch gate disabled — was: isLaunched || isPreview || previewUnlocked
   const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
   const logoTapTimes = useRef([]);
   const [isProcessingMagicLink, setIsProcessingMagicLink] = useState(() => isSignInWithEmailLink(auth, window.location.href));
