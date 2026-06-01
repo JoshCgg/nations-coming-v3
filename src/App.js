@@ -4376,10 +4376,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   // Initialize SocialLogin once on mount so it's ready before the user taps
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      SocialLogin.initialize({
+      const config = {
         google: { webClientId: process.env.REACT_APP_GOOGLE_WEB_CLIENT_ID },
-        apple: { clientId: 'com.globalgates.prayforthecup' },
-      }).catch(() => {});
+        ...(Capacitor.getPlatform() === 'ios' && { apple: { clientId: 'com.globalgates.prayforthecup' } }),
+      };
+      SocialLogin.initialize(config).catch(() => {});
     }
   }, []);
 
@@ -4468,6 +4469,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         await processGoogleUser(result.user);
       }
     } catch (e) {
+      console.error('Google sign-in error:', e);
       setGoogleLoading(false);
     }
   };
