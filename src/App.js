@@ -405,7 +405,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Pretoria", lang: "Zulu, Xhosa, Afrikaans, English",
     ug: ["Cape Malay Muslims", "Zulu traditionalists", "Indian South Africans"],
     m: "South Africa has one of Africa's largest and most resourced churches — yet significant Muslim and traditional communities remain unreached. The Cape Malay Muslim community in Cape Town, descended from Southeast Asian slaves, has seen almost no gospel engagement for centuries. South Africa is both a sending nation and a mission field.",
-    ujp: 63, ujp_unreached: 9, jp: "SF", ow: "soua",
+    ujp: 63, ujp_unreached: 9, jp: "SF",
   },
   {
     n: "South Korea", f: "🇰🇷", iso: "kr",
@@ -413,7 +413,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Seoul", lang: "Korean",
     ug: ["Korean non-religious", "Joseonjok (ethnic Koreans in China)", "North Koreans"],
     m: "South Korea has sent over 20,000 missionaries worldwide — second only to the United States. Yet at home, the church faces declining attendance among younger generations, and the 2.5 million Koreans in North America include many who are culturally Christian but spiritually distant. And yet the nation most on the hearts of South Korean believers — North Korea — remains one of the world's most closed and unreachable.",
-    ujp: 30, ujp_unreached: 13, jp: "KS", ow: "souk",
+    ujp: 30, ujp_unreached: 13, jp: "KS", ow: "korea-republic-of",
   },
   {
     n: "Czechia", f: "🇨🇿", iso: "cz",
@@ -481,7 +481,7 @@ const RAW_COUNTRIES = [
     rel: "Secular", cap: "Edinburgh", lang: "English, Scottish Gaelic",
     ug: ["Secular Scots", "Pakistani Scots", "Polish migrants in Scotland"],
     m: "Scotland once sent missionaries to the ends of the earth — David Livingstone, Eric Liddell, and thousands more. Today Scotland is one of the most post-Christian nations in the UK, with church attendance in steep decline. Yet Pakistani Muslim communities in Glasgow and Edinburgh represent a significant and largely unreached diaspora population right in the heart of historic missionary sending country.",
-    ujp: 124, ujp_unreached: 42, jp: "UK",
+    ujp: 124, ujp_unreached: 42, jp: "UK", ow: "united-kingdom-of-gb-ni",
   },
   {
     n: "USA", f: "🇺🇸", iso: "us",
@@ -489,7 +489,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Washington D.C.", lang: "English",
     ug: ["Arab Americans", "Jewish Americans", "Somali Americans"],
     m: "The United States is simultaneously the world's largest missionary-sending nation and home to millions of unreached peoples. Over 400 people groups live in American cities with little or no gospel witness in their own language and culture. Arab, Somali, Afghan, and South Asian Muslim communities in New York, Minneapolis, Houston, and Dearborn represent some of the greatest mission opportunities on earth.",
-    ujp: 498, ujp_unreached: 92, jp: "US", ow: "unst",
+    ujp: 498, ujp_unreached: 92, jp: "US", ow: "united-states-of-america",
   },
   {
     n: "Paraguay", f: "🇵🇾", iso: "py",
@@ -514,7 +514,7 @@ const RAW_COUNTRIES = [
     ug: ["Turk", "Kurd, Kurmanji", "Turk, Alevi"],
     m: "Türkiye is home to 15 million Kurds — one of the world's largest unreached people groups — and hosts over 3 million Syrian refugees. The tiny Turkish church faces significant legal and social pressure, yet continues to grow. Türkiye is both a mission field and a strategic bridge between Europe, Central Asia, and the Arab world.",
     diaspora: "Around 425,000 Turks and tens of thousands of Kurds live across North America, in cities from New York to Chicago to Toronto. Explore their communities: https://upgnorthamerica.com/project/turks-in-north-america/",
-    ujp: 85, ujp_unreached: 61, jp: "TU", ow: "turk",
+    ujp: 85, ujp_unreached: 61, jp: "TU", ow: "turkey",
   },
   {
     n: "Germany", f: "🇩🇪", iso: "de",
@@ -538,7 +538,7 @@ const RAW_COUNTRIES = [
     rel: "Islam", cap: "Yamoussoukro", lang: "French",
     ug: ["Jula (Dioula)", "Hausa", "Fulani, Maasina"],
     m: "Côte d'Ivoire is evenly divided between Muslim north and Christian south — a spiritual and cultural fault line that has fueled decades of political tension. The Dioula Muslim people are one of the largest unreached groups in West Africa, spread across the Sahel. Yet the Ivorian church is vibrant, growing, and increasingly mission-minded toward its own unreached north.",
-    ujp: 105, ujp_unreached: 32, jp: "IV", ow: "cote",
+    ujp: 105, ujp_unreached: 32, jp: "IV", ow: "cote-divoire",
   },
   {
     n: "Ecuador", f: "🇪🇨", iso: "ec",
@@ -613,7 +613,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Wellington", lang: "English, Māori",
     ug: ["Māori people", "Pacific Islander migrants", "Indian New Zealanders"],
     m: "New Zealand's indigenous Māori people have a complex relationship with Christianity — the gospel arrived alongside colonization, and reclaiming a distinctly Māori expression of faith is an ongoing journey. Auckland is one of the world's most Polynesian cities and home to growing South Asian and Chinese communities. New Zealand churches are small but engaged in cross-cultural mission both locally and across the Pacific.",
-    ujp: 60, ujp_unreached: 19, jp: "NZ", ow: "newz",
+    ujp: 60, ujp_unreached: 19, jp: "NZ",
   },
   {
     n: "Spain", f: "🇪🇸", iso: "es",
@@ -638,7 +638,7 @@ const RAW_COUNTRIES = [
     ug: ["Arab, Saudi - Najdi", "Arab, Saudi - Hijazi", "Arab, Bedouin"],
     m: "Saudi Arabia is the birthplace of Islam and one of the most restricted nations for gospel witness — yet something remarkable is happening. Reports of Saudis coming to faith through dreams, visions, and online media have multiplied in recent years. The young population, shaken by rapid modernization and the contradictions of Saudi Arabia's Vision 2030 modernization agenda, is spiritually searching in ways previous generations were not.",
     diaspora: "Saudi Arab communities are present across North America, often students and professionals with rare access to the gospel in their home country. Learn more: https://upgnorthamerica.com/project/saudi-arab-muslims-in-north-america/",
-    ujp: 57, ujp_unreached: 43, jp: "SA", ow: "saua",
+    ujp: 57, ujp_unreached: 43, jp: "SA",
   },
   {
     n: "Uruguay", f: "🇺🇾", iso: "uy",
@@ -730,7 +730,7 @@ const RAW_COUNTRIES = [
     rel: "Christianity", cap: "Kinshasa", lang: "French, Lingala, Swahili",
     ug: ["Mongo", "Luba", "Pygmy (Mbuti) peoples"],
     m: "DR Congo has over 200 distinct people groups and Africa's fourth-largest population. While Christianity is widespread, deep syncretism with traditional religion means millions have never encountered an undiluted gospel. Remote frontier communities in the Congo Basin remain among the least-reached in sub-Saharan Africa.",
-    ujp: 231, ujp_unreached: 4, jp: "CG", ow: "demc",
+    ujp: 231, ujp_unreached: 4, jp: "CG", ow: "congo-democratic-republic-of",
   },
   {
     n: "Uzbekistan", f: "🇺🇿", iso: "uz",
