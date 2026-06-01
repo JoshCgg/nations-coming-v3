@@ -4,7 +4,7 @@ import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField, onSnapshot } from 'firebase/firestore';
 const triggerHaptic = async (style = 'medium') => {
   try {
@@ -4443,10 +4443,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     localStorage.setItem('hasOnboarded', 'true');
 
     try {
-      await fetch('https://prayforthecup.com/api/subscribe', {
+      await CapacitorHttp.request({
         method: 'POST',
+        url: 'https://prayforthecup.com/api/subscribe',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstName: displayName, listId: 64 })
+        data: { email, firstName: displayName, listId: 64 },
       });
     } catch {}
 
@@ -4881,10 +4882,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                       createdAt: new Date().toISOString(),
                       gameState: DEFAULT_GAME_STATE,
                     });
-                    fetch('https://prayforthecup.com/api/subscribe', {
+                    CapacitorHttp.request({
                       method: 'POST',
+                      url: 'https://prayforthecup.com/api/subscribe',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
+                      data: { email: email, firstName: displayName, listId: 64 },
                     }).catch(err => { console.error('Brevo email error:', err); });
                   } else {
                     throw signInErr;
@@ -4907,10 +4909,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
                   createdAt: new Date().toISOString(),
                   gameState: DEFAULT_GAME_STATE,
                 });
-                fetch('https://prayforthecup.com/api/subscribe', {
+                CapacitorHttp.request({
                   method: 'POST',
+                  url: 'https://prayforthecup.com/api/subscribe',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ email: email, firstName: displayName, listId: 64 })
+                  data: { email: email, firstName: displayName, listId: 64 },
                 }).catch(err => { console.error('Brevo email error:', err); });
               }
 
@@ -5376,10 +5379,11 @@ export default function App() {
             localStorage.setItem('pftc_tooltips_done', 'true');
           }
           const firstName = (tutSnap.exists() && tutSnap.data().displayName) || email;
-          fetch('https://prayforthecup.com/api/subscribe', {
+          CapacitorHttp.request({
             method: 'POST',
+            url: 'https://prayforthecup.com/api/subscribe',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, firstName, listId: 64 })
+            data: { email, firstName, listId: 64 },
           }).catch(() => {});
         } catch {}
         setUserProfile(prev => {
