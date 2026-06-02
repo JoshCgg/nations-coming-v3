@@ -4428,6 +4428,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   }
 
   const processGoogleUser = async (user) => {
+    console.log('processGoogleUser called with displayName:', user.displayName);
     const rawDisplayName = user.displayName?.split(' ')[0] || null;
     const displayName = rawDisplayName || 'Friend';
     const hasRealName = !!rawDisplayName;
@@ -4555,6 +4556,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         || user.displayName
         || null
       );
+      console.log('fullName resolved to:', fullName);
       await processGoogleUser({ uid: user.uid, displayName: fullName, email: user.email });
 
       // Show name picker if user hasn't set a name yet
