@@ -2851,8 +2851,18 @@ async function generateShareCard(type, data) {
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
+async function getDisplayName(uid, profileObj) {
+  if (uid) {
+    try {
+      const snap = await getDoc(doc(db, 'users', uid));
+      if (snap.exists() && snap.data().displayName) return snap.data().displayName;
+    } catch {}
+  }
+  return profileObj?.displayName || 'Anonymous';
+}
+
 /* ─── TEAMS TAB ─── */
-const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAutoJoinConsumed }) => {
+const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAutoJoinConsumed, tabFocusVersion }) => {
   const teams = gameState.teams || [];
   const [view, setView] = useState(teams.length > 0 ? 'myteam' : 'empty');
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -2913,6 +2923,11 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       setSnapVersion(v => v + 1);
     }
   }, [view, gameState.teams]);
+
+  useEffect(() => {
+    if (tabFocusVersion > 0) setSnapVersion(v => v + 1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabFocusVersion]);
 
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
@@ -3081,8 +3096,8 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       return;
     }
     setCreateError('');
-    const displayName = (userProfile && userProfile.displayName) ? userProfile.displayName : 'Anonymous';
     const memberUid = (userProfile && userProfile.uid) ? userProfile.uid : 'me';
+    const displayName = await getDisplayName(memberUid !== 'me' ? memberUid : null, userProfile);
     const newTeam = {
       id: teamCode,
       name: teamNameInput.trim(),
@@ -3189,7 +3204,7 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
       };
       const updatedTeams = [...(gameState.teams || []), newTeam];
       updateGameState({ teams: updatedTeams });
-      const name = profile.displayName || 'Anonymous';
+      const name = await getDisplayName(profile.uid, profile);
       const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
       syncMemberToTeam(teamCode, profile.uid, {
         name,
@@ -5325,6 +5340,7 @@ export default function App() {
   const daysRemaining = Math.ceil((LAUNCH_DATE - new Date()) / 86400000);
   const logoTapTimes = useRef([]);
   const [tab, setTab] = useState("digest");
+  const [teamsTabFocusVersion, setTeamsTabFocusVersion] = useState(0);
   const [selectedDayIdx, setSelectedDayIdx] = useState(null);
   const [showBanner, setShowBanner] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
@@ -5438,19 +5454,21 @@ export default function App() {
     if ((nextState.prayedNations || []).length !== (gameState.prayedNations || []).length) {
       const uid = userProfile?.uid || auth.currentUser?.uid;
       if (uid) {
-        const name = userProfile?.displayName || 'Anonymous';
-        const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
-        for (const team of (nextState.teams || [])) {
-          syncMemberToTeam(team.id, uid, {
-            name,
-            initials,
-            role: team.role,
-            nations: (nextState.prayedNations || []).length,
-            streak: nextState.streakCount || 0,
-            inactiveDays: 0,
-            lastUpdated: new Date().toISOString(),
-          });
-        }
+        (async () => {
+          const name = await getDisplayName(uid, userProfile);
+          const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
+          for (const team of (nextState.teams || [])) {
+            syncMemberToTeam(team.id, uid, {
+              name,
+              initials,
+              role: team.role,
+              nations: (nextState.prayedNations || []).length,
+              streak: nextState.streakCount || 0,
+              inactiveDays: 0,
+              lastUpdated: new Date().toISOString(),
+            });
+          }
+        })();
       }
     }
   }
@@ -5501,6 +5519,10 @@ export default function App() {
       setTab('teams');
     }
   }, [pendingJoinCode, gameState.hasOnboarded, tab]);
+
+  useEffect(() => {
+    if (tab === 'teams') setTeamsTabFocusVersion(v => v + 1);
+  }, [tab]);
 
   useEffect(() => {
     const joinCode = new URLSearchParams(window.location.search).get('join');
@@ -5737,7 +5759,7 @@ export default function App() {
               : <DigestHome gameState={gameState} onCardTap={setSelectedDayIdx} onOpenSettings={() => setShowSettings(true)} />
           ) : tab === "teams" ? (
             (userProfile?.uid && (gameState.teams || []).length > 0) ? (
-              <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
+              <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} tabFocusVersion={teamsTabFocusVersion} />
             ) : !userProfile?.uid ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 32px", textAlign: "center" }}>
                 <div style={{ fontSize: 40, marginBottom: 16 }}>🏆</div>
@@ -5759,7 +5781,7 @@ export default function App() {
                 >Open Settings →</button>
               </div>
             ) : (
-              <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} />
+              <TeamsTab gameState={gameState} updateGameState={updateGameState} userProfile={userProfile} autoJoinCode={pendingJoinCode} onAutoJoinConsumed={() => setPendingJoinCode(null)} tabFocusVersion={teamsTabFocusVersion} />
             )
           ) : (
             <AllNations gameState={gameState} updateGameState={handleGameStateUpdate} onPray={handleNationPray} />
