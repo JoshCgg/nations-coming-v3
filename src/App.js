@@ -2925,7 +2925,10 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
   }, [view, gameState.teams]);
 
   useEffect(() => {
-    if (tabFocusVersion > 0) setSnapVersion(v => v + 1);
+    if (tabFocusVersion > 0) {
+      console.log('[TeamsTab] tab focused, bumping snapVersion');
+      setSnapVersion(v => v + 1);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabFocusVersion]);
 
