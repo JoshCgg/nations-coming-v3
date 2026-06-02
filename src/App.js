@@ -4172,28 +4172,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
               }}>
                 {teamCode}
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  onClick={() => copyToClipboard(teamCode)}
-                  style={{
-                    flex: 1, background: '#ECF1EE', border: 'none', borderRadius: 8,
-                    padding: '10px 0', fontFamily: 'Montserrat, sans-serif',
-                    fontWeight: 700, fontSize: 13, color: '#1B2B3A', cursor: 'pointer',
-                  }}
-                >
-                  Copy code
-                </button>
-                <button
-                  onClick={() => copyToClipboard(`https://prayforcup.com/join/${teamCode}`)}
-                  style={{
-                    flex: 1, background: '#ECF1EE', border: 'none', borderRadius: 8,
-                    padding: '10px 0', fontFamily: 'Montserrat, sans-serif',
-                    fontWeight: 700, fontSize: 13, color: '#1B2B3A', cursor: 'pointer',
-                  }}
-                >
-                  Copy link
-                </button>
-              </div>
             </div>
 
             <button
