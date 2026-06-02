@@ -4428,7 +4428,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   }
 
   const processGoogleUser = async (user) => {
-    console.log('processGoogleUser called with displayName:', user.displayName);
     const rawDisplayName = user.displayName?.split(' ')[0] || null;
     const displayName = rawDisplayName || 'Friend';
     const hasRealName = !!rawDisplayName;
@@ -4507,11 +4506,11 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         const idToken = socialResult.result.idToken;
         const credential = GoogleAuthProvider.credential(idToken);
         const result = await signInWithCredential(auth, credential);
-        await processGoogleUser(result.user);
+        await processGoogleUser({ uid: result.user.uid, displayName: result.user.displayName, email: result.user.email });
       } else {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
-        await processGoogleUser(result.user);
+        await processGoogleUser({ uid: result.user.uid, displayName: result.user.displayName, email: result.user.email });
       }
     } catch (e) {
       setGoogleLoading(false);
@@ -4556,7 +4555,6 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         || user.displayName
         || null
       );
-      console.log('fullName resolved to:', fullName);
       await processGoogleUser({ uid: user.uid, displayName: fullName, email: user.email });
 
       // Show name picker if user hasn't set a name yet
