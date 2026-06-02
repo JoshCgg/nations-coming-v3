@@ -4553,8 +4553,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
       const fullName = (
         ((profile?.givenName || '') + ' ' + (profile?.familyName || '')).trim()
         || user.displayName
-        || (user.email || '').split('@')[0]
-        || 'Friend'
+        || null
       );
       await processGoogleUser({ uid: user.uid, displayName: fullName, email: user.email });
 
@@ -5912,7 +5911,7 @@ export default function App() {
                                   localStorage.setItem("userProfile", JSON.stringify(stored));
                                   setSettingsDisplayName(trimmed);
                                   if (userProfile?.uid) {
-                                    try { await updateDoc(doc(db, "users", userProfile.uid), { displayName: trimmed }); } catch {}
+                                    try { await updateDoc(doc(db, "users", userProfile.uid), { displayName: trimmed, name: trimmed, nameSetByUser: true }); } catch {}
                                     propagateNameToTeams(userProfile.uid, trimmed, gameState.teams);
                                   }
                                   setShowNameEdit(false);
