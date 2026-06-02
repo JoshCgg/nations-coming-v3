@@ -4437,12 +4437,14 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
     let restoredFromFirestore = false;
     let firestoreDisplayName = null;
     let docExists = false;
+    let nameSetByUser = false;
     try {
       const snap = await getDoc(doc(db, 'users', uid));
       docExists = snap.exists();
       const snapData = snap.exists() ? snap.data() : null;
       if (snap.exists()) {
         firestoreDisplayName = snapData.displayName || null;
+        nameSetByUser = !!snapData.nameSetByUser;
         if (snapData.tutorialSeen) { try { localStorage.setItem('pftc_tooltips_done', 'true'); } catch {} }
         if (snapData.gameState) {
           try { localStorage.setItem('pftc_game', JSON.stringify({ ...DEFAULT_GAME_STATE, ...snapData.gameState })); } catch {}
@@ -4467,10 +4469,10 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
         }, { merge: true });
       } catch {}
     } else {
-      // Doc exists (with or without gameState) — never overwrite gameState
+      // Doc exists (with or without gameState) — never overwrite gameState or a user-chosen name
       try {
         await setDoc(doc(db, 'users', uid), {
-          ...(hasRealName && { displayName, name: displayName }),
+          ...(hasRealName && !nameSetByUser && { displayName, name: displayName }),
           email, updatedAt: new Date().toISOString(),
         }, { merge: true });
       } catch {}
