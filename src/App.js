@@ -2926,8 +2926,24 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
 
   useEffect(() => {
     if (tabFocusVersion > 0) {
-      console.log('[TeamsTab] tab focused, bumping snapVersion');
       setSnapVersion(v => v + 1);
+      const uid = userProfile?.uid;
+      if (!uid || !(gameState?.teams?.length)) return;
+      (async () => {
+        const name = await getDisplayName(uid, userProfile);
+        const initials = name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('').slice(0, 2) || '?';
+        for (const team of gameState.teams) {
+          syncMemberToTeam(team.id, uid, {
+            name,
+            initials,
+            role: team.role,
+            nations: (gameState.prayedNations || []).length,
+            streak: gameState.streakCount || 0,
+            inactiveDays: 0,
+            lastUpdated: new Date().toISOString(),
+          });
+        }
+      })();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabFocusVersion]);
