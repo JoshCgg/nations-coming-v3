@@ -1,24 +1,18 @@
 {
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains; preload" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.brevo.com https://prayforthecup.com; manifest-src 'self'" }
-      ]
-    }
-  ],
-  "rewrites": [
-    { "source": "/app", "destination": "/index.html" },
-    { "source": "/app/(.*)", "destination": "/index.html" },
-    { "source": "/", "destination": "/landing.html" },
-    { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/videos/(.*)", "destination": "/videos/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/app", "dest": "/index.html" },
+    { "src": "/app/(.*)", "dest": "/index.html" },
+    { "src": "/", "dest": "/landing.html" },
+    { "src": "/privacy", "dest": "/privacy.html" },
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "(.*)\\.js", "dest": "$1.js" },
+    { "src": "(.*)\\.css", "dest": "$1.css" },
+    { "src": "(.*)\\.png", "dest": "$1.png" },
+    { "src": "(.*)\\.webp", "dest": "$1.webp" },
+    { "src": "(.*)\\.svg", "dest": "$1.svg" },
+    { "src": "(.*)\\.json", "dest": "$1.json" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/videos/(.*)", "dest": "/videos/$1" },
+    { "src": "(.*)", "dest": "/index.html" }
   ]
 }
