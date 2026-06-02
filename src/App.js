@@ -3063,10 +3063,6 @@ const TeamsTab = ({ gameState, updateGameState, userProfile, autoJoinCode, onAut
     return palette[Math.abs(hash) % palette.length];
   }
 
-  function copyToClipboard(text) {
-    try { navigator.clipboard.writeText(text); } catch {}
-  }
-
   const handleInvite = (team) => {
     const inviteUrl = `https://prayforthecup.com/app?join=${team.id}`;
     const shareText = `Join my prayer team "${team.name}" on Pray for the Cup — praying through all 48 nations of the 2026 World Cup. Join here:`;
