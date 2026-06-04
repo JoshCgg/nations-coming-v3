@@ -2759,7 +2759,7 @@ async function generateShareCard(type, data) {
 
     ctx.font = '48px Montserrat, sans-serif';
     ctx.fillStyle = '#8ADBFF';
-    ctx.fillText('2026 FIFA World Cup', 540, 1030);
+    ctx.fillText('2026 Tournament', 540, 1030);
 
     ctx.strokeStyle = '#E06520';
     ctx.lineWidth = 2;
@@ -4683,7 +4683,7 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
             color: OB.navy, textTransform: "uppercase", letterSpacing: 1.1,
             marginBottom: 36, maxWidth: 280, lineHeight: 1.6,
           }}>
-            A Prayer Guide for the 2026 FIFA World Cup
+            A Prayer Guide for the Nations of the World
           </div>
 
           <ObOrangeBtn onClick={() => setStep(2)}>Begin →</ObOrangeBtn>
@@ -5059,8 +5059,8 @@ function Onboarding({ onComplete, initialStep = 1, initialJourneyPath = null, se
   if (step === 3 && !journeyPath) {
     const features = [
       { icon: "📅", title: "Daily Devotionals", desc: "20 days of prayer readings" },
-      { icon: "🌍", title: "All 48 Nations", desc: "Pray for every World Cup nation" },
-      { icon: "⚽", title: "Match Schedule", desc: "Full FIFA 2026 schedule" },
+      { icon: "🌍", title: "All 48 Nations", desc: "Pray for every nation" },
+      { icon: "⚽", title: "Match Schedule", desc: "Full 2026 tournament schedule" },
     ];
     return (
       <div style={{ minHeight: "100vh", background: "#f0f7ff", display: "flex", flexDirection: "column", maxWidth: 520, margin: "0 auto" }}>
@@ -5283,7 +5283,7 @@ function FinalWhistleShareModal({ onClose }) {
     try {
       const blob = await generateShareCard('final_whistle', {});
       const file = new File([blob], 'pray-for-the-cup.png', { type: 'image/png' });
-      const text = 'I just prayed for all 48 nations at the 2026 FIFA World Cup! 🏆🌍 prayforthecup.com #PrayForTheCup';
+      const text = 'I just prayed for all 48 nations at the 2026 tournament! 🏆🌍 prayforthecup.com #PrayForTheCup';
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], text });
       } else if (navigator.share) {
@@ -5580,7 +5580,7 @@ export default function App() {
           Coming June 11, 2026
         </div>
         <div style={{ fontSize: 16, color: "#8ADBFF", textAlign: "center", marginBottom: 32, maxWidth: 300 }}>
-          A prayer guide for the 2026 FIFA World Cup
+          A prayer guide for the 2026 tournament
         </div>
         <div style={{ fontSize: 48, fontWeight: 900, color: "#ffffff", lineHeight: 1 }}>
           {daysRemaining}
@@ -5671,7 +5671,7 @@ export default function App() {
                 Pray for the Cup
               </div>
               <div style={{ fontFamily: "Libre Baskerville, serif", fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 5, fontStyle: "italic" }}>
-                2026 FIFA World Cup Missions Resource
+                2026 Tournament Missions Resource
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
@@ -6246,7 +6246,7 @@ export default function App() {
               <div style={{ marginBottom: 28 }}>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 14, fontWeight: 700, color: "#00BAF8", marginBottom: 8 }}>Pray for the Cup</div>
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#FFFFFF", lineHeight: 1.6 }}>
-                  A World Cup 2026 prayer guide connecting believers to the nations — and to the unreached peoples attending the tournament. Built by Global Gates.
+                  A 2026 tournament prayer guide connecting believers to the nations — and to the unreached peoples attending the tournament. Built by Global Gates.
                 </div>
               </div>
 
