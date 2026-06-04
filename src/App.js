@@ -6311,6 +6311,9 @@ export default function App() {
                 <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#aaa", lineHeight: 1.6 }}>
                   This guide may be freely copied, shared, and distributed in its complete, unaltered form for non-commercial ministry use. It may not be sold, charged for, or used for commercial gain without prior written permission from Global Gates. Licensed under Creative Commons BY‑NC‑ND 4.0.
                 </div>
+                <div style={{ fontFamily: "Montserrat, sans-serif", fontSize: 11, color: "#aaa", lineHeight: 1.6, marginTop: 12 }}>
+                  This app is an independent faith project created by Global Gates. It is not affiliated with, endorsed by, or sponsored by FIFA or any official football association.
+                </div>
               </div>
             </div>
           </div>
