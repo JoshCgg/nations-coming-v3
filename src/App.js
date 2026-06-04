@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { auth, db } from './firebase';
 import SoccerBallKit from './SoccerBallKit';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithCredential, signInWithPopup, GoogleAuthProvider, OAuthProvider, signOut, deleteUser } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
@@ -5340,6 +5340,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState('');
   const [showFinalWhistleShare, setShowFinalWhistleShare] = useState(false);
   const [userProfile, setUserProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("userProfile") || "{}"); } catch { return {}; }
@@ -6017,6 +6019,24 @@ export default function App() {
                 </button>
               </div>
 
+              {/* Delete Account */}
+              {userProfile?.uid && (
+                <div style={{ marginTop: 12 }}>
+                  <button
+                    onClick={() => { setDeleteAccountError(''); setShowDeleteConfirm(true); }}
+                    style={{
+                      width: '100%', background: 'transparent',
+                      border: '1px solid #c0392b', borderRadius: 10,
+                      padding: '11px 0', cursor: 'pointer',
+                      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                      color: '#c0392b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    }}
+                  >
+                    🗑 Delete Account
+                  </button>
+                </div>
+              )}
+
               {/* Share a Testimony link */}
               <div style={{ textAlign: "center", marginTop: 16 }}>
                 <button
@@ -6106,6 +6126,84 @@ export default function App() {
                   }}
                 >
                   Sign out
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* Delete account confirm modal */}
+        {showDeleteConfirm && createPortal(
+          <div
+            onClick={() => setShowDeleteConfirm(false)}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+              zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 24,
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#FFFFFF', borderRadius: 20, padding: '28px 24px',
+                maxWidth: 320, width: '100%',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+              }}
+            >
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18, color: '#c0392b', marginBottom: 12 }}>
+                Delete your account?
+              </div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
+                This will permanently delete your account and all your data. This cannot be undone.
+              </div>
+              {deleteAccountError ? (
+                <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: '#c0392b', marginBottom: 16, lineHeight: 1.5 }}>
+                  {deleteAccountError}
+                </div>
+              ) : null}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  style={{
+                    flex: 1, background: 'transparent', border: '2px solid #ECF1EE',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#1B2B3A',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    const uid = userProfile?.uid;
+                    try {
+                      if (uid) {
+                        try { await deleteDoc(doc(db, 'users', uid)); } catch {}
+                      }
+                      await deleteUser(auth.currentUser);
+                      try { localStorage.removeItem('pftc_game'); } catch {}
+                      try { localStorage.removeItem('pftc_tooltips_done'); } catch {}
+                      try { localStorage.removeItem('pftc_preview'); } catch {}
+                      localStorage.clear();
+                      window.location.reload();
+                    } catch (err) {
+                      if (err?.code === 'auth/requires-recent-login') {
+                        setDeleteAccountError('For security, please sign out and sign back in before deleting your account.');
+                      } else {
+                        console.error('Delete account error:', err);
+                        setShowDeleteConfirm(false);
+                      }
+                    }
+                  }}
+                  style={{
+                    flex: 1, background: '#c0392b', border: 'none',
+                    borderRadius: 10, padding: '12px 0', cursor: 'pointer',
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                    color: '#FFFFFF',
+                  }}
+                >
+                  Delete
                 </button>
               </div>
             </div>
