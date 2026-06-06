@@ -5709,7 +5709,7 @@ export default function App() {
             {[
               { id: "digest", label: "🏠  Home" },
               { id: "nations", label: "🌍  All Nations" },
-              { id: "teams", label: "🏆  Teams" },
+              { id: "teams", label: "🌍  Teams" },
             ].map(t => (
               <button key={t.id} onClick={() => { setTab(t.id); setSelectedDayIdx(null); }} style={{
                 flex: 1,
