@@ -5351,6 +5351,7 @@ export default function App() {
   const [toastQueue, setToastQueue] = useState([]);
   const [showNationNudge, setShowNationNudge] = useState(false);
   const [pendingNationPray, setPendingNationPray] = useState(null);
+  const [, forceScheduleRefresh] = useState(0);
   const nationTapTimes = useRef([]);
 
   useEffect(() => {
@@ -5550,6 +5551,7 @@ export default function App() {
               RAW_SCHEDULE[idx] = { ...RAW_SCHEDULE[idx], ...override };
             }
           });
+          forceScheduleRefresh(n => n + 1);
         }
       })
       .catch(() => {});
