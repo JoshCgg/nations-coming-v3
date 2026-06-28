@@ -1,3 +1,51 @@
 {
-  "overrides": []
+  "overrides": [
+    {
+      "d": "Jun 29",
+      "matches": [
+        { "t": "3:00 PM", "a": "South Africa", "b": "Canada", "g": "R32", "v": "SoFi Stadium, Los Angeles" },
+        { "t": "1:00 PM", "a": "Brazil", "b": "Runner-up Group F", "g": "R32", "v": "NRG Stadium, Houston" },
+        { "t": "4:30 PM", "a": "Germany", "b": "Best 3rd (A/B/C/D/F)", "g": "R32", "v": "Gillette Stadium, Boston" },
+        { "t": "9:00 PM", "a": "Winner Group F", "b": "Morocco", "g": "R32", "v": "Estadio BBVA, Monterrey" },
+        { "t": "1:00 PM", "a": "Runner-up Group E", "b": "Runner-up Group I", "g": "R32", "v": "AT&T Stadium, Dallas" },
+        { "t": "5:00 PM", "a": "Winner Group I", "b": "Best 3rd (C/D/F/G/H)", "g": "R32", "v": "MetLife Stadium, New York/NJ" },
+        { "t": "9:00 PM", "a": "Mexico", "b": "Best 3rd (C/E/F/H/I)", "g": "R32", "v": "Estadio Azteca, Mexico City" },
+        { "t": "12:00 PM", "a": "Winner Group L", "b": "Best 3rd (E/H/I/J/K)", "g": "R32", "v": "Mercedes-Benz Stadium, Atlanta" },
+        { "t": "4:00 PM", "a": "Winner Group G", "b": "Best 3rd (A/E/H/I/J)", "g": "R32", "v": "Lumen Field, Seattle" },
+        { "t": "8:00 PM", "a": "USA", "b": "Best 3rd (B/E/F/I/J)", "g": "R32", "v": "Levi's Stadium, San Francisco" },
+        { "t": "3:00 PM", "a": "Winner Group H", "b": "Runner-up Group J", "g": "R32", "v": "SoFi Stadium, Los Angeles" },
+        { "t": "7:00 PM", "a": "Runner-up Group K", "b": "Runner-up Group L", "g": "R32", "v": "BMO Field, Toronto" },
+        { "t": "11:00 PM", "a": "Switzerland", "b": "Best 3rd (E/F/G/I/J)", "g": "R32", "v": "BC Place, Vancouver" },
+        { "t": "2:00 PM", "a": "Runner-up Group D", "b": "Runner-up Group G", "g": "R32", "v": "AT&T Stadium, Dallas" },
+        { "t": "6:00 PM", "a": "Argentina", "b": "Runner-up Group H", "g": "R32", "v": "Hard Rock Stadium, Miami" },
+        { "t": "9:30 PM", "a": "Winner Group K", "b": "Best 3rd (D/E/I/J/L)", "g": "R32", "v": "Arrowhead Stadium, Kansas City" }
+      ]
+    },
+    {
+      "d": "Jul 6",
+      "matches": [
+        { "t": "1:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "NRG Stadium, Houston" },
+        { "t": "5:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "Lincoln Financial Field, Philadelphia" },
+        { "t": "4:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "MetLife Stadium, New York/NJ" },
+        { "t": "8:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "Estadio Azteca, Mexico City" },
+        { "t": "3:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "AT&T Stadium, Dallas" },
+        { "t": "8:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "Lumen Field, Seattle" },
+        { "t": "12:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "Mercedes-Benz Stadium, Atlanta" },
+        { "t": "4:00 PM", "a": "Round of 32 Winner", "b": "Round of 32 Winner", "g": "R16", "v": "BC Place, Vancouver" }
+      ]
+    },
+    {
+      "d": "Jul 13",
+      "matches": [
+        { "t": "4:00 PM", "a": "Round of 16 Winner", "b": "Round of 16 Winner", "g": "QF", "v": "Gillette Stadium, Boston" },
+        { "t": "3:00 PM", "a": "Round of 16 Winner", "b": "Round of 16 Winner", "g": "QF", "v": "SoFi Stadium, Los Angeles" },
+        { "t": "5:00 PM", "a": "Round of 16 Winner", "b": "Round of 16 Winner", "g": "QF", "v": "Hard Rock Stadium, Miami" },
+        { "t": "9:00 PM", "a": "Round of 16 Winner", "b": "Round of 16 Winner", "g": "QF", "v": "Arrowhead Stadium, Kansas City" },
+        { "t": "3:00 PM", "a": "Quarterfinal Winner", "b": "Quarterfinal Winner", "g": "SF", "v": "AT&T Stadium, Dallas" },
+        { "t": "3:00 PM", "a": "Quarterfinal Winner", "b": "Quarterfinal Winner", "g": "SF", "v": "Mercedes-Benz Stadium, Atlanta" },
+        { "t": "5:00 PM", "a": "Semifinal Loser", "b": "Semifinal Loser", "g": "3rd Place", "v": "Hard Rock Stadium, Miami" },
+        { "t": "3:00 PM", "a": "Semifinal Winner", "b": "Semifinal Winner", "g": "Final", "v": "MetLife Stadium, New York/NJ" }
+      ]
+    }
+  ]
 }
